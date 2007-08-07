@@ -1,14 +1,37 @@
-SRC_DIR		:= ../../src
-OBJ_DIR		:= ../../obj/$(PLATFORM_LOWER)
-DIST_DIR	:= ../../dist/$(PLATFORM_LOWER)
+# About the release.
+VERSION	:= 2007_08_07_BETA
 
-GENERIC_OBJS := \
-	$(OBJ_DIR)/$(PLATFORM_LOWER)/input.o \
-	$(OBJ_DIR)/$(PLATFORM_LOWER)/main.o \
-	$(OBJ_DIR)/$(PLATFORM_LOWER)/sound.o \
-	$(OBJ_DIR)/$(PLATFORM_LOWER)/system.o \
-	$(OBJ_DIR)/$(PLATFORM_LOWER)/video_software.o \
-	\
+# Directories.
+SRC_DIR		:= ../../src
+OBJ_DIR		:= ../../obj/gamecube
+DIST_DIR	:= ../../dist/gamecube
+
+# Key files.
+DOL				:= $(DIST_DIR)/Quake.dol
+ELF				:= $(OBJ_DIR)/Quake.elf
+ZIP_FILE		:= Quake_$(VERSION).zip
+ZIP_CONTENTS	:= Quake.dol ID1/CONFIG.CFG GPL.txt readme.html
+
+# Compiler flags.
+# Note that we MUST USE -fno-merge-constants, because the compiler generates crap otherwise.
+COMMON_FLAGS	:= -mcpu=750 -meabi -mhard-float -g -Wall -pipe
+CFLAGS			:= $(COMMON_FLAGS) -O3 -fno-merge-constants -DGEKKO
+CXXFLAGS		:= $(CFLAGS) -Weffc++ -fno-exceptions -fno-rtti
+LDFLAGS			:= $(COMMON_FLAGS) -mogc
+
+# Linker info.
+LIBS := -logc -lm -logcsys -lsdcard
+
+# Files to compile.
+OBJS := \
+	$(OBJ_DIR)/gamecube/fileio/sdfileio.o \
+	$(OBJ_DIR)/gamecube/tffs/diskio.o \
+	$(OBJ_DIR)/gamecube/tffs/tff.o \
+	$(OBJ_DIR)/gamecube/input.o \
+	$(OBJ_DIR)/gamecube/main.o \
+	$(OBJ_DIR)/gamecube/sound.o \
+	$(OBJ_DIR)/gamecube/system.o \
+	$(OBJ_DIR)/gamecube/video_software.o \
 	$(OBJ_DIR)/generic/cd_null.o \
 	$(OBJ_DIR)/generic/chase.o \
 	$(OBJ_DIR)/generic/cl_demo.o \
@@ -77,33 +100,46 @@ GENERIC_OBJS := \
 	$(OBJ_DIR)/generic/world.o \
 	$(OBJ_DIR)/generic/zone.o
 
-OBJS := $(PLATFORM_OBJS) $(GENERIC_OBJS)
-
-# Where's the elf?
-ELF := $(OBJ_DIR)/Quake.elf
-
 # How to build everything.
-all: $(PLATFORM_TARGETS)
+all: $(DOL)
+
+# How to install.
+install: all
+	@echo Installing
+	@cp $(DOL) S:/
+	@cp $(DIST_DIR)/ID1/CONFIG.CFG S:/ID1/
 
 # How to clean.
 clean:
 	@echo Cleaning
-	@rm -f $(OBJS) $(PLATFORM_TARGETS) $(ELF)
+	@rm -f $(OBJS) $(DOL) $(ELF)
 
-# How to compile a C++ source file.
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@echo Compiling $(notdir $<)
-	@mkdir -p $(dir $@)
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+# How to build the distribution.
+dist: clean all
+	@echo Building distribution
+	rm -f $(DIST_DIR)/$(ZIP_FILE)
+	cd $(DIST_DIR) && zip -9 -r $(ZIP_FILE) $(ZIP_CONTENTS)
 
-# How to compile a C source file.
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@echo Compiling $(notdir $<)
+# How to make the .DOL file.
+$(DOL): $(ELF)
+	@echo Creating $(notdir $@)
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@powerpc-gekko-objcopy -O binary $< $@
 
 # How to link the ELF.
 $(ELF): $(OBJS)
 	@echo Linking $(notdir $@)
 	@mkdir -p $(dir $@)
-	@$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+	@powerpc-gekko-g++ $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+
+# How to compile a C++ source file.
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@echo Compiling $(notdir $<)
+	@mkdir -p $(dir $@)
+	@powerpc-gekko-g++ $(CXXFLAGS) -c $< -o $@
+
+# How to compile a C source file.
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@echo Compiling $(notdir $<)
+	@mkdir -p $(dir $@)
+	@powerpc-gekko-gcc $(CFLAGS) -c $< -o $@

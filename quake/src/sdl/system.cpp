@@ -26,9 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cstring>
 #include <cstdio>
 
-#include <SDL_events.h>
-#include <SDL_RWops.h>
-#include <SDL_Timer.h>
+#include <SDL.h>
 
 extern "C"
 {
@@ -54,25 +52,6 @@ namespace quake
 		static file_slot				files[file_count];
 
 		static volatile unsigned long	frames = 0;
-
-		static void translate_path(const char* in, char* out)
-		{
-			// Copy the string.
-			strcpy(out, in);
-
-			// Convert all remaining characters.
-			for (char* c = out; *c; ++c)
-			{
-				if (*c == '/')
-				{
-					//*c = '\\';
-				}
-				else
-				{
-					*c = toupper(*c);
-				}
-			}
-		}
 
 		static file_slot& index_to_file(size_t index, const char* function)
 		{
@@ -197,12 +176,6 @@ using namespace quake::system;
 
 int Sys_FileOpenRead (const char *path, int *hndl)
 {
-	// Translate the file name into one which works for the SDCARD library?
-	char translated_path[MAX_OSPATH + 1];
-	translate_path(path, translated_path);
-	Sys_Printf("Sys_FileOpenRead: %s\n", translated_path);
-	//return -1;
-
 	// Find an unused file slot.
 	for (std::size_t file_index = 0; file_index < file_count; ++file_index)
 	{
@@ -211,7 +184,7 @@ int Sys_FileOpenRead (const char *path, int *hndl)
 		if (!file.in_use())
 		{
 			// Open the file.
-			file.handle = SDL_RWFromFile(translated_path, "rb");
+			file.handle = SDL_RWFromFile(path, "rb");
 			if (!file.handle)
 			{
 				*hndl = -1;
@@ -223,7 +196,7 @@ int Sys_FileOpenRead (const char *path, int *hndl)
 			SDL_RWseek(file.handle, 0, RW_SEEK_SET);
 
 			// Set up the file info.
-			strcpy(file.path, translated_path);
+			strcpy(file.path, path);
 
 			// Done.
 			*hndl = file_index;
@@ -239,12 +212,6 @@ int Sys_FileOpenRead (const char *path, int *hndl)
 
 int Sys_FileOpenWrite (const char *path)
 {
-	// Translate the file name into one which works for the SDCARD library?
-	char translated_path[MAX_OSPATH + 1];
-	translate_path(path, translated_path);
-	Sys_Printf("Sys_FileOpenRead: %s\n", translated_path);
-	//return -1;
-
 	// Find an unused file slot.
 	for (std::size_t file_index = 0; file_index < file_count; ++file_index)
 	{
@@ -253,14 +220,14 @@ int Sys_FileOpenWrite (const char *path)
 		if (!file.in_use())
 		{
 			// Open the file.
-			file.handle = SDL_RWFromFile(translated_path, "wb");
+			file.handle = SDL_RWFromFile(path, "wb");
 			if (!file.handle)
 			{
 				return -1;
 			}
 
 			// Set up the file info.
-			strcpy(file.path, translated_path);
+			strcpy(file.path, path);
 
 			// Done.
 			return file_index;
@@ -343,12 +310,8 @@ int Sys_FileWrite (int handle, const void *data, int count)
 
 int	Sys_FileTime (const char *path)
 {
-	char translated_path[MAX_OSPATH + 1];
-	translate_path(path, translated_path);
-	Sys_Printf("Sys_FileTime: %s\n", translated_path);
-
 	// Get the file info.
-	SDL_RWops* const handle = SDL_RWFromFile(translated_path, "rb");
+	SDL_RWops* const handle = SDL_RWFromFile(path, "rb");
 	if (handle)
 	{
 		SDL_RWclose(handle);
@@ -376,6 +339,9 @@ void Sys_Error (char *error, ...)
 	vfprintf(stderr, error, args);
 	va_end(args);
 
+	// Wait.
+	SDL_Delay(5000);
+
 	// Quit.
 	Sys_Quit();
 }
@@ -390,18 +356,13 @@ void Sys_Printf (char *fmt, ...)
 	va_end(args);
 	
 # if 0
-	for (int i = 0; i < 50; ++i)
-	{
-		VIDEO_WaitVSync();
-	}
+	SDL_Delay(1000);
 # endif
 #endif
 }
 
 void Sys_Quit (void)
 {
-	printf("%s", "Resetting...\n");
-
 	// Shut down the host system.
 	if (host_initialized)
 	{
@@ -409,6 +370,7 @@ void Sys_Quit (void)
 	}
 
 	// Exit.
+	SDL_Quit();
 	exit(0);
 }
 

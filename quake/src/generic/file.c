@@ -56,6 +56,10 @@ static file_t* find_free_file_slot(void)
 			return file;
 		}
 	}
+
+	// No free slots.
+	Sys_Error("find_free_file_slot: No free file slots");
+	return 0;
 }
 
 file_t* File_Open(const char* path, file_mode_t mode)

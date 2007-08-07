@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern "C"
 {
 #include "../generic/quakedef.h"
+#include "../generic/file.h"
 }
 
 #define TIME_DEMO	0
@@ -39,7 +40,7 @@ namespace quake
 	{
 		// Set up the heap.
 		typedef Uint32 heap_type;
-		static std::vector<heap_type>	heap(12 * 1024 * 1024 / sizeof(heap_type));
+		static heap_type	heap[12 * 1024 * 1024 / sizeof(heap_type)];
 	}
 }
 
@@ -51,8 +52,9 @@ qboolean isDedicated = qfalse;
 int main(int argc, char* argv[])
 {
 	// Initialise.
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO /*| SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE*/) < 0)
 	{
+		printf("SDL_Init failed (%s)\n", SDL_GetError());
 		return EXIT_FAILURE;
 	}
 
@@ -65,8 +67,8 @@ int main(int argc, char* argv[])
 	parms.argc		= com_argc;
 	parms.argv		= com_argv;
 	parms.basedir	= ".";
-	parms.memsize	= heap.size() * sizeof(heap_type);
-	parms.membase	= &heap.at(0);
+	parms.memsize	= sizeof(heap);
+	parms.membase	= &heap[0];
 	if (parms.membase == 0)
 	{
 		Sys_Error("Heap allocation failed");

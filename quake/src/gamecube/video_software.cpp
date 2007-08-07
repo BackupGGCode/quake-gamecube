@@ -46,7 +46,6 @@ namespace quake
 	{
 		// Types.
 		using main::pixel_pair;
-		typedef unsigned char	component_t;
 
 		// Constants.
 		static const size_t		max_screen_width	= 640;
@@ -70,7 +69,7 @@ namespace quake
 
 		static inline unsigned int calc_y(unsigned int r, unsigned int g, unsigned int b)
 		{
-			return (299 * r + 587 * g + 114 * b) / 1000;
+			return gamma[(299 * r + 587 * g + 114 * b) / 1000];
 		}
 
 		static inline unsigned int calc_cb(unsigned int r, unsigned int g, unsigned int b)
@@ -92,14 +91,14 @@ namespace quake
 		static inline void blit_pixels<1>(const pixel_t*& src, pixel_pair*& dst)
 		{
 			// Read an integer at a time.
-			const unsigned int i = *(reinterpret_cast<const u32*&>(src))++;
+			const unsigned int i	= *(reinterpret_cast<const u32*&>(src))++;
+			const unsigned int i1	= i >> 24;
+			const unsigned int i2	= (i >> 16) & 0xff;
+			const unsigned int i3	= (i >> 8) & 0xff;
+			const unsigned int i4	= i & 0xff;
 
 			// Write out 2 pixels.
-			const unsigned int i1 = i >> 24;
-			const unsigned int i2 = (i >> 16) & 0xff;
 			*dst++ = palette[i1][i2];
-			const unsigned int i3 = (i >> 8) & 0xff;
-			const unsigned int i4 = i & 0xff;
 			*dst++ = palette[i3][i4];
 		}
 
@@ -108,16 +107,16 @@ namespace quake
 		static inline void blit_pixels<2>(const pixel_t*& src, pixel_pair*& dst)
 		{
 			// Read an integer at a time.
-			const unsigned int i = *(reinterpret_cast<const u32*&>(src))++;
+			const unsigned int i	= *(reinterpret_cast<const u32*&>(src))++;
+			const unsigned int i1	= i >> 24;
+			const unsigned int i2	= (i >> 16) & 0xff;
+			const unsigned int i3	= (i >> 8) & 0xff;
+			const unsigned int i4	= i & 0xff;
 
 			// Write out 4 pixels.
-			const unsigned int i1 = i >> 24;
 			*dst++ = palette[i1][i1];
-			const unsigned int i2 = (i >> 16) & 0xff;
 			*dst++ = palette[i2][i2];
-			const unsigned int i3 = (i >> 8) & 0xff;
 			*dst++ = palette[i3][i3];
-			const unsigned int i4 = i & 0xff;
 			*dst++ = palette[i4][i4];
 		}
 
@@ -138,21 +137,17 @@ namespace quake
 		static void blit_screen()
 		{
 			// Constants.
-			const unsigned int	src_row_length	= vid.width;
-			const pixel_t (* const src_row_end)[max_screen_width] = &render_buffer[vid.height];
-
-			// Variables which change per row.
-			const pixel_t (*src_row)[max_screen_width]	= &render_buffer[0];
-			pixel_pair (*dst_row)[320]					= &(*main::xfb)[0];
+			const unsigned int	w	= vid.width;
+			const unsigned int	h	= vid.height;
 
 			// For each row...
-			while (src_row != src_row_end)
+			for (unsigned int row = 0; row < h; ++row)
 			{
 				// Blit this row.
-				blit_row<magnification>(&(*src_row)[0], &(*src_row)[src_row_length], &(*dst_row++)[0]);
-
-				// Next row.
-				++src_row;
+				blit_row<magnification>(
+					&render_buffer[row][0],
+					&render_buffer[row][w],
+					&(*main::xfb)[row][0]);
 			}
 		}
 	}
@@ -169,44 +164,38 @@ void VID_SetPalette(unsigned char* palette)
 	// How to store the components.
 	struct ycbcr
 	{
-		component_t y;
-		component_t cb;
-		component_t cr;
+		unsigned char y;
+		unsigned char cb;
+		unsigned char cr;
 	};
 	ycbcr components[256];
 
 	// Build the YCBCR table.
-	const ycbcr* const components_end = &components[256];
-	for (ycbcr* component = &components[0]; component != components_end; ++component)
+	for (unsigned int component = 0; component < 256; ++component)
 	{
-		const unsigned int r = video::gamma[*palette++];
-		const unsigned int g = video::gamma[*palette++];
-		const unsigned int b = video::gamma[*palette++];
+		const unsigned int r = *palette++;
+		const unsigned int g = *palette++;
+		const unsigned int b = *palette++;
 
-		component->y	= calc_y(r, g, b);
-		component->cb	= calc_cb(r, g, b);
-		component->cr	= calc_cr(r, g, b);
+		components[component].y		= calc_y(r, g, b);
+		components[component].cb	= calc_cb(r, g, b);
+		components[component].cr	= calc_cr(r, g, b);
 	}
 
 	// Build the Y1CBY2CR palette from the YCBCR table.
-	const ycbcr*	left_component				= &components[0];
-	pixel_pair		(*left_pixel_pairs)[256]	= &video::palette[0];
-	while (left_component != components_end)
+	for (unsigned int left = 0; left < 256; ++left)
 	{
-		const unsigned int	y1	= left_component->y;
-		const unsigned int	cb1	= left_component->cb;
-		const unsigned int	cr1	= left_component->cr;
+		const unsigned int	y1	= components[left].y;
+		const unsigned int	cb1	= components[left].cb;
+		const unsigned int	cr1	= components[left].cr;
 		
-		pixel_pair*	packed_pixel_pair	= &(*left_pixel_pairs)[0];
-		for (const ycbcr* right_component = &components[0]; right_component != components_end; ++right_component)
+		for (unsigned int right = 0; right < 256; ++right)
 		{
-			const unsigned int	cb	= (cb1 + right_component->cb) >> 1;
-			const unsigned int	cr	= (cr1 + right_component->cr) >> 1;
-			*packed_pixel_pair++ = pack(y1, cb, right_component->y, cr);
-		}
+			const unsigned int	cb	= (cb1 + components[right].cb) >> 1;
+			const unsigned int	cr	= (cr1 + components[right].cr) >> 1;
 
-		++left_component;
-		++left_pixel_pairs;
+			video::palette[left][right] = pack(y1, cb, components[right].y, cr);
+		}
 	}
 }
 
@@ -218,7 +207,7 @@ void VID_ShiftPalette(unsigned char* palette)
 void VID_Init(unsigned char* palette)
 {
 	// Set up the gamma table.
-	const float factor = 0.75f;
+	const float factor = 0.5f;
 	for (unsigned int in = 0; in < 256; ++in)
 	{
 		video::gamma[in] = static_cast<unsigned int>(255.0f * powf(in / 255.0f, factor));
@@ -237,11 +226,11 @@ void VID_Init(unsigned char* palette)
 	vid.buffer			= &render_buffer[0][0];
 	vid.colormap		= host_colormap;
 	vid.colormap16		= d_8to16table;
-	vid.conbuffer		= vid.buffer;
+	vid.conbuffer		= &render_buffer[0][0];
 	vid.conheight		= screen_height;
 	vid.conrowbytes		= max_screen_width;
 	vid.conwidth		= screen_width;
-	vid.direct			= vid.buffer;
+	vid.direct			= &render_buffer[0][0];
 	vid.fullbright		= 256 - LittleLong(*((int *) vid.colormap + 2048));
 	vid.height			= screen_height;
 	vid.maxwarpheight	= WARP_HEIGHT;
@@ -256,8 +245,6 @@ void VID_Init(unsigned char* palette)
 
 	// Initialise the surface cache.
 	D_InitCaches(surface_cache, sizeof(surface_cache));
-
-	// Start a render.
 
 	// Set the palette.
 	VID_SetPalette(palette);

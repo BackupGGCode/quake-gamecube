@@ -35,7 +35,7 @@ namespace quake
 
 		// We copy Quake's audio into double buffered DMA buffers while it is
 		// being transferred to the GameCube's audio system.
-		static const size_t		samples_per_dma_buffer	= 1024;
+		static const size_t		samples_per_dma_buffer	= 2048;
 		static sample			dma_buffers[2][samples_per_dma_buffer] __attribute__((aligned(32)));
 		static size_t			current_dma_buffer		= 0;
 
@@ -91,7 +91,7 @@ qboolean SNDDMA_Init(void)
 	shm = &sn;
 	shm->channels			= 2;
 	shm->samplebits			= 16;
-	shm->speed				= 48000;
+	shm->speed				= 32000;
 	shm->soundalive			= qtrue;
 	shm->splitbuffer		= qfalse;
 	shm->samples			= samples_per_mix_buffer * shm->channels;
@@ -101,7 +101,7 @@ qboolean SNDDMA_Init(void)
 
 	// Initialise the audio system.
 	AUDIO_Init(0);
-	AUDIO_SetDSPSampleRate(AI_SAMPLERATE_48KHZ);
+	AUDIO_SetDSPSampleRate(AI_SAMPLERATE_32KHZ);
 	AUDIO_RegisterDMACallback(play_more_audio);
 
 	// Start the first chunk of audio playing.
