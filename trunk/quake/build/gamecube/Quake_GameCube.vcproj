@@ -602,11 +602,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Makefile_GameCube.txt"
-				>
-			</File>
-			<File
-				RelativePath=".\Makefile_Generic.txt"
+				RelativePath=".\Makefile"
 				>
 			</File>
 		</Filter>

@@ -25,6 +25,8 @@ extern "C"
 #include "../generic/quakedef.h"
 }
 
+#define USE_NATIVE_FORMAT 1
+
 namespace quake
 {
 	namespace sound
@@ -37,7 +39,9 @@ namespace quake
 		};
 		
 		// The buffer SDL uses.
+#if USE_NATIVE_FORMAT
 		static SDL_AudioCVT	conversion;
+#endif
 		static const int	samples_per_submission	= 1024;
 
 		// Quake writes its audio into this mix buffer.
@@ -45,6 +49,7 @@ namespace quake
 		static sample		mix_buffer[samples_per_mix_buffer];
 		static int			mix_buffer_pointer		= 0;
 
+#if USE_NATIVE_FORMAT
 		// Convert and copy.
 		static void convert_and_copy(Uint8* src, int src_byte_count, Uint8* dst, int dst_byte_count)
 		{
@@ -70,21 +75,24 @@ namespace quake
 				SDL_ConvertAudio(&conversion);
 			}
 		}
+#endif
 
 		// The audio submission callback.
 		static void callback(void*, Uint8 *dst, int dst_byte_count)
 		{
 			// Set up the source data.
-			Uint8* const	src				= reinterpret_cast<Uint8*>(&mix_buffer[mix_buffer_pointer]);
-			const int		src_byte_count	= sizeof(sample) * samples_per_submission;
+			Uint8* const src = reinterpret_cast<Uint8*>(&mix_buffer[mix_buffer_pointer]);
 
+#if USE_NATIVE_FORMAT
 			// Is audio conversion required?
 			if (conversion.needed)
 			{
 				// Convert and copy at the same time.
+				const int src_byte_count = sizeof(sample) * samples_per_submission;
 				convert_and_copy(src, src_byte_count, dst, dst_byte_count);
 			}
 			else
+#endif
 			{
 				// Copy directly to the stream.
 				memcpy(dst, src, dst_byte_count);
@@ -123,6 +131,7 @@ qboolean SNDDMA_Init(void)
 	shm->submission_chunk	= 1;
 	shm->buffer				= reinterpret_cast<unsigned char*>(&mix_buffer[0]);
 
+#if USE_NATIVE_FORMAT
 	// Initialise the audio system.
 	SDL_AudioSpec obtained;
 	if (SDL_OpenAudio(&desired, &obtained) < 0)
@@ -144,6 +153,14 @@ qboolean SNDDMA_Init(void)
 		Sys_Error("SDL_BuildAudioCVT failed");
 		return qfalse;
 	}
+#else
+	// Initialise the audio system.
+	if (SDL_OpenAudio(&desired, 0) < 0)
+	{
+		Sys_Error("SDL_OpenAudio failed");
+		return qfalse;
+	}
+#endif
 
 	// Start the first chunk of audio playing.
 	SDL_PauseAudio(0);
@@ -154,7 +171,7 @@ qboolean SNDDMA_Init(void)
 void SNDDMA_Shutdown(void)
 {
 	// Stop streaming.
-	SDL_PauseAudio(0);
+	SDL_PauseAudio(1);
 
 	// Stop the audio system.
 	SDL_CloseAudio();

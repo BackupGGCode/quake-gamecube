@@ -114,11 +114,6 @@ namespace quake
 			PAD_Init();
 		}
 
-		static char* detect_base_dir()
-		{
-			return "";
-		}
-
 		static void check_stack_size()
 		{
 			const size_t stack_size		= &__stack_addr - &__stack_end;
@@ -128,6 +123,31 @@ namespace quake
 				Sys_Error("Stack is too small. Should be >= %uK, but is only %uK in size.",
 					required_size / 1024,
 					stack_size / 1024);
+			}
+		}
+
+		static void check_pak_file_exists()
+		{
+			int handle = -1;
+			if (Sys_FileOpenRead("/id1/pak0.pak", &handle) < 0)
+			{
+				Sys_Error(
+					"/ID1/PAK0.PAK was not found.\n"
+					"\n"
+					"This file comes with the full or demo version of Quake\n"
+					"and is necessary for the game to run.\n"
+					"\n"
+					"Please make sure it is on your SD card in the correct\n"
+					"location and is named only in UPPER CASE.\n"
+					"\n"
+					"If you are absolutely sure the file is correct, your SD\n"
+					"card adaptor may not be compatible with the SD card\n"
+					"library which Quake uses. Please check the issue tracker.");
+				return;
+			}
+			else
+			{
+				Sys_FileClose(handle);
 			}
 		}
 	}
@@ -143,6 +163,7 @@ int main(int argc, char* argv[])
 	// Initialise.
 	init();
 	check_stack_size();
+	check_pak_file_exists();
 
 	// Initialise the Common module.
 	char* args[] =
@@ -159,7 +180,7 @@ int main(int argc, char* argv[])
 	memset(&parms, 0, sizeof(parms));
 	parms.argc		= com_argc;
 	parms.argv		= com_argv;
-	parms.basedir	= detect_base_dir();
+	parms.basedir	= "";
 	parms.memsize	= heap_size;
 	parms.membase	= heap;
 	if (parms.membase == 0)
