@@ -1,5 +1,5 @@
+#summary Describes a Wii system update which causes several homebrew launch methods to fail.
 #labels Phase-Support
-# Describes a Wii system update which causes several homebrew launch methods to fail.
 
 = When was the update released? =
 
