@@ -1,0 +1,23 @@
+#summary How to install and run the game.
+#labels Featured,Phase-Deploy
+
+= Installing the game on your SD card =
+
+ # Download the game and copy it onto your SD card. Your SD card should have the following layout, where "/" is the root of the card:
+  * `/ID1/PAK0.PAK`
+  * `/ID1/PAK1.PAK` (if you own the full version of Quake)
+  * `/ID1/CONFIG.CFG` (this file is not absolutely required, but will make it easier to get started)
+  * `/Quake.dol`
+  * `/SDLOAD.DOL` (if you use SD Media Launcher)
+ # Please ensure that the `ID1` folder and `PAK*.PAK` files are in the correct locations and are named only in UPPER CASE. The SD card library which Quake uses to read the data files requires that the file names are in upper case _only_.
+
+= Launching the game =
+
+ # Insert your SD card into its adaptor and into *slot 1* of your !GameCube. Slot 2 is not supported.
+ # If you use SD Media Launcher:
+  # Insert the SD Media Launcher disc into your console and switch on your console.
+  # Once presented with the SD Media Launcher menu, choose `SDLOAD.DOL`.
+  # Once presented with the SDLOAD menu, Choose `Quake.dol`.
+ # If you use Action Replay MAX:
+  # Insert the Action Replay MAX disc into your console and switch on your console.
+  # Section to be completed (I do not have an Action Replay MAX).
