@@ -1,9 +1,20 @@
 = Supported consoles =
 
+Any of the following are supported:
+
  * Nintendo !GameCube (PAL or NTSC)
  * Nintendo Wii (without the WiiSystemUpdate)
 
 = Supported launch methods =
 
- * Datel SD Media Launcher
+Any of the following are supported:
+
+ * Datel SD Media Launcher.
  * Datel Action Replay MAX (old version)
+
+= Software requirements =
+
+The software requirements depend on what launch method you want to use.
+
+ * SDMediaLauncherRequirements
+ * ActionReplayRequirements
