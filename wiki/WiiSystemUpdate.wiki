@@ -1,0 +1,8 @@
+= When was the update released? =
+
+The update was released on August 7th 2007.
+
+= What does the update break? =
+
+ * The SD Media Launcher disc will not boot.
+ * The Action Replay MAX disc will not boot.
