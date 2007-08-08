@@ -6,3 +6,7 @@ The update was released on August 7th 2007.
 
  * The SD Media Launcher disc will not boot.
  * The Action Replay MAX disc will not boot.
+
+= How do I know if my Wii has this update installed? =
+
+ * Your Wii will display a digital clock underneath the channel grid.
