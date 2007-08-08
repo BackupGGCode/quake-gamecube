@@ -1,3 +1,4 @@
+#labels Phase-Deploy,Featured
 = Supported consoles =
 
 Any of the following are supported:
@@ -14,7 +15,8 @@ Any of the following are supported:
 
 = Software requirements =
 
-The software requirements depend on what launch method you want to use.
+You will absolutely require a legal copy of Quake. Either get the demo version from the downloads page here or buy the full version. It is very cheap on eBay and is also available via Valve's "Steam" service.
 
- * [SDMediaLauncherRequirements SD Media Launcher requirements]
- * [ActionReplayRequirements Action Replay requirements]
+I do not support the use of illegal copies of the full version of Quake.
+
+If you have an SD Media Launcher, you may need to launch the game via SDLOAD instead of the SD Media Launcher's menu. SDLOAD is available as a DOL file.
