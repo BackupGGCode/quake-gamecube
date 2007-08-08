@@ -1,4 +1,4 @@
-# All the docs there are.
+#summary All the docs there are.
 
 = Contents =
 
