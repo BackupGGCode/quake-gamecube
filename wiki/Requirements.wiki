@@ -3,7 +3,7 @@
 Any of the following are supported:
 
  * Nintendo !GameCube (PAL or NTSC)
- * Nintendo Wii (without the WiiSystemUpdate)
+ * Nintendo Wii (without the recent [WiiSystemUpdate Wii system update])
 
 = Supported launch methods =
 
@@ -16,5 +16,5 @@ Any of the following are supported:
 
 The software requirements depend on what launch method you want to use.
 
- * SDMediaLauncherRequirements
- * ActionReplayRequirements
+ * [SDMediaLauncherRequirements SD Media Launcher requirements]
+ * [ActionReplayRequirements Action Replay requirements]
