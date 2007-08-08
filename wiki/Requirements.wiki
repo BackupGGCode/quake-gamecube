@@ -1,4 +1,6 @@
+#summary Things you will need before you can run Quake.
 #labels Phase-Deploy,Featured
+
 = Supported consoles =
 
 Any of the following are supported:
