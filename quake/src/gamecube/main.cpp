@@ -22,9 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cstdio>
 
 // OGC includes.
-#include <gccore.h>
-#include <ogcsys.h>
 #include <ogc/lwp_watchdog.h>
+#include <ogcsys.h>
 
 extern "C"
 {
@@ -33,9 +32,9 @@ extern "C"
 }
 
 #define INTERLACED		1
-#define FORCE_PAL		1
+#define FORCE_PAL		0
 #define CONSOLE_DEBUG	0
-#define TIME_DEMO		1
+#define TIME_DEMO		0
 
 extern const char __stack_addr;
 extern const char __stack_end;

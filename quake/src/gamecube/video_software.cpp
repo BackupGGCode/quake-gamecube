@@ -20,9 +20,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // Standard includes.
 #include <cstddef>
+#include <malloc.h>
+#include <algorithm>
 
 // OGC includes.
-#include <gccore.h>
+#include <ogc/cache.h>
+#include <ogc/gx.h>
+#include <ogc/gx_struct.h>
+#include <ogc/system.h>
+#include <ogc/video.h>
+#include <ogc/video_types.h>
 
 extern "C"
 {
@@ -44,110 +51,77 @@ namespace quake
 
 	namespace video
 	{
-		// Types.
-		using main::pixel_pair;
+		using main::rmode;
+		using main::xfb;
 
-		// Constants.
+		// Quake constants.
 		static const size_t		max_screen_width	= 640;
 		static const size_t		max_screen_height	= 528;
 		static const size_t		surface_cache_size	= SURFCACHE_SIZE_AT_320X200 + ((max_screen_width - 320) * (max_screen_height - 200) * 3);
 
-		// Render buffers.
+		// Quake render buffers.
 		static pixel_t			render_buffer[max_screen_height][max_screen_width];
-		static short			depth_buffer[max_screen_height][max_screen_width];
+		static short			depth_buffer[max_screen_height * max_screen_width];
 		static unsigned char	surface_cache[surface_cache_size];
 
-		// Colour fudging.
-		static	unsigned int	gamma[256];
-		static	pixel_pair		palette[256][256];
+		// GX constants.
+		static const size_t		fifo_size			= 1024 * 256;
+		static const size_t		texture_width		= max_screen_width;
+		static const size_t		texture_height		= max_screen_height;
+		static const size_t		texture_tile_width	= 8;
+		static const size_t		texture_tile_height	= 4;
+		static const size_t		texture_width_in_tiles	= texture_width / texture_tile_width;
+		static const size_t		texture_height_in_tiles	= texture_height / texture_tile_height;
 
-		// Packs the component_ts into a pixel pair.
-		static inline pixel_pair pack(unsigned int y1, unsigned int cb, unsigned int y2, unsigned int cr)
+		// GX types.
+		typedef u8 texture_tile[texture_tile_height][texture_tile_width];
+		typedef texture_tile texture_tile_row[texture_width_in_tiles];
+		typedef texture_tile_row texture_t[texture_height_in_tiles];
+
+		// GX globals.
+		static void*			gp_fifo;
+		static u16				palette_data[256] ATTRIBUTE_ALIGN(32);
+		static GXTlutObj		palette;
+		static texture_t		texture_data ATTRIBUTE_ALIGN(32);
+		static GXTexObj			texture;
+
+		static inline void copy_tile_row(u8* dst_row, const pixel_t* src_row)
 		{
-			return (y1 << 24) | (cb << 16) | (y2 << 8) | cr;
+			dst_row[0] = src_row[0];
+			dst_row[1] = src_row[1];
+			dst_row[2] = src_row[2];
+			dst_row[3] = src_row[3];
+			dst_row[4] = src_row[4];
+			dst_row[5] = src_row[5];
+			dst_row[6] = src_row[6];
+			dst_row[7] = src_row[7];
 		}
 
-		static inline unsigned int calc_y(unsigned int r, unsigned int g, unsigned int b)
+		static inline void copy_tile(texture_tile* tile, size_t tile_x, size_t tile_y)
 		{
-			return gamma[(299 * r + 587 * g + 114 * b) / 1000];
+			const size_t	src_x1	= tile_x * texture_tile_width;
+			const size_t	src_y1	= tile_y * texture_tile_height;
+
+			copy_tile_row(&(*tile)[0][0], &render_buffer[src_y1][src_x1]);
+			copy_tile_row(&(*tile)[1][0], &render_buffer[src_y1 + 1][src_x1]);
+			copy_tile_row(&(*tile)[2][0], &render_buffer[src_y1 + 2][src_x1]);
+			copy_tile_row(&(*tile)[3][0], &render_buffer[src_y1 + 3][src_x1]);
 		}
 
-		static inline unsigned int calc_cb(unsigned int r, unsigned int g, unsigned int b)
+		static void copy_texture()
 		{
-			return (-16874 * r - 33126 * g + 50000 * b + 12800000) / 100000;
-		}
+			const size_t	src_w_in_tiles	= std::min(vid.width / texture_tile_width, texture_width_in_tiles);
+			const size_t	src_h_in_tiles	= std::min(vid.height / texture_tile_height, texture_height_in_tiles);
 
-		static inline unsigned int calc_cr(unsigned int r, unsigned int g, unsigned int b)
-		{
-			return (50000 * r - 41869 * g - 8131 * b + 12800000) / 100000;
-		}
-
-		// Blits some pixels from the render buffer to the GameCube's frame buffer.
-		template <size_t magnification>
-		static inline void blit_pixels(const pixel_t*& src, pixel_pair*& dst);
-
-		// Specialise for single width pixels.
-		template <>
-		static inline void blit_pixels<1>(const pixel_t*& src, pixel_pair*& dst)
-		{
-			// Read an integer at a time.
-			const unsigned int i	= *(reinterpret_cast<const u32*&>(src))++;
-			const unsigned int i1	= i >> 24;
-			const unsigned int i2	= (i >> 16) & 0xff;
-			const unsigned int i3	= (i >> 8) & 0xff;
-			const unsigned int i4	= i & 0xff;
-
-			// Write out 2 pixels.
-			*dst++ = palette[i1][i2];
-			*dst++ = palette[i3][i4];
-		}
-
-		// Specialise for double width pixels.
-		template <>
-		static inline void blit_pixels<2>(const pixel_t*& src, pixel_pair*& dst)
-		{
-			// Read an integer at a time.
-			const unsigned int i	= *(reinterpret_cast<const u32*&>(src))++;
-			const unsigned int i1	= i >> 24;
-			const unsigned int i2	= (i >> 16) & 0xff;
-			const unsigned int i3	= (i >> 8) & 0xff;
-			const unsigned int i4	= i & 0xff;
-
-			// Write out 4 pixels.
-			*dst++ = palette[i1][i1];
-			*dst++ = palette[i2][i2];
-			*dst++ = palette[i3][i3];
-			*dst++ = palette[i4][i4];
-		}
-
-		// Blits one row from the render buffer to the GameCube's frame buffer.
-		template <size_t magnification>
-		static inline void blit_row(const pixel_t* src_row_start, const pixel_t* src_row_end, pixel_pair* dst_row_start)
-		{
-			const pixel_t*	src = src_row_start;
-			pixel_pair*		dst = dst_row_start;
-			while (src != src_row_end)
+			for (size_t tile_y = 0; tile_y < src_h_in_tiles; ++tile_y)
 			{
-				blit_pixels<magnification>(src, dst);
-			}
-		}
+				texture_tile_row* const tile_row = &texture_data[tile_y];
 
-		// Blits the screen from the render buffer to the GameCube's frame buffer.
-		template <size_t magnification>
-		static void blit_screen()
-		{
-			// Constants.
-			const unsigned int	w	= vid.width;
-			const unsigned int	h	= vid.height;
-
-			// For each row...
-			for (unsigned int row = 0; row < h; ++row)
-			{
-				// Blit this row.
-				blit_row<magnification>(
-					&render_buffer[row][0],
-					&render_buffer[row][w],
-					&(*main::xfb)[row][0]);
+				for (size_t tile_x = 0; tile_x < src_w_in_tiles; ++tile_x)
+				{
+					texture_tile* const tile = &(*tile_row)[tile_x];
+					copy_tile(tile, tile_x, tile_y);
+				}
 			}
 		}
 	}
@@ -161,42 +135,16 @@ unsigned short	d_8to16table[256];
 
 void VID_SetPalette(unsigned char* palette)
 {
-	// How to store the components.
-	struct ycbcr
+	for (unsigned int colour = 0; colour < 256; ++colour)
 	{
-		unsigned char y;
-		unsigned char cb;
-		unsigned char cr;
-	};
-	ycbcr components[256];
-
-	// Build the YCBCR table.
-	for (unsigned int component = 0; component < 256; ++component)
-	{
-		const unsigned int r = *palette++;
-		const unsigned int g = *palette++;
-		const unsigned int b = *palette++;
-
-		components[component].y		= calc_y(r, g, b);
-		components[component].cb	= calc_cb(r, g, b);
-		components[component].cr	= calc_cr(r, g, b);
+		const unsigned int r = *palette++ >> 3;
+		const unsigned int g = *palette++ >> 2;
+		const unsigned int b = *palette++ >> 3;
+		palette_data[colour] = b | (g << 5) | (r << 11);
 	}
 
-	// Build the Y1CBY2CR palette from the YCBCR table.
-	for (unsigned int left = 0; left < 256; ++left)
-	{
-		const unsigned int	y1	= components[left].y;
-		const unsigned int	cb1	= components[left].cb;
-		const unsigned int	cr1	= components[left].cr;
-		
-		for (unsigned int right = 0; right < 256; ++right)
-		{
-			const unsigned int	cb	= (cb1 + components[right].cb) >> 1;
-			const unsigned int	cr	= (cr1 + components[right].cr) >> 1;
-
-			video::palette[left][right] = pack(y1, cb, components[right].y, cr);
-		}
-	}
+	DCFlushRange(&palette_data, sizeof(palette_data));
+	GX_LoadTlut(&::palette, GX_TLUT0);
 }
 
 void VID_ShiftPalette(unsigned char* palette)
@@ -206,21 +154,78 @@ void VID_ShiftPalette(unsigned char* palette)
 
 void VID_Init(unsigned char* palette)
 {
-	// Set up the gamma table.
-	const float factor = 0.5f;
-	for (unsigned int in = 0; in < 256; ++in)
+	// Initialise GX.
+	gp_fifo = MEM_K0_TO_K1(memalign(32, fifo_size));
+	memset(gp_fifo, 0, fifo_size);
+	GX_Init(gp_fifo, fifo_size);
+
+	GXColor	backgroundColor	= {32, 64, 128,	255};
+
+	GX_SetCopyClear(backgroundColor, GX_MAX_Z24);
+	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
+	GX_SetDispCopyYScale((f32)rmode->xfbHeight/(f32)rmode->efbHeight);
+	GX_SetScissor(0,0,rmode->fbWidth,rmode->efbHeight);
+	GX_SetDispCopySrc(0,0,rmode->fbWidth,rmode->efbHeight);
+	GX_SetDispCopyDst(rmode->fbWidth,rmode->xfbHeight);
+	GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,
+		GX_TRUE,rmode->vfilter);
+	GX_SetFieldMode(rmode->field_rendering,
+		((rmode->viHeight==2*rmode->xfbHeight)?GX_ENABLE:GX_DISABLE));
+
+	GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_TRUE);
+	GX_SetColorUpdate(GX_TRUE);
+	GX_SetDispCopyGamma(GX_GM_2_2);
+
+	Mtx	projection;
+	guOrtho(projection, 1, 0, 0, 1, -1, 1);
+	GX_LoadProjectionMtx(projection, GX_ORTHOGRAPHIC);
+
+	GX_ClearVtxDesc();
+	GX_SetVtxDesc(GX_VA_POS, GX_INDEX8);
+	GX_SetVtxDesc(GX_VA_TEX0, GX_INDEX8);
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS,	GX_POS_XYZ,	GX_F32,	0);
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32,	0);
+
+	static float vertices[4][3] ATTRIBUTE_ALIGN(32) =
 	{
-		video::gamma[in] = static_cast<unsigned int>(255.0f * powf(in / 255.0f, factor));
-	}
+		{0, 0, 0},
+		{1, 0, 0},
+		{1, 1, 0},
+		{0, 1, 0}
+	};
+
+	GX_SetArray(GX_VA_POS, vertices, sizeof(vertices[0]));
 
 	// Get some constants.
-	size_t			screen_width	= main::rmode->fbWidth;
+	const size_t	screen_width	= main::rmode->fbWidth;
 	const size_t	screen_height	= main::rmode->xfbHeight;
-	if (main::rmode->xfbMode == VI_XFBMODE_SF)
-	{
-		screen_width /= 2;
-	}
 
+	const float s = screen_width / static_cast<float>(texture_width);
+	const float t = screen_height / static_cast<float>(texture_height);
+
+	static float sts[4][2] ATTRIBUTE_ALIGN(32) =
+	{
+		{0, t},
+		{s, t},
+		{s, 0},
+		{0, 0}
+	};
+
+	GX_SetArray(GX_VA_TEX0,	sts, sizeof(sts[0]));
+	GX_SetNumChans(1);
+	GX_SetNumTexGens(1);
+	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
+	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLORNULL);
+	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+	GX_SetCullMode(GX_CULL_NONE);
+
+	GX_InitTlutObj(&::palette, &palette_data[0], 1, GX_TLUT_256);
+
+	GX_InitTexObjCI(
+		&texture, &texture_data[0][0], texture_width, texture_height, GX_TF_CI8, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT0);
+	GX_InitTexObjLOD(
+		&texture, GX_NEAR, GX_NEAR, 0, 0, 0, GX_FALSE, GX_FALSE, GX_ANISO_1);
+	
 	// Set up Quake's video parameters.
 	vid.aspect			= vid.aspect = (static_cast<float>(screen_height) / static_cast<float>(screen_width)) * (4.0f / 3.0f);
 	vid.buffer			= &render_buffer[0][0];
@@ -228,7 +233,7 @@ void VID_Init(unsigned char* palette)
 	vid.colormap16		= d_8to16table;
 	vid.conbuffer		= &render_buffer[0][0];
 	vid.conheight		= screen_height;
-	vid.conrowbytes		= max_screen_width;
+	vid.conrowbytes		= sizeof(render_buffer[0]);
 	vid.conwidth		= screen_width;
 	vid.direct			= &render_buffer[0][0];
 	vid.fullbright		= 256 - LittleLong(*((int *) vid.colormap + 2048));
@@ -237,11 +242,11 @@ void VID_Init(unsigned char* palette)
 	vid.maxwarpwidth	= WARP_WIDTH;
 	vid.numpages		= 1;
 	vid.recalc_refdef	= 0;
-	vid.rowbytes		= max_screen_width;
+	vid.rowbytes		= sizeof(render_buffer[0]);
 	vid.width			= screen_width;
-	
+
 	// Set the z buffer address.
-	d_pzbuffer			= &depth_buffer[0][0];
+	d_pzbuffer			= &depth_buffer[0];
 
 	// Initialise the surface cache.
 	D_InitCaches(surface_cache, sizeof(surface_cache));
@@ -253,21 +258,44 @@ void VID_Init(unsigned char* palette)
 void VID_Shutdown(void)
 {
 	// Shut down the display.
+
+	// Free the FIFO.
+	free(MEM_K1_TO_K0(gp_fifo));
+	gp_fifo = 0;
 }
 
 void VID_Update(vrect_t* rects)
 {
-	// Single field?
-	if (main::rmode->xfbMode == VI_XFBMODE_SF)
+	// Finish any previous drawing.
+	GX_Flush();
+
+	// Copy Quake's frame buffer into the texture data and convert from linear
+	// to tiled.
+	copy_texture();
+
+	// Flush the CPU data cache.
+	DCFlushRange(&texture_data, sizeof(texture_data));
+
+	// Clear the texture cache.
+	GX_InvalidateTexAll();
+
+	// Load the texture.
+	GX_LoadTexObj(&texture, GX_TEXMAP0);
+
+	// Draw a fullscreen quad.
+	GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT0, 4);
+	for (u8 index = 0; index < 4; ++index)
 	{
-		// Double magnification.
-		blit_screen<2>();
+		GX_Position1x8(index);
+		GX_TexCoord1x8(index);
 	}
-	else
-	{
-		// Single magnification.
-		blit_screen<1>();
-	}
+	GX_End();
+
+	// Mark the end of drawing.
+	GX_DrawDone();
+
+	// Copy the GX display to the external frame buffer.
+	GX_CopyDisp(xfb, GX_FALSE);
 }
 
 void D_BeginDirectRect(int x, int y, byte* pbitmap, int width, int height)
