@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="Quake_GameCube"
 	ProjectGUID="{37587AB5-5B70-47FE-B203-B60730402EBE}"
+	RootNamespace="Quake_GameCube"
 	Keyword="MakeFileProj"
 	>
 	<Platforms>
@@ -23,7 +24,7 @@
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="Make_GameCube.bat install"
-				ReBuildCommandLine="Make_GameCube.bat dist install"
+				ReBuildCommandLine="Make_GameCube.bat clean install"
 				CleanCommandLine="Make_GameCube.bat clean"
 				Output=""
 				PreprocessorDefinitions="GEKKO;__GNUC__"
@@ -43,7 +44,7 @@
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="Make_GameCube.bat install"
-				ReBuildCommandLine="Make_GameCube.bat dist install"
+				ReBuildCommandLine="Make_GameCube.bat clean install"
 				CleanCommandLine="Make_GameCube.bat clean"
 				Output=""
 				PreprocessorDefinitions="GEKKO;__GNUC__"
