@@ -1,5 +1,5 @@
 # About the release.
-VERSION	:= 2007_08_07_BETA
+VERSION	:= WIP
 
 # Directories.
 SRC_DIR		:= ../../src
