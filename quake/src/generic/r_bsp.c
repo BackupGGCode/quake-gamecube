@@ -447,13 +447,6 @@ R_RecursiveWorldNode
 */
 void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
-	int			i, c, side, *pindex;
-	vec3_t		acceptpt, rejectpt;
-	mplane_t	*plane;
-	msurface_t	*surf, **mark;
-	mleaf_t		*pleaf;
-	float		d, dot;
-
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
 
@@ -465,8 +458,13 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 //  twice as fast in ASM
 	if (clipflags)
 	{
+		static int i;
 		for (i=0 ; i<4 ; i++)
 		{
+			static float	d;
+			static vec3_t	acceptpt, rejectpt;
+			static int		*pindex;
+
 			if (! (clipflags & (1<<i)) )
 				continue;	// don't need to clip against it
 
@@ -501,6 +499,10 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 // if a leaf node, draw stuff
 	if (node->contents < 0)
 	{
+		mleaf_t		*pleaf;
+		msurface_t	**mark;
+		static int	c;
+
 		pleaf = (mleaf_t *)node;
 
 		mark = pleaf->firstmarksurface;
@@ -526,6 +528,12 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 	}
 	else
 	{
+		static mplane_t	*plane;
+		static int		c;
+
+		float	dot;
+		int		side;
+
 	// node is just a decision point, so go down the apropriate sides
 
 	// find which side of the node we are on
@@ -560,6 +568,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 		if (c)
 		{
+			static msurface_t	*surf;
 			surf = cl.worldmodel->surfaces + node->firstsurface;
 
 			if (dot < -BACKFACE_EPSILON)

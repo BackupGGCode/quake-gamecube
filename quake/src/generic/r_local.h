@@ -72,12 +72,12 @@ extern cvar_t	r_reportedgeout;
 extern cvar_t	r_maxedges;
 extern cvar_t	r_numedges;
 
-#define XCENTERING	(1.0 / 2.0)
-#define YCENTERING	(1.0 / 2.0)
+#define XCENTERING	(1.0f / 2.0f)
+#define YCENTERING	(1.0f / 2.0f)
 
-#define CLIP_EPSILON		0.001
+#define CLIP_EPSILON		0.001f
 
-#define BACKFACE_EPSILON	0.01
+#define BACKFACE_EPSILON	0.01f
 
 //===========================================================================
 
