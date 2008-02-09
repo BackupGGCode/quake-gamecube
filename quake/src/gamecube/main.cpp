@@ -31,13 +31,17 @@ extern "C"
 #include "../generic/quakedef.h"
 }
 
+// Handy switches.
 #define INTERLACED		1
-#define FORCE_PAL		0
+#define FORCE_PAL		1
 #define CONSOLE_DEBUG	0
 #define TIME_DEMO		0
 
+// Globals provided by the ogc.ld link script.
 extern const char __stack_addr;
 extern const char __stack_end;
+extern const char __ArenaLo;
+extern const char __ArenaHi;
 
 namespace quake
 {
@@ -67,8 +71,8 @@ namespace quake
 #endif
 			switch (mode)
 			{
-			case VI_MPAL:
 			case VI_PAL:
+			case VI_MPAL:
 #if INTERLACED
 				rmode = &TVPal528IntDf;
 #else
@@ -173,6 +177,11 @@ int main(int argc, char* argv[])
 #endif
 	};
 	COM_InitArgv(sizeof(args) / sizeof(args[0]), args);
+
+#if 1
+	const size_t arena_size = &__ArenaHi - &__ArenaLo;
+	Sys_Printf("arena_size = %u\n", arena_size);
+#endif
 
 	// Initialise the Host module.
 	quakeparms_t parms;
