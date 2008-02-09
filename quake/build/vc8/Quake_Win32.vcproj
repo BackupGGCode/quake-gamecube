@@ -66,6 +66,8 @@
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				StackReserveSize="131072"
+				StackCommitSize="131072"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -140,6 +142,8 @@
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				StackReserveSize="131072"
+				StackCommitSize="131072"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
