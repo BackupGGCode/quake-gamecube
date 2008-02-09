@@ -77,6 +77,14 @@ void VID_ShiftPalette(unsigned char* palette)
 
 void VID_Init(unsigned char* palette)
 {
+	// Set the window title.
+#ifdef _DEBUG
+	const char* const title = "Quake (Debug)";
+#else
+	const char* const title = "Quake";
+#endif
+	SDL_WM_SetCaption(title, title);
+
 	// Create the screen.
 	screen = SDL_SetVideoMode(640, 480, 8, SDL_SWSURFACE);
 	if (!screen)
