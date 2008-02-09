@@ -950,10 +950,10 @@ R_RenderView
 r_refdef must be set before the first call
 ================
 */
+static byte	warpbuffer[WARP_WIDTH * WARP_HEIGHT];
+
 void R_RenderView_ (void)
 {
-	byte	warpbuffer[WARP_WIDTH * WARP_HEIGHT];
-
 	r_warpbuffer = warpbuffer;
 
 	if (r_timegraph.value || r_speeds.value || r_dspeeds.value)

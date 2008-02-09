@@ -653,11 +653,12 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 R_RenderWorld
 ================
 */
+static btofpoly_t	btofpolys[MAX_BTOFPOLYS];
+
 void R_RenderWorld (void)
 {
 	int			i;
 	model_t		*clmodel;
-	btofpoly_t	btofpolys[MAX_BTOFPOLYS];
 
 	pbtofpolys = btofpolys;
 
