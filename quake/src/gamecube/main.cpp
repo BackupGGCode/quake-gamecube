@@ -32,7 +32,7 @@ extern "C"
 }
 
 // Handy switches.
-#define INTERLACED		1
+#define INTERLACED		0
 #define FORCE_PAL		1
 #define CONSOLE_DEBUG	0
 #define TIME_DEMO		0

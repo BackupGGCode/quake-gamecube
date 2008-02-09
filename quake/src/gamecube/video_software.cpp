@@ -55,8 +55,8 @@ namespace quake
 		using main::xfb;
 
 		// Quake constants.
-		static const size_t		max_screen_width	= 640;
-		static const size_t		max_screen_height	= 528;
+		static const size_t		max_screen_width	= 320;
+		static const size_t		max_screen_height	= 264;
 		static const size_t		surface_cache_size	= SURFCACHE_SIZE_AT_320X200 + ((max_screen_width - 320) * (max_screen_height - 200) * 3);
 
 		// Quake render buffers.
@@ -169,8 +169,9 @@ void VID_Init(unsigned char* palette)
 	GX_SetDispCopyDst(rmode->fbWidth,rmode->xfbHeight);
 	GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,
 		GX_TRUE,rmode->vfilter);
-	GX_SetFieldMode(rmode->field_rendering,
-		((rmode->viHeight==2*rmode->xfbHeight)?GX_ENABLE:GX_DISABLE));
+
+	const bool field_rendering = (rmode->viHeight == (2 * rmode->xfbHeight));
+	GX_SetFieldMode(rmode->field_rendering, field_rendering ? GX_ENABLE : GX_DISABLE);
 
 	GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_TRUE);
 	GX_SetColorUpdate(GX_TRUE);
@@ -197,7 +198,7 @@ void VID_Init(unsigned char* palette)
 	GX_SetArray(GX_VA_POS, vertices, sizeof(vertices[0]));
 
 	// Get some constants.
-	const size_t	screen_width	= main::rmode->fbWidth;
+	const size_t	screen_width	= field_rendering ? (main::rmode->fbWidth / 2) : main::rmode->fbWidth;
 	const size_t	screen_height	= main::rmode->xfbHeight;
 
 	const float s = screen_width / static_cast<float>(texture_width);
