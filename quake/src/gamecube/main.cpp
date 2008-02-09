@@ -120,7 +120,7 @@ namespace quake
 		static void check_stack_size()
 		{
 			const size_t stack_size		= &__stack_addr - &__stack_end;
-			const size_t required_size	= 256 * 1024;
+			const size_t required_size	= 128 * 1024;
 			if (stack_size < required_size)
 			{
 				Sys_Error("Stack is too small. Should be >= %uK, but is only %uK in size.",
