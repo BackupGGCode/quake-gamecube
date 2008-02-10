@@ -104,14 +104,14 @@ void R_Alias_clip_left (finalvert_t *pfv0, finalvert_t *pfv1, finalvert_t *out)
 		scale = (float)(r_refdef.aliasvrect.x - pfv0->v[0]) /
 				(pfv1->v[0] - pfv0->v[0]);
 		for (i=0 ; i<6 ; i++)
-			out->v[i] = pfv0->v[i] + (pfv1->v[i] - pfv0->v[i])*scale + 0.5;
+			out->v[i] = pfv0->v[i] + (pfv1->v[i] - pfv0->v[i])*scale + 0.5f;
 	}
 	else
 	{
 		scale = (float)(r_refdef.aliasvrect.x - pfv1->v[0]) /
 				(pfv0->v[0] - pfv1->v[0]);
 		for (i=0 ; i<6 ; i++)
-			out->v[i] = pfv1->v[i] + (pfv0->v[i] - pfv1->v[i])*scale + 0.5;
+			out->v[i] = pfv1->v[i] + (pfv0->v[i] - pfv1->v[i])*scale + 0.5f;
 	}
 }
 
@@ -127,14 +127,14 @@ void R_Alias_clip_right (finalvert_t *pfv0, finalvert_t *pfv1,
 		scale = (float)(r_refdef.aliasvrectright - pfv0->v[0]) /
 				(pfv1->v[0] - pfv0->v[0]);
 		for (i=0 ; i<6 ; i++)
-			out->v[i] = pfv0->v[i] + (pfv1->v[i] - pfv0->v[i])*scale + 0.5;
+			out->v[i] = pfv0->v[i] + (pfv1->v[i] - pfv0->v[i])*scale + 0.5f;
 	}
 	else
 	{
 		scale = (float)(r_refdef.aliasvrectright - pfv1->v[0]) /
 				(pfv0->v[0] - pfv1->v[0]);
 		for (i=0 ; i<6 ; i++)
-			out->v[i] = pfv1->v[i] + (pfv0->v[i] - pfv1->v[i])*scale + 0.5;
+			out->v[i] = pfv1->v[i] + (pfv0->v[i] - pfv1->v[i])*scale + 0.5f;
 	}
 }
 
@@ -149,14 +149,14 @@ void R_Alias_clip_top (finalvert_t *pfv0, finalvert_t *pfv1, finalvert_t *out)
 		scale = (float)(r_refdef.aliasvrect.y - pfv0->v[1]) /
 				(pfv1->v[1] - pfv0->v[1]);
 		for (i=0 ; i<6 ; i++)
-			out->v[i] = pfv0->v[i] + (pfv1->v[i] - pfv0->v[i])*scale + 0.5;
+			out->v[i] = pfv0->v[i] + (pfv1->v[i] - pfv0->v[i])*scale + 0.5f;
 	}
 	else
 	{
 		scale = (float)(r_refdef.aliasvrect.y - pfv1->v[1]) /
 				(pfv0->v[1] - pfv1->v[1]);
 		for (i=0 ; i<6 ; i++)
-			out->v[i] = pfv1->v[i] + (pfv0->v[i] - pfv1->v[i])*scale + 0.5;
+			out->v[i] = pfv1->v[i] + (pfv0->v[i] - pfv1->v[i])*scale + 0.5f;
 	}
 }
 
@@ -173,7 +173,7 @@ void R_Alias_clip_bottom (finalvert_t *pfv0, finalvert_t *pfv1,
 				(pfv1->v[1] - pfv0->v[1]);
 
 		for (i=0 ; i<6 ; i++)
-			out->v[i] = pfv0->v[i] + (pfv1->v[i] - pfv0->v[i])*scale + 0.5;
+			out->v[i] = pfv0->v[i] + (pfv1->v[i] - pfv0->v[i])*scale + 0.5f;
 	}
 	else
 	{
@@ -181,7 +181,7 @@ void R_Alias_clip_bottom (finalvert_t *pfv0, finalvert_t *pfv1,
 				(pfv0->v[1] - pfv1->v[1]);
 
 		for (i=0 ; i<6 ; i++)
-			out->v[i] = pfv1->v[i] + (pfv0->v[i] - pfv1->v[i])*scale + 0.5;
+			out->v[i] = pfv1->v[i] + (pfv0->v[i] - pfv1->v[i])*scale + 0.5f;
 	}
 }
 

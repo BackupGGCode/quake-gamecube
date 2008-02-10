@@ -374,9 +374,9 @@ void Sys_Quit (void)
 	exit(0);
 }
 
-double Sys_FloatTime (void)
+float Sys_FloatTime (void)
 {
-	return SDL_GetTicks() * 0.001;
+	return SDL_GetTicks() * 0.001f;
 }
 
 char *Sys_ConsoleInput (void)

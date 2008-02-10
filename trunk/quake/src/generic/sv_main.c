@@ -167,7 +167,7 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 	MSG_WriteShort (&sv.datagram, channel);
 	MSG_WriteByte (&sv.datagram, sound_num);
 	for (i=0 ; i<3 ; i++)
-		MSG_WriteCoord (&sv.datagram, entity->v.origin[i]+0.5*(entity->v.mins[i]+entity->v.maxs[i]));
+		MSG_WriteCoord (&sv.datagram, entity->v.origin[i]+0.5f*(entity->v.mins[i]+entity->v.maxs[i]));
 }           
 
 /*
@@ -474,7 +474,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		for (i=0 ; i<3 ; i++)
 		{
 			miss = ent->v.origin[i] - ent->baseline.origin[i];
-			if ( miss < -0.1 || miss > 0.1 )
+			if ( miss < -0.1f || miss > 0.1f )
 				bits |= U_ORIGIN1<<i;
 		}
 
@@ -593,7 +593,7 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 		MSG_WriteByte (msg, ent->v.dmg_save);
 		MSG_WriteByte (msg, ent->v.dmg_take);
 		for (i=0 ; i<3 ; i++)
-			MSG_WriteCoord (msg, other->v.origin[i] + 0.5*(other->v.mins[i] + other->v.maxs[i]));
+			MSG_WriteCoord (msg, other->v.origin[i] + 0.5f*(other->v.mins[i] + other->v.maxs[i]));
 	
 		ent->v.dmg_take = 0;
 		ent->v.dmg_save = 0;
@@ -1071,7 +1071,7 @@ void SV_SpawnServer (char *server)
 //
 	if (coop.value)
 		Cvar_SetValue ("deathmatch", 0);
-	current_skill = (int)(skill.value + 0.5);
+	current_skill = (int)(skill.value + 0.5f);
 	if (current_skill < 0)
 		current_skill = 0;
 	if (current_skill > 3)
@@ -1123,7 +1123,7 @@ void SV_SpawnServer (char *server)
 	sv.state = ss_loading;
 	sv.paused = false;
 
-	sv.time = 1.0;
+	sv.time = 1.0f;
 	
 	strcpy (sv.name, server);
 	sprintf (sv.modelname,"maps/%s.bsp", server);
@@ -1183,7 +1183,7 @@ void SV_SpawnServer (char *server)
 	sv.state = ss_active;
 	
 // run two frames to allow everything to settle
-	host_frametime = 0.1;
+	host_frametime = 0.1f;
 	SV_Physics ();
 	SV_Physics ();
 

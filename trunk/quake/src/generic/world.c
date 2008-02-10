@@ -224,7 +224,7 @@ areanode_t *SV_CreateAreaNode (int depth, vec3_t mins, vec3_t maxs)
 	else
 		anode->axis = 1;
 	
-	anode->dist = 0.5 * (maxs[anode->axis] + mins[anode->axis]);
+	anode->dist = 0.5f * (maxs[anode->axis] + mins[anode->axis]);
 	VectorCopy (mins, mins1);	
 	VectorCopy (mins, mins2);	
 	VectorCopy (maxs, maxs1);	
@@ -570,7 +570,7 @@ LINE TESTING IN HULLS
 */
 
 // 1/32 epsilon to keep floating point happy
-#define	DIST_EPSILON	(0.03125)
+#define	DIST_EPSILON	(0.03125f)
 
 /*
 ==================
@@ -691,7 +691,7 @@ qboolean SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec
 	while (SV_HullPointContents (hull, hull->firstclipnode, mid)
 	== CONTENTS_SOLID)
 	{ // shouldn't really happen, but does occasionally
-		frac -= 0.1;
+		frac -= 0.1f;
 		if (frac < 0)
 		{
 			trace->fraction = midf;

@@ -87,7 +87,7 @@ void R_DarkFieldParticles (entity_t *ent)
 				p->next = active_particles;
 				active_particles = p;
 		
-				p->die = cl.time + 0.2 + (rand()&7) * 0.02;
+				p->die = cl.time + 0.2f + (rand()&7) * 0.02;
 				p->color = 150 + rand()%6;
 				p->type = pt_slowgrav;
 				
@@ -118,8 +118,8 @@ extern	float	r_avertexnormals[NUMVERTEXNORMALS][3];
 vec3_t	avelocities[NUMVERTEXNORMALS];
 float	beamlength = 16;
 vec3_t	avelocity = {23, 7, 3};
-float	partstep = 0.01;
-float	timescale = 0.01;
+float	partstep = 0.01f;
+float	timescale = 0.01f;
 
 void R_EntityParticles (entity_t *ent)
 {
@@ -137,7 +137,7 @@ void R_EntityParticles (entity_t *ent)
 if (!avelocities[0][0])
 {
 for (i=0 ; i<NUMVERTEXNORMALS*3 ; i++)
-avelocities[0][i] = (rand()&255) * 0.01;
+avelocities[0][i] = (rand()&255) * 0.01f;
 }
 
 
@@ -164,7 +164,7 @@ avelocities[0][i] = (rand()&255) * 0.01;
 		p->next = active_particles;
 		active_particles = p;
 
-		p->die = cl.time + 0.01;
+		p->die = cl.time + 0.01f;
 		p->color = 0x6f;
 		p->type = pt_explode;
 		
@@ -274,7 +274,7 @@ void R_ParseParticleEffect (void)
 	for (i=0 ; i<3 ; i++)
 		org[i] = MSG_ReadCoord ();
 	for (i=0 ; i<3 ; i++)
-		dir[i] = MSG_ReadChar () * (1.0/16);
+		dir[i] = MSG_ReadChar () * (1.0f/16);
 	msgcount = MSG_ReadByte ();
 	color = MSG_ReadByte ();
 
@@ -351,7 +351,7 @@ void R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 		p->next = active_particles;
 		active_particles = p;
 
-		p->die = cl.time + 0.3;
+		p->die = cl.time + 0.3f;
 		p->color = colorStart + (colorMod % colorLength);
 		colorMod++;
 
@@ -384,7 +384,7 @@ void R_BlobExplosion (vec3_t org)
 		p->next = active_particles;
 		active_particles = p;
 
-		p->die = cl.time + 1 + (rand()&8)*0.05;
+		p->die = cl.time + 1 + (rand()&8)*0.05f;
 
 		if (i & 1)
 		{
@@ -455,7 +455,7 @@ void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 		}
 		else
 		{
-			p->die = cl.time + 0.1*(rand()%5);
+			p->die = cl.time + 0.1f*(rand()%5);
 			p->color = (color&~7) + (rand()&7);
 			p->type = pt_slowgrav;
 			for (j=0 ; j<3 ; j++)
@@ -492,7 +492,7 @@ void R_LavaSplash (vec3_t org)
 				p->next = active_particles;
 				active_particles = p;
 		
-				p->die = cl.time + 2 + (rand()&31) * 0.02;
+				p->die = cl.time + 2 + (rand()&31) * 0.02f;
 				p->color = 224 + (rand()&7);
 				p->type = pt_slowgrav;
 				
@@ -534,7 +534,7 @@ void R_TeleportSplash (vec3_t org)
 				p->next = active_particles;
 				active_particles = p;
 		
-				p->die = cl.time + 0.2 + (rand()&7) * 0.02;
+				p->die = cl.time + 0.2f + (rand()&7) * 0.02f;
 				p->color = 7 + (rand()&7);
 				p->type = pt_slowgrav;
 				
@@ -612,7 +612,7 @@ void R_RocketTrail (vec3_t start, vec3_t end, int type)
 
 			case 3:
 			case 5:	// tracer
-				p->die = cl.time + 0.5;
+				p->die = cl.time + 0.5f;
 				p->type = pt_static;
 				if (type == 3)
 					p->color = 52 + ((tracercount&4)<<1);
@@ -645,7 +645,7 @@ void R_RocketTrail (vec3_t start, vec3_t end, int type)
 			case 6:	// voor trail
 				p->color = 9*16 + 8 + (rand()&3);
 				p->type = pt_static;
-				p->die = cl.time + 0.3;
+				p->die = cl.time + 0.3f;
 				for (j=0 ; j<3 ; j++)
 					p->org[j] = start[j] + ((rand()&15)-8);
 				break;
@@ -696,7 +696,7 @@ void R_DrawParticles (void)
 	time3 = frametime * 15;
 	time2 = frametime * 10; // 15;
 	time1 = frametime * 5;
-	grav = frametime * sv_gravity.value * 0.05;
+	grav = frametime * sv_gravity.value * 0.05f;
 	dvel = 4*frametime;
 	
 	for ( ;; ) 
