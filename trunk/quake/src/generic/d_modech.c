@@ -29,27 +29,6 @@ int	d_y_aspect_shift, d_pix_min, d_pix_max, d_pix_shift;
 int		d_scantable[MAXHEIGHT];
 short	*zspantable[MAXHEIGHT]; 
 
-/*
-================
-D_Patch
-================
-*/
-void D_Patch (void)
-{
-#if id386
-
-	static qboolean protectset8 = false;
-
-	if (!protectset8)
-	{
-		Sys_MakeCodeWriteable ((int)D_PolysetAff8Start,
-						     (int)D_PolysetAff8End - (int)D_PolysetAff8Start);
-		protectset8 = true;
-	}
-
-#endif	// id386
-}
-
 
 /*
 ================
@@ -101,7 +80,5 @@ void D_ViewChanged (void)
 			zspantable[i] = d_pzbuffer + i*d_zwidth;
 		}
 	}
-
-	D_Patch ();
 }
 

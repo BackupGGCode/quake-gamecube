@@ -71,24 +71,17 @@ fixed16_t	bbextents, bbextentt;
 
 
 void D_DrawSpans8 (espan_t *pspans);
-void D_DrawSpans16 (espan_t *pspans);
 void D_DrawZSpans (espan_t *pspans);
 void Turbulent8 (espan_t *pspan);
 void D_SpriteDrawSpans (sspan_t *pspan);
 
 void D_DrawSkyScans8 (espan_t *pspan);
-void D_DrawSkyScans16 (espan_t *pspan);
 
 void R_ShowSubDiv (void);
 void (*prealspandrawer)(void);
 surfcache_t	*D_CacheSurface (msurface_t *surface, int miplevel);
 
 extern int D_MipLevelForScale (float scale);
-
-#if id386
-extern void D_PolysetAff8Start (void);
-extern void D_PolysetAff8End (void);
-#endif
 
 extern short *d_pzbuffer;
 extern unsigned int d_zrowbytes, d_zwidth;
