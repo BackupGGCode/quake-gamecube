@@ -44,7 +44,7 @@ typedef struct entity_s
 
 	entity_state_t			baseline;		// to fill in defaults in updates
 
-	double					msgtime;		// time of last update
+	float					msgtime;		// time of last update
 	vec3_t					msg_origins[2];	// last two updates (0 is newest)	
 	vec3_t					origin;
 	vec3_t					msg_angles[2];	// last two updates (0 is newest)
@@ -81,16 +81,16 @@ typedef struct
 										//  for use in edge list
 	float		fvrectx, fvrecty;		// for floating-point compares
 	float		fvrectx_adj, fvrecty_adj; // left and top edges, for clamping
-	int			vrect_x_adj_shift20;	// (vrect.x + 0.5 - epsilon) << 20
-	int			vrectright_adj_shift20;	// (vrectright + 0.5 - epsilon) << 20
+	int			vrect_x_adj_shift20;	// (vrect.x + 0.5f - epsilon) << 20
+	int			vrectright_adj_shift20;	// (vrectright + 0.5f - epsilon) << 20
 	float		fvrectright_adj, fvrectbottom_adj;
 										// right and bottom edges, for clamping
 	float		fvrectright;			// rightmost edge, for Alias clamping
 	float		fvrectbottom;			// bottommost edge, for Alias clamping
-	float		horizontalFieldOfView;	// at Z = 1.0, this many X is visible 
+	float		horizontalFieldOfView;	// at Z = 1.0f, this many X is visible 
 										// 2.0 = 90 degrees
-	float		xOrigin;			// should probably allways be 0.5
-	float		yOrigin;			// between be around 0.3 to 0.5
+	float		xOrigin;			// should probably allways be 0.5f
+	float		yOrigin;			// between be around 0.3f to 0.5f
 
 	vec3_t		vieworg;
 	vec3_t		viewangles;

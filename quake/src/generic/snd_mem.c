@@ -43,7 +43,7 @@ void ResampleSfx (sfx_t *sfx, int inrate, int inwidth, byte *data)
 	if (!sc)
 		return;
 
-	stepscale = (float)inrate / shm->speed;	// this is usually 0.5, 1, or 2
+	stepscale = (float)inrate / shm->speed;	// this is usually 0.5f, 1, or 2
 
 	outcount = sc->length / stepscale;
 	sc->length = outcount;

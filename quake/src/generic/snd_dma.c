@@ -416,22 +416,22 @@ void SND_Spatialize(channel_t *ch)
 
 	if (shm->channels == 1)
 	{
-		rscale = 1.0;
-		lscale = 1.0;
+		rscale = 1.0f;
+		lscale = 1.0f;
 	}
 	else
 	{
-		rscale = 1.0 + dot;
-		lscale = 1.0 - dot;
+		rscale = 1.0f + dot;
+		lscale = 1.0f - dot;
 	}
 
 // add in distance effect
-	scale = (1.0 - dist) * rscale;
+	scale = (1.0f - dist) * rscale;
 	ch->rightvol = (int) (ch->master_vol * scale);
 	if (ch->rightvol < 0)
 		ch->rightvol = 0;
 
-	scale = (1.0 - dist) * lscale;
+	scale = (1.0f - dist) * lscale;
 	ch->leftvol = (int) (ch->master_vol * scale);
 	if (ch->leftvol < 0)
 		ch->leftvol = 0;
@@ -487,7 +487,7 @@ void S_StartSound(int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float f
 	}
 
 	target_chan->sfx = sfx;
-	target_chan->pos = 0.0;
+	target_chan->pos = 0.0f;
     target_chan->end = paintedtime + sc->length;	
 
 // if an identical sound has also been started this frame, offset the pos
@@ -499,7 +499,7 @@ void S_StartSound(int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float f
 			continue;
 		if (check->sfx == sfx && !check->pos)
 		{
-			skip = rand () % (int)(0.1*shm->speed);
+			skip = rand () % (int)(0.1f*shm->speed);
 			if (skip >= target_chan->end)
 				skip = target_chan->end - 1;
 			target_chan->pos += skip;
@@ -857,7 +857,7 @@ void S_Play(void)
 		else
 			Q_strcpy(name, Cmd_Argv(i));
 		sfx = S_PrecacheSound(name);
-		S_StartSound(hash++, 0, sfx, listener_origin, 1.0, 1.0);
+		S_StartSound(hash++, 0, sfx, listener_origin, 1.0f, 1.0f);
 		i++;
 	}
 }
@@ -882,7 +882,7 @@ void S_PlayVol(void)
 			Q_strcpy(name, Cmd_Argv(i));
 		sfx = S_PrecacheSound(name);
 		vol = Q_atof(Cmd_Argv(i+1));
-		S_StartSound(hash++, 0, sfx, listener_origin, vol, 1.0);
+		S_StartSound(hash++, 0, sfx, listener_origin, vol, 1.0f);
 		i+=2;
 	}
 }

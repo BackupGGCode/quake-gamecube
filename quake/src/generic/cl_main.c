@@ -400,16 +400,16 @@ float	CL_LerpPoint (void)
 		return 1;
 	}
 		
-	if (f > 0.1)
+	if (f > 0.1f)
 	{	// dropped packet, or start of demo
-		cl.mtime[1] = cl.mtime[0] - 0.1;
-		f = 0.1;
+		cl.mtime[1] = cl.mtime[0] - 0.1f;
+		f = 0.1f;
 	}
 	frac = (cl.time - cl.mtime[1]) / f;
 //Con_Printf ("frac: %f\n",frac);
 	if (frac < 0)
 	{
-		if (frac < -0.01)
+		if (frac < -0.01f)
 		{
 SetPal(1);
 			cl.time = cl.mtime[1];
@@ -549,7 +549,7 @@ void CL_RelinkEntities (void)
 			VectorMA (dl->origin, 18, fv, dl->origin);
 			dl->radius = 200 + (rand()&31);
 			dl->minlight = 32;
-			dl->die = cl.time + 0.1;
+			dl->die = cl.time + 0.1f;
 		}
 		if (ent->effects & EF_BRIGHTLIGHT)
 		{			
@@ -557,14 +557,14 @@ void CL_RelinkEntities (void)
 			VectorCopy (ent->origin,  dl->origin);
 			dl->origin[2] += 16;
 			dl->radius = 400 + (rand()&31);
-			dl->die = cl.time + 0.001;
+			dl->die = cl.time + 0.001f;
 		}
 		if (ent->effects & EF_DIMLIGHT)
 		{			
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin,  dl->origin);
 			dl->radius = 200 + (rand()&31);
-			dl->die = cl.time + 0.001;
+			dl->die = cl.time + 0.001f;
 		}
 #ifdef QUAKE2
 		if (ent->effects & EF_DARKLIGHT)
@@ -572,7 +572,7 @@ void CL_RelinkEntities (void)
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin,  dl->origin);
 			dl->radius = 200.0 + (rand()&31);
-			dl->die = cl.time + 0.001;
+			dl->die = cl.time + 0.001f;
 			dl->dark = true;
 		}
 		if (ent->effects & EF_LIGHT)
@@ -580,7 +580,7 @@ void CL_RelinkEntities (void)
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin,  dl->origin);
 			dl->radius = 200;
-			dl->die = cl.time + 0.001;
+			dl->die = cl.time + 0.001f;
 		}
 #endif
 
@@ -598,7 +598,7 @@ void CL_RelinkEntities (void)
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin, dl->origin);
 			dl->radius = 200;
-			dl->die = cl.time + 0.01;
+			dl->die = cl.time + 0.01f;
 		}
 		else if (ent->model->flags & EF_GRENADE)
 			R_RocketTrail (oldorg, ent->origin, 1);

@@ -676,10 +676,10 @@ void Mod_LoadTexinfo (lump_t *l)
 		else
 			out->mipadjust = 1;
 #if 0
-		if (len1 + len2 < 0.001)
+		if (len1 + len2 < 0.001f)
 			out->mipadjust = 1;		// don't crash
 		else
-			out->mipadjust = 1 / floorf( (len1+len2)/2 + 0.1 );
+			out->mipadjust = 1 / floorf( (len1+len2)/2 + 0.1f );
 #endif
 
 		miptex = LittleLong (in->miptex);
@@ -1317,7 +1317,7 @@ void * Mod_LoadAliasGroup (void * pin, int *pframeindex, int numv,
 	for (i=0 ; i<numframes ; i++)
 	{
 		*poutintervals = LittleFloat (pin_intervals->interval);
-		if (*poutintervals <= 0.0)
+		if (*poutintervals <= 0.0f)
 			Sys_Error ("Mod_LoadAliasGroup: interval<=0");
 
 		poutintervals++;
@@ -1752,7 +1752,7 @@ void * Mod_LoadSpriteGroup (void * pin, mspriteframe_t **ppframe)
 	for (i=0 ; i<numframes ; i++)
 	{
 		*poutintervals = LittleFloat (pin_intervals->interval);
-		if (*poutintervals <= 0.0)
+		if (*poutintervals <= 0.0f)
 			Sys_Error ("Mod_LoadSpriteGroup: interval<=0");
 
 		poutintervals++;

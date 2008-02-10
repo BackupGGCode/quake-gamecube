@@ -54,7 +54,7 @@ namespace quake
 		static void convert_and_copy(Uint8* src, int src_byte_count, Uint8* dst, int dst_byte_count)
 		{
 			// Is there room to convert inside the mix buffer?
-			if (conversion.len_ratio <= 1.0)
+			if (conversion.len_ratio <= 1.0f)
 			{
 				// Do the conversion in the mix buffer.
 				conversion.buf	= src;
