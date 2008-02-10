@@ -15,7 +15,9 @@ ZIP_CONTENTS	:= Quake.dol ID1/CONFIG.CFG GPL.txt readme.html
 # Compiler flags.
 # Note that we MUST USE -fno-merge-constants, because the compiler generates crap otherwise.
 COMMON_FLAGS	:= -mcpu=750 -meabi -mhard-float -g -Wall -pipe
-CFLAGS			:= $(COMMON_FLAGS) -Os -fno-merge-constants -ffast-math -DGEKKO
+OPT_FLAGS		:= -Os -fno-merge-constants -fno-strict-aliasing -ffast-math -fsingle-precision-constant
+DEFINES			:= -DGEKKO
+CFLAGS			:= $(COMMON_FLAGS) $(OPT_FLAGS) $(DEFINES)
 CXXFLAGS		:= $(CFLAGS) -Weffc++ -fno-exceptions -fno-rtti
 LDFLAGS			:= $(COMMON_FLAGS) -mogc
 
