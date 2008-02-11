@@ -1080,15 +1080,15 @@ void M_AdjustSliders (int dir)
 		Cvar_SetValue ("viewsize", scr_viewsize.value);
 		break;
 	case 4:	// gamma
-		v_gamma.value -= dir * 0.05f;
-		if (v_gamma.value < 0.5f)
-			v_gamma.value = 0.5f;
+		v_gamma.value -= dir * 0.05;
+		if (v_gamma.value < 0.5)
+			v_gamma.value = 0.5;
 		if (v_gamma.value > 1)
 			v_gamma.value = 1;
 		Cvar_SetValue ("gamma", v_gamma.value);
 		break;
 	case 5:	// mouse speed
-		sensitivity.value += dir * 0.5f;
+		sensitivity.value += dir * 0.5;
 		if (sensitivity.value < 1)
 			sensitivity.value = 1;
 		if (sensitivity.value > 11)
@@ -1096,7 +1096,7 @@ void M_AdjustSliders (int dir)
 		Cvar_SetValue ("sensitivity", sensitivity.value);
 		break;
 	case 6:	// music volume
-		bgmvolume.value += dir * 0.1f;
+		bgmvolume.value += dir * 0.1;
 		if (bgmvolume.value < 0)
 			bgmvolume.value = 0;
 		if (bgmvolume.value > 1)
@@ -1104,7 +1104,7 @@ void M_AdjustSliders (int dir)
 		Cvar_SetValue ("bgmvolume", bgmvolume.value);
 		break;
 	case 7:	// sfx volume
-		volume.value += dir * 0.1f;
+		volume.value += dir * 0.1;
 		if (volume.value < 0)
 			volume.value = 0;
 		if (volume.value > 1)
@@ -1187,7 +1187,7 @@ void M_Options_Draw (void)
 	M_DrawSlider (220, 56, r);
 
 	M_Print (16, 64, "            Brightness");
-	r = (1.0f - v_gamma.value) / 0.5f;
+	r = (1.0 - v_gamma.value) / 0.5;
 	M_DrawSlider (220, 64, r);
 
 	M_Print (16, 72, "           Mouse Speed");
@@ -2456,7 +2456,7 @@ int	startepisode;
 int	startlevel;
 int maxplayers;
 qboolean m_serverInfoMessage = false;
-float m_serverInfoMessageTime;
+double m_serverInfoMessageTime;
 
 void M_Menu_GameOptions_f (void)
 {
@@ -2768,7 +2768,7 @@ void M_GameOptions_Key (int key)
 /* SEARCH MENU */
 
 qboolean	searchComplete = false;
-float		searchCompleteTime;
+double		searchCompleteTime;
 
 void M_Menu_Search_f (void)
 {

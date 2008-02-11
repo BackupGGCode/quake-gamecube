@@ -620,7 +620,7 @@ Con_NotifyBox
 */
 void Con_NotifyBox (char *text)
 {
-	float		t1, t2;
+	double		t1, t2;
 
 // during startup for sound / cd warnings
 	Con_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n");

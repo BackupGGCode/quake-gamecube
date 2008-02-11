@@ -609,7 +609,7 @@ void Host_Loadgame_f (void)
 		File_ScanF (f, "%f\n", &spawn_parms[i]);
 // this silliness is so we can load 1.06 save files, which have float skill values
 	File_ScanF (f, "%f\n", &tfloat);
-	current_skill = (int)(tfloat + 0.1f);
+	current_skill = (int)(tfloat + 0.1);
 	Cvar_SetValue ("skill", (float)current_skill);
 
 #ifdef QUAKE2

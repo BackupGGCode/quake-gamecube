@@ -763,7 +763,7 @@ void PF_checkclient (void)
 	vec3_t	view;
 	
 // find a new check if on a new frame
-	if (sv.time - sv.lastchecktime >= 0.1f)
+	if (sv.time - sv.lastchecktime >= 0.1)
 	{
 		sv.lastcheck = PF_newcheckclient (sv.lastcheck);
 		sv.lastchecktime = sv.time;
@@ -903,7 +903,7 @@ void PF_findradius (void)
 		if (ent->v.solid == SOLID_NOT)
 			continue;
 		for (j=0 ; j<3 ; j++)
-			eorg[j] = org[j] - (ent->v.origin[j] + (ent->v.mins[j] + ent->v.maxs[j])*0.5f);			
+			eorg[j] = org[j] - (ent->v.origin[j] + (ent->v.mins[j] + ent->v.maxs[j])*0.5);			
 		if (Length(eorg) > rad)
 			continue;
 			
@@ -1254,9 +1254,9 @@ void PF_rint (void)
 	float	f;
 	f = G_FLOAT(OFS_PARM0);
 	if (f > 0)
-		G_FLOAT(OFS_RETURN) = (int)(f + 0.5f);
+		G_FLOAT(OFS_RETURN) = (int)(f + 0.5);
 	else
-		G_FLOAT(OFS_RETURN) = (int)(f - 0.5f);
+		G_FLOAT(OFS_RETURN) = (int)(f - 0.5);
 }
 void PF_floor (void)
 {
@@ -1378,7 +1378,7 @@ void PF_aim (void)
 			continue;	// don't aim at teammate
 		for (j=0 ; j<3 ; j++)
 			end[j] = check->v.origin[j]
-			+ 0.5f*(check->v.mins[j] + check->v.maxs[j]);
+			+ 0.5*(check->v.mins[j] + check->v.maxs[j]);
 		VectorSubtract (end, start, dir);
 		VectorNormalize (dir);
 		dist = DotProduct (dir, pr_global_struct->v_forward);
@@ -1692,7 +1692,7 @@ void PF_WaterMove (void)
 	int			waterlevel;
 	int			watertype;
 	float		drownlevel;
-	float		damage = 0.0f;
+	float		damage = 0.0;
 
 	self = PROG_TO_EDICT(pr_global_struct->self);
 
@@ -1729,7 +1729,7 @@ void PF_WaterMove (void)
 						self->v.dmg = 10;
 //					T_Damage (self, world, world, self.dmg, 0, FALSE);
 					damage = self->v.dmg;
-					self->v.pain_finished = sv.time + 1.0f;
+					self->v.pain_finished = sv.time + 1.0;
 				}
 		}
 		else
@@ -1764,9 +1764,9 @@ void PF_WaterMove (void)
 			if (self->v.dmgtime < sv.time)
 			{
 				if (self->v.radsuit_finished < sv.time)
-					self->v.dmgtime = sv.time + 0.2f;
+					self->v.dmgtime = sv.time + 0.2;
 				else
-					self->v.dmgtime = sv.time + 1.0f;
+					self->v.dmgtime = sv.time + 1.0;
 //				T_Damage (self, world, world, 10*self.waterlevel, 0, TRUE);
 				damage = (float)(10*waterlevel);
 			}
@@ -1776,7 +1776,7 @@ void PF_WaterMove (void)
 		if (!(flags & (FL_IMMUNE_SLIME + FL_GODMODE)))
 			if (self->v.dmgtime < sv.time && self->v.radsuit_finished < sv.time)
 			{
-				self->v.dmgtime = sv.time + 1.0f;
+				self->v.dmgtime = sv.time + 1.0;
 //				T_Damage (self, world, world, 4*self.waterlevel, 0, TRUE);
 				damage = (float)(4*waterlevel);
 			}
@@ -1802,8 +1802,8 @@ void PF_WaterMove (void)
 	
 	if (! (flags & FL_WATERJUMP) )
 	{
-//		self.velocity = self.velocity - 0.8f*self.waterlevel*frametime*self.velocity;
-		VectorMA (self->v.velocity, -0.8f * self->v.waterlevel * host_frametime, self->v.velocity, self->v.velocity);
+//		self.velocity = self.velocity - 0.8*self.waterlevel*frametime*self.velocity;
+		VectorMA (self->v.velocity, -0.8 * self->v.waterlevel * host_frametime, self->v.velocity, self->v.velocity);
 	}
 
 	G_FLOAT(OFS_RETURN) = damage;

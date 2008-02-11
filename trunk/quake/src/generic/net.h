@@ -119,9 +119,9 @@ struct qsockaddr
 typedef struct qsocket_s
 {
 	struct qsocket_s	*next;
-	float			connecttime;
-	float			lastMessageTime;
-	float			lastSendTime;
+	double			connecttime;
+	double			lastMessageTime;
+	double			lastSendTime;
 
 	qboolean		disconnected;
 	qboolean		canSend;
@@ -218,7 +218,7 @@ extern int		unreliableMessagesReceived;
 
 qsocket_t *NET_NewQSocket (void);
 void NET_FreeQSocket(qsocket_t *);
-float SetNetTime(void);
+double SetNetTime(void);
 
 
 #define HOSTCACHESIZE	8
@@ -248,7 +248,7 @@ qboolean IsID(struct qsockaddr *addr);
 //
 //============================================================================
 
-extern	float		net_time;
+extern	double		net_time;
 extern	sizebuf_t	net_message;
 extern	int			net_activeconnections;
 
@@ -298,12 +298,12 @@ void NET_Poll(void);
 typedef struct _PollProcedure
 {
 	struct _PollProcedure	*next;
-	float					nextTime;
+	double					nextTime;
 	void					(*procedure)();
 	void					*arg;
 } PollProcedure;
 
-void SchedulePollProcedure(PollProcedure *pp, float timeOffset);
+void SchedulePollProcedure(PollProcedure *pp, double timeOffset);
 
 extern	qboolean	serialAvailable;
 extern	qboolean	ipxAvailable;

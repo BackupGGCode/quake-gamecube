@@ -207,7 +207,7 @@ qboolean R_AliasCheckBBox (void)
 		if (viewpts[i].flags & ALIAS_Z_CLIP)
 			continue;
 
-		zi = 1.0f / viewaux[i].fv[2];
+		zi = 1.0 / viewaux[i].fv[2];
 
 	// FIXME: do with chop mode in ASM, or convert to float
 		v0 = (viewaux[i].fv[0] * xscale * zi) + xcenter;
@@ -397,10 +397,10 @@ void R_AliasSetUpTransform (int trivial_accept)
 		for (i=0 ; i<4 ; i++)
 		{
 			aliastransform[0][i] *= aliasxscale *
-					(1.0f / ((float)0x8000 * 0x10000));
+					(1.0 / ((float)0x8000 * 0x10000));
 			aliastransform[1][i] *= aliasyscale *
-					(1.0f / ((float)0x8000 * 0x10000));
-			aliastransform[2][i] *= 1.0f / ((float)0x8000 * 0x10000);
+					(1.0 / ((float)0x8000 * 0x10000));
+			aliastransform[2][i] *= 1.0 / ((float)0x8000 * 0x10000);
 
 		}
 	}
@@ -465,7 +465,7 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 	for (i=0 ; i<r_anumverts ; i++, fv++, pverts++, pstverts++)
 	{
 	// transform and project
-		zi = 1.0f / (DotProduct(pverts->v, aliastransform[2]) +
+		zi = 1.0 / (DotProduct(pverts->v, aliastransform[2]) +
 				aliastransform[2][3]);
 
 	// x, y, and z are scaled down by 1/2**31 in the transform, so 1/z is
@@ -512,7 +512,7 @@ void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av)
 	float	zi;
 
 // project points
-	zi = 1.0f / av->fv[2];
+	zi = 1.0 / av->fv[2];
 
 	fv->v[5] = zi * ziscale;
 

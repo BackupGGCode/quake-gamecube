@@ -70,7 +70,6 @@ OBJS := \
 	$(OBJ_DIR)/generic/net_main.o \
 	$(OBJ_DIR)/generic/net_none.o \
 	$(OBJ_DIR)/generic/net_vcr.o \
-	$(OBJ_DIR)/generic/nonintel.o \
 	$(OBJ_DIR)/generic/pr_cmds.o \
 	$(OBJ_DIR)/generic/pr_edict.o \
 	$(OBJ_DIR)/generic/pr_exec.o \

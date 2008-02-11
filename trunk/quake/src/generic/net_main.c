@@ -46,13 +46,13 @@ static qboolean	listening = false;
 qboolean	slistInProgress = false;
 qboolean	slistSilent = false;
 qboolean	slistLocal = true;
-static float	slistStartTime;
+static double	slistStartTime;
 static int		slistLastShown;
 
 static void Slist_Send(void);
 static void Slist_Poll(void);
-PollProcedure	slistSendProcedure = {NULL, 0.0f, Slist_Send};
-PollProcedure	slistPollProcedure = {NULL, 0.0f, Slist_Poll};
+PollProcedure	slistSendProcedure = {NULL, 0.0, Slist_Send};
+PollProcedure	slistPollProcedure = {NULL, 0.0, Slist_Poll};
 
 
 sizebuf_t		net_message;
@@ -90,9 +90,9 @@ qboolean recording = false;
 int	net_driverlevel;
 
 
-float			net_time;
+double			net_time;
 
-float SetNetTime(void)
+double SetNetTime(void)
 {
 	net_time = Sys_FloatTime();
 	return net_time;
@@ -305,8 +305,8 @@ void NET_Slist_f (void)
 	slistInProgress = true;
 	slistStartTime = Sys_FloatTime();
 
-	SchedulePollProcedure(&slistSendProcedure, 0.0f);
-	SchedulePollProcedure(&slistPollProcedure, 0.1f);
+	SchedulePollProcedure(&slistSendProcedure, 0.0);
+	SchedulePollProcedure(&slistPollProcedure, 0.1);
 
 	hostCacheCount = 0;
 }
@@ -323,7 +323,7 @@ static void Slist_Send(void)
 		dfunc.SearchForHosts (true);
 	}
 
-	if ((Sys_FloatTime() - slistStartTime) < 0.5f)
+	if ((Sys_FloatTime() - slistStartTime) < 0.5)
 		SchedulePollProcedure(&slistSendProcedure, 0.75);
 }
 
@@ -344,7 +344,7 @@ static void Slist_Poll(void)
 
 	if ((Sys_FloatTime() - slistStartTime) < 1.5)
 	{
-		SchedulePollProcedure(&slistPollProcedure, 0.1f);
+		SchedulePollProcedure(&slistPollProcedure, 0.1);
 		return;
 	}
 
@@ -449,7 +449,7 @@ NET_CheckNewConnections
 
 struct
 {
-	float	time;
+	double	time;
 	int		op;
 	long	session;
 } vcrConnect;
@@ -528,7 +528,7 @@ returns -1 if connection is invalid
 
 struct
 {
-	float	time;
+	double	time;
 	int		op;
 	long	session;
 	int		ret;
@@ -616,7 +616,7 @@ returns -1 if the connection died
 */
 struct
 {
-	float	time;
+	double	time;
 	int		op;
 	long	session;
 	int		r;
@@ -721,7 +721,7 @@ qboolean NET_CanSendMessage (qsocket_t *sock)
 
 int NET_SendToAll(sizebuf_t *data, int blocktime)
 {
-	float		start;
+	double		start;
 	int			i;
 	int			count = 0;
 	qboolean	state1 [MAX_SCOREBOARD];
@@ -933,7 +933,7 @@ void NET_Poll(void)
 	{
 		if (serialAvailable)
 		{
-			if (config_com_modem.value == 1.0f)
+			if (config_com_modem.value == 1.0)
 				useModem = true;
 			else
 				useModem = false;
@@ -955,7 +955,7 @@ void NET_Poll(void)
 }
 
 
-void SchedulePollProcedure(PollProcedure *proc, float timeOffset)
+void SchedulePollProcedure(PollProcedure *proc, double timeOffset)
 {
 	PollProcedure *pp, *prev;
 
@@ -984,7 +984,7 @@ void SchedulePollProcedure(PollProcedure *proc, float timeOffset)
 
 qboolean IsID(struct qsockaddr *addr)
 {
-	if (idgods.value == 0.0f)
+	if (idgods.value == 0.0)
 		return false;
 
 	if (addr->sa_family != 2)

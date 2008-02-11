@@ -181,7 +181,7 @@ typedef struct
 	float		pitchvel;
 	qboolean	nodrift;
 	float		driftmove;
-	float		laststop;
+	double		laststop;
 
 	float		viewheight;
 	float		crouch;			// local amount for smoothing stepups
@@ -193,11 +193,11 @@ typedef struct
 	int			intermission;	// don't change view angle, full screen, etc
 	int			completed_time;	// latched at intermission start
 	
-	float		mtime[2];		// the timestamp of last two messages	
-	float		time;			// clients view of time, should be between
+	double		mtime[2];		// the timestamp of last two messages	
+	double		time;			// clients view of time, should be between
 								// servertime and oldservertime to generate
 								// a lerp point for other data
-	float		oldtime;		// previous cl.time, time-oldtime is used
+	double		oldtime;		// previous cl.time, time-oldtime is used
 								// to decay light values and smooth step ups
 	
 

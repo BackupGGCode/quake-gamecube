@@ -39,10 +39,10 @@ typedef struct
 	qboolean	paused;
 	qboolean	loadgame;			// handle connections specially
 
-	float		time;
+	double		time;
 	
 	int			lastcheck;			// used by PF_checkclient
-	float		lastchecktime;
+	double		lastchecktime;
 	
 	char		name[64];			// map name
 #ifdef QUAKE2
@@ -83,7 +83,7 @@ typedef struct client_s
 	qboolean		privileged;			// can execute any host command
 	qboolean		sendsignon;			// only valid before spawned
 
-	float			last_message;		// reliable messages must be sent
+	double			last_message;		// reliable messages must be sent
 										// periodically
 
 	struct qsocket_s *netconnection;	// communications handle
@@ -209,7 +209,7 @@ extern	client_t	*host_client;
 
 extern	jmp_buf 	host_abortserver;
 
-extern	float		host_time;
+extern	double		host_time;
 
 extern	edict_t		*sv_player;
 

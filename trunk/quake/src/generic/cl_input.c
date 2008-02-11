@@ -163,9 +163,9 @@ void IN_Impulse (void) {in_impulse=Q_atoi(Cmd_Argv(1));}
 CL_KeyState
 
 Returns 0.25 if a key was pressed and released during the frame,
-0.5f if it was pressed and held
+0.5 if it was pressed and held
 0 if held then released, and
-1.0f if held for the entire time
+1.0 if held for the entire time
 ===============
 */
 float CL_KeyState (kbutton_t *key)
@@ -181,7 +181,7 @@ float CL_KeyState (kbutton_t *key)
 	if (impulsedown && !impulseup)
 	{
 		if (down)
-			val = 0.5f;	// pressed and held this frame
+			val = 0.5;	// pressed and held this frame
 		else
 			val = 0;	//	I_Error ();
 	}
@@ -195,7 +195,7 @@ float CL_KeyState (kbutton_t *key)
 	if (!impulsedown && !impulseup)
 	{
 		if (down)
-			val = 1.0f;	// held the entire frame
+			val = 1.0;	// held the entire frame
 		else
 			val = 0;	// up the entire frame
 	}

@@ -33,7 +33,7 @@ qboolean		d_roverwrapped;
 int				d_minmip;
 float			d_scalemip[NUM_MIPS-1];
 
-static float	basemip[NUM_MIPS-1] = {1.0f, 0.5f*0.8f, 0.25*0.8f};
+static float	basemip[NUM_MIPS-1] = {1.0, 0.5*0.8, 0.25*0.8};
 
 extern int			d_aflatcolor;
 
@@ -58,7 +58,7 @@ void D_Init (void)
 	r_worldpolysbacktofront = false;
 	r_recursiveaffinetriangles = true;
 	r_pixbytes = 1;
-	r_aliasuvscale = 1.0f;
+	r_aliasuvscale = 1.0;
 }
 
 
