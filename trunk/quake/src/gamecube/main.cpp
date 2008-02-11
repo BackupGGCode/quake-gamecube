@@ -115,6 +115,7 @@ namespace quake
 
 			// Initialise the controller library.
 			PAD_Init();
+			VIDEO_SetPostRetraceCallback(PAD_ScanPads);
 		}
 
 		static void check_stack_size()

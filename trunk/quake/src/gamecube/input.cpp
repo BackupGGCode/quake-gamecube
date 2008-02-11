@@ -41,9 +41,6 @@ namespace quake
 		// The previous key state (for checking if things changed).
 		static bool			previous_key_state[KEY_COUNT];
 
-		// The pad state.
-		static PADStatus	pads[PAD_CHANMAX];
-
 		// Converts a bitmask into a bit offset.
 		static size_t mask_to_shift(size_t mask)
 		{
@@ -101,6 +98,8 @@ using namespace quake::input;
 
 void IN_Init (void)
 {
+	// PAD_Init is called from main() as it's required to "OK" error messages.
+
 	// Set up the game mappings.
 	game_button_map[mask_to_shift(PAD_BUTTON_LEFT)]		= K_LEFTARROW;
 	game_button_map[mask_to_shift(PAD_BUTTON_RIGHT)]	= K_RIGHTARROW;
@@ -130,96 +129,58 @@ void IN_Shutdown (void)
 
 void IN_Commands (void)
 {
-	// Read the pad state.
-	memset(&pads[0], 0, sizeof(pads));
-	PAD_Read(&pads[0]);
+	// Fetch the pad state.
+	const u16 buttons = PAD_ButtonsHeld(0);
 
-	// Any errors reading the pad?
-	switch (pads[0].err)
+	// Somewhere to store the key state.
+	bool key_state[KEY_COUNT];
+	memset(&key_state[0], 0, sizeof(key_state));
+
+	// For each button in the key map...
+	for (size_t button = 0; button < button_count; ++button)
 	{
-		// Pad read okay.
-	case PAD_ERR_NONE:
+		// Is this mapping defined?
+		size_t key = game_button_map[button];
+		if (key)
 		{
-			// Somewhere to store the key state.
-			bool key_state[KEY_COUNT];
-			memset(&key_state[0], 0, sizeof(key_state));
-
-			// For each button in the key map...
-			for (size_t button = 0; button < button_count; ++button)
-			{
-				// Is this mapping defined?
-				size_t key = game_button_map[button];
-				if (key)
-				{
-					// Set the key state.
-					const size_t mask = 1 << button;
-					key_state[key] |= pads[0].button & mask;
-				}
-			}
-
-			// Find any differences between the key states.
-			for (int key = 0; key < KEY_COUNT; ++key)
-			{
-				// Has this key changed?
-				if (key_state[key] != previous_key_state[key])
-				{
-					// Was it pressed?
-					if (key_state[key])
-					{
-						// Send a press event.
-						Key_Event(static_cast<key_id_t>(key), qtrue);
-					}
-					else
-					{
-						// Send a release event.
-						Key_Event(static_cast<key_id_t>(key), qfalse);
-					}
-
-					// Copy the key.
-					previous_key_state[key] = key_state[key];
-				}
-			}
+			// Set the key state.
+			const size_t mask = 1 << button;
+			key_state[key] |= buttons & mask;
 		}
-		break;
+	}
 
-		// No controller inserted, release all buttons.
-	case PAD_ERR_NO_CONTROLLER:
+	// Find any differences between the key states.
+	for (int key = 0; key < KEY_COUNT; ++key)
+	{
+		// Has this key changed?
+		if (key_state[key] != previous_key_state[key])
 		{
-			// Find any pressed keys.
-			for (int key = 0; key < KEY_COUNT; ++key)
+			// Was it pressed?
+			if (key_state[key])
 			{
-				// Was this key pressed?
-				if (previous_key_state[key])
-				{
-					// Send a release event.
-					Key_Event(static_cast<key_id_t>(key), qfalse);
-
-					// Release the key.
-					previous_key_state[key] = false;
-				}
+				// Send a press event.
+				Key_Event(static_cast<key_id_t>(key), qtrue);
 			}
+			else
+			{
+				// Send a release event.
+				Key_Event(static_cast<key_id_t>(key), qfalse);
+			}
+
+			// Copy the key.
+			previous_key_state[key] = key_state[key];
 		}
-		break;
-
-		// Pad not ready, do nothing.
-	case PAD_ERR_NOT_READY:
-		Con_Printf("%s", "PAD_ERR_NOT_READY\n");
-		memset(&pads[0], 0, sizeof(pads));
-		break;
-
-		// Transfer error, do nothing.
-	case PAD_ERR_TRANSFER:
-		memset(&pads[0], 0, sizeof(pads));
-		break;
-
-		// Unhandled error code.
-	default:
-		Sys_Error("Unhandled PAD_Read error %d", pads[0].err);
 	}
 }
 
 void IN_Move (usercmd_t *cmd)
 {
+	// Read the stick values.
+	const s8 stick_x = PAD_StickX(0);
+	const s8 stick_y = PAD_StickY(0);
+	const s8 sub_stick_x = PAD_SubStickX(0);
+	const s8 sub_stick_y = PAD_SubStickY(0);
+
 	// Convert the inputs to floats in the range [-1, 1].
 #if 0
 	Con_Printf("pad: %4d, %4d %4d, %4d\n",
@@ -228,10 +189,10 @@ void IN_Move (usercmd_t *cmd)
 		pads[0].substickX,
 		pads[0].substickY);
 #endif
-	float x1 = clamp(pads[0].stickX / 90.0f, -1.0f, 1.0f);
-	float y1 = clamp(pads[0].stickY / -90.0f, -1.0f, 1.0f);
-	float x2 = clamp(pads[0].substickX / 80.0f, -1.0f, 1.0f);
-	float y2 = clamp(pads[0].substickY / -80.0f, -1.0f, 1.0f);
+	float x1 = clamp(stick_x / 90.0f, -1.0f, 1.0f);
+	float y1 = clamp(stick_y / -90.0f, -1.0f, 1.0f);
+	float x2 = clamp(sub_stick_x / 80.0f, -1.0f, 1.0f);
+	float y2 = clamp(sub_stick_y / -80.0f, -1.0f, 1.0f);
 
 	// Apply the dead zone.
 	const float dead_zone = 0.1f;
