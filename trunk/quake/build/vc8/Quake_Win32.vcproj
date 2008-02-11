@@ -213,19 +213,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\generic\anorm_dots.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\generic\anorms.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\generic\asm_i386.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\generic\block16.h"
 				>
 			</File>
 			<File
@@ -321,10 +309,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\generic\d_ifacea.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\generic\d_init.c"
 				>
 			</File>
@@ -382,10 +366,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\generic\file.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\generic\gl_warp_sin.h"
 				>
 			</File>
 			<File
@@ -462,10 +442,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\generic\net_vcr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\generic\nonintel.c"
 				>
 			</File>
 			<File
