@@ -119,14 +119,14 @@ float V_CalcBob (void)
 	if (cycle < cl_bobup.value)
 		cycle = M_PI * cycle / cl_bobup.value;
 	else
-		cycle = M_PI + M_PI*(cycle-cl_bobup.value)/(1.0f - cl_bobup.value);
+		cycle = M_PI + M_PI*(cycle-cl_bobup.value)/(1.0 - cl_bobup.value);
 
 // bob is proportional to velocity in the xy plane
 // (don't count Z, or jumping messes it up)
 
 	bob = sqrtf(cl.velocity[0]*cl.velocity[0] + cl.velocity[1]*cl.velocity[1]) * cl_bob.value;
 //Con_Printf ("speed: %5.1f\n", Length(cl.velocity));
-	bob = bob*0.3f + bob*0.7f*sinf(cycle);
+	bob = bob*0.3 + bob*0.7*sinf(cycle);
 	if (bob > 4)
 		bob = 4;
 	else if (bob < -7)
@@ -262,14 +262,14 @@ byte		gammatable[256];	// palette is sent through this
 
 #if defined(GLQUAKE)
 byte		ramps[3][256];
-float		v_blend[4];		// rgba 0.0f - 1.0f
+float		v_blend[4];		// rgba 0.0 - 1.0
 #endif	// GLQUAKE
 
 void BuildGammaTable (float g)
 {
 	int		i, inf;
 	
-	if (g == 1.0f)
+	if (g == 1.0)
 	{
 		for (i=0 ; i<256 ; i++)
 			gammatable[i] = i;
@@ -278,7 +278,7 @@ void BuildGammaTable (float g)
 	
 	for (i=0 ; i<256 ; i++)
 	{
-		inf = 255 * powf ( (i+0.5f)/255.5f , g ) + 0.5f;
+		inf = 255 * powf ( (i+0.5f)/255.5f , g ) + 0.5;
 		if (inf < 0)
 			inf = 0;
 		if (inf > 255)
@@ -328,11 +328,11 @@ void V_ParseDamage (void)
 	for (i=0 ; i<3 ; i++)
 		from[i] = MSG_ReadCoord ();
 
-	count = blood*0.5f + armor*0.5f;
+	count = blood*0.5 + armor*0.5;
 	if (count < 10)
 		count = 10;
 
-	cl.faceanimtime = cl.time + 0.2f;		// but sbar face into pain frame
+	cl.faceanimtime = cl.time + 0.2;		// but sbar face into pain frame
 
 	cl.cshifts[CSHIFT_DAMAGE].percent += 3*count;
 	if (cl.cshifts[CSHIFT_DAMAGE].percent < 0)
@@ -711,12 +711,12 @@ void CalcGunAngle (void)
 	yaw = r_refdef.viewangles[YAW];
 	pitch = -r_refdef.viewangles[PITCH];
 
-	yaw = angledelta(yaw - r_refdef.viewangles[YAW]) * 0.4f;
+	yaw = angledelta(yaw - r_refdef.viewangles[YAW]) * 0.4;
 	if (yaw > 10)
 		yaw = 10;
 	if (yaw < -10)
 		yaw = -10;
-	pitch = angledelta(-pitch - r_refdef.viewangles[PITCH]) * 0.4f;
+	pitch = angledelta(-pitch - r_refdef.viewangles[PITCH]) * 0.4;
 	if (pitch > 10)
 		pitch = 10;
 	if (pitch < -10)
@@ -895,9 +895,9 @@ void V_CalcRefdef (void)
 // never let it sit exactly on a node line, because a water plane can
 // dissapear when viewed with the eye exactly on it.
 // the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis
-	r_refdef.vieworg[0] += 1.0f/32;
-	r_refdef.vieworg[1] += 1.0f/32;
-	r_refdef.vieworg[2] += 1.0f/32;
+	r_refdef.vieworg[0] += 1.0/32;
+	r_refdef.vieworg[1] += 1.0/32;
+	r_refdef.vieworg[2] += 1.0/32;
 
 	VectorCopy (cl.viewangles, r_refdef.viewangles);
 	V_CalcViewRoll ();
@@ -929,9 +929,9 @@ void V_CalcRefdef (void)
 
 	for (i=0 ; i<3 ; i++)
 	{
-		view->origin[i] += forward[i]*bob*0.4f;
-//		view->origin[i] += right[i]*bob*0.4f;
-//		view->origin[i] += up[i]*bob*0.8f;
+		view->origin[i] += forward[i]*bob*0.4;
+//		view->origin[i] += right[i]*bob*0.4;
+//		view->origin[i] += up[i]*bob*0.8;
 	}
 	view->origin[2] += bob;
 
@@ -948,7 +948,7 @@ void V_CalcRefdef (void)
 	else if (scr_viewsize.value == 90)
 		view->origin[2] += 1;
 	else if (scr_viewsize.value == 80)
-		view->origin[2] += 0.5f;
+		view->origin[2] += 0.5;
 
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	view->frame = cl.stats[STAT_WEAPONFRAME];
@@ -1025,7 +1025,7 @@ void V_RenderView (void)
 		int		i;
 
 		vid.rowbytes <<= 1;
-		vid.aspect *= 0.5f;
+		vid.aspect *= 0.5;
 
 		r_refdef.viewangles[YAW] -= lcd_yaw.value;
 		for (i=0 ; i<3 ; i++)
@@ -1106,7 +1106,7 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_kickroll);
 	Cvar_RegisterVariable (&v_kickpitch);	
 	
-	BuildGammaTable (1.0f);	// no gamma yet
+	BuildGammaTable (1.0);	// no gamma yet
 	Cvar_RegisterVariable (&v_gamma);
 }
 

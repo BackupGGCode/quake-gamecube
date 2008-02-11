@@ -67,15 +67,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\generic\anorm_dots.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\generic\anorms.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\generic\asm_i386.h"
 				>
 			</File>
 			<File
@@ -172,10 +164,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\generic\d_iface.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\generic\d_ifacea.h"
 				>
 			</File>
 			<File

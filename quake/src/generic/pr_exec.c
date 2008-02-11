@@ -651,7 +651,7 @@ while (1)
 #ifdef FPS_20
 		ed->v.nextthink = pr_global_struct->time + 0.05;
 #else
-		ed->v.nextthink = pr_global_struct->time + 0.1f;
+		ed->v.nextthink = pr_global_struct->time + 0.1;
 #endif
 		if (a->_float != ed->v.frame)
 		{

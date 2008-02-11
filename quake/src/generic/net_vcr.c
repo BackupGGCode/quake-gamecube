@@ -31,7 +31,7 @@ extern int vcrFile;
 
 static struct
 {
-	float	time;
+	double	time;
 	int		op;
 	long	session;
 }	next;

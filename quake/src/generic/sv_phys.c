@@ -46,10 +46,10 @@ cvar_t	sv_maxvelocity = {"sv_maxvelocity","2000"};
 cvar_t	sv_nostep = {"sv_nostep","0"};
 
 #ifdef QUAKE2
-static	vec3_t	vec_origin = {0.0f, 0.0f, 0.0f};
+static	vec3_t	vec_origin = {0.0, 0.0, 0.0};
 #endif
 
-#define	MOVE_EPSILON	0.01f
+#define	MOVE_EPSILON	0.01
 
 void SV_Physics_Toss (edict_t *ent);
 
@@ -185,7 +185,7 @@ Slide off of the impacting object
 returns the blocked flags (1 = floor, 2 = step / wall)
 ==================
 */
-#define	STOP_EPSILON	0.1f
+#define	STOP_EPSILON	0.1
 
 int ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 {
@@ -278,7 +278,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		if (!trace.ent)
 			Sys_Error ("SV_FlyMove: !trace.ent");
 
-		if (trace.plane.normal[2] > 0.7f)
+		if (trace.plane.normal[2] > 0.7)
 		{
 			blocked |= 1;		// floor
 			if (trace.ent->v.solid == SOLID_BSP)
@@ -376,7 +376,7 @@ void SV_AddGravity (edict_t *ent)
 	if (ent->v.gravity)
 		ent_gravity = ent->v.gravity;
 	else
-		ent_gravity = 1.0f;
+		ent_gravity = 1.0;
 #else
 	eval_t	*val;
 
@@ -384,7 +384,7 @@ void SV_AddGravity (edict_t *ent)
 	if (val && val->_float)
 		ent_gravity = val->_float;
 	else
-		ent_gravity = 1.0f;
+		ent_gravity = 1.0;
 #endif
 	ent->v.velocity[2] -= ent_gravity * sv_gravity.value * host_frametime;
 }
@@ -827,7 +827,7 @@ qboolean SV_CheckWater (edict_t *ent)
 #endif
 		ent->v.watertype = cont;
 		ent->v.waterlevel = 1;
-		point[2] = ent->v.origin[2] + (ent->v.mins[2] + ent->v.maxs[2])*0.5f;
+		point[2] = ent->v.origin[2] + (ent->v.mins[2] + ent->v.maxs[2])*0.5;
 		cont = SV_PointContents (point);
 		if (cont <= CONTENTS_WATER)
 		{
@@ -873,7 +873,7 @@ void SV_WallFriction (edict_t *ent, trace_t *trace)
 	AngleVectors (ent->v.v_angle, forward, right, up);
 	d = DotProduct (trace->plane.normal, forward);
 	
-	d += 0.5f;
+	d += 0.5;
 	if (d >= 0)
 		return;
 		
@@ -930,7 +930,7 @@ int SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 		ent->v.velocity[0] = oldvel[0];
 		ent->v. velocity[1] = oldvel[1];
 		ent->v. velocity[2] = 0;
-		clip = SV_FlyMove (ent, 0.1f, &steptrace);
+		clip = SV_FlyMove (ent, 0.1, &steptrace);
 
 		if ( fabsf(oldorg[1] - ent->v.origin[1]) > 4
 		|| fabsf(oldorg[0] - ent->v.origin[0]) > 4 )
@@ -1030,7 +1030,7 @@ void SV_WalkMove (edict_t *ent)
 // move down
 	downtrace = SV_PushEntity (ent, downmove);	// FIXME: don't link?
 
-	if (downtrace.plane.normal[2] > 0.7f)
+	if (downtrace.plane.normal[2] > 0.7)
 	{
 		if (ent->v.solid == SOLID_BSP)
 		{
@@ -1321,7 +1321,7 @@ void SV_Physics_Toss (edict_t *ent)
 	ClipVelocity (ent->v.velocity, trace.plane.normal, ent->v.velocity, backoff);
 
 // stop if on ground
-	if (trace.plane.normal[2] > 0.7f)
+	if (trace.plane.normal[2] > 0.7)
 	{		
 #ifdef QUAKE2
 		if (ent->v.velocity[2] < 60 || (ent->v.movetype != MOVETYPE_BOUNCE && ent->v.movetype != MOVETYPE_BOUNCEMISSILE))
@@ -1393,7 +1393,7 @@ void SV_Physics_Step (edict_t *ent)
 		if (!((int)ent->v.flags & FL_FLY))
 			if (!(((int)ent->v.flags & FL_SWIM) && (ent->v.waterlevel > 0)))
 			{
-				if (ent->v.velocity[2] < sv_gravity.value*-0.1f)
+				if (ent->v.velocity[2] < sv_gravity.value*-0.1)
 					hitsound = true;
 				if (!inwater)
 					SV_AddGravity (ent);
@@ -1405,7 +1405,7 @@ void SV_Physics_Step (edict_t *ent)
 		// apply friction
 		// let dead monsters who aren't completely onground slide
 		if (wasonground)
-			if (!(ent->v.health <= 0.0f && !SV_CheckBottom(ent)))
+			if (!(ent->v.health <= 0.0 && !SV_CheckBottom(ent)))
 			{
 				vel = ent->v.velocity;
 				speed = sqrtf(vel[0]*vel[0] +vel[1]*vel[1]);
@@ -1472,7 +1472,7 @@ void SV_Physics_Step (edict_t *ent)
 // freefall if not onground
 	if ( ! ((int)ent->v.flags & (FL_ONGROUND | FL_FLY | FL_SWIM) ) )
 	{
-		if (ent->v.velocity[2] < sv_gravity.value*-0.1f)
+		if (ent->v.velocity[2] < sv_gravity.value*-0.1)
 			hitsound = true;
 		else
 			hitsound = false;
@@ -1571,7 +1571,7 @@ trace_t SV_Trace_Toss (edict_t *ent, edict_t *ignore)
 	trace_t	trace;
 	vec3_t	move;
 	vec3_t	end;
-	float	save_frametime;
+	double	save_frametime;
 //	extern particle_t	*active_particles, *free_particles;
 //	particle_t	*p;
 

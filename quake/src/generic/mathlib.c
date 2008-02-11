@@ -157,7 +157,7 @@ float	anglemod(float a)
 	else
 		a += 360*( 1 + (int)(-a/360) );
 #endif
-	a = (360.0f/65536) * ((int)(a*(65536/360.0f)) & 65535);
+	a = (360.0/65536) * ((int)(a*(65536/360.0)) & 65535);
 	return a;
 }
 
@@ -483,7 +483,7 @@ void FloorDivMod (float numer, float denom, int *quotient,
 	float	x;
 
 #ifndef PARANOID
-	if (denom <= 0.0f)
+	if (denom <= 0.0)
 		Sys_Error ("FloorDivMod: bad denominator %d\n", denom);
 
 //	if ((floorf(numer) != numer) || (floor(denom) != denom))
@@ -491,7 +491,7 @@ void FloorDivMod (float numer, float denom, int *quotient,
 //				numer, denom);
 #endif
 
-	if (numer >= 0.0f)
+	if (numer >= 0.0)
 	{
 
 		x = floorf(numer / denom);
@@ -556,5 +556,5 @@ fixed16_t Invert24To16(fixed16_t val)
 		return (0xFFFFFFFF);
 
 	return (fixed16_t)
-			(((float)0x10000 * (float)0x1000000 / (float)val) + 0.5f);
+			(((float)0x10000 * (float)0x1000000 / (float)val) + 0.5);
 }

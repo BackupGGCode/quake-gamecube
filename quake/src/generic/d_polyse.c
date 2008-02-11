@@ -529,7 +529,7 @@ void D_PolysetCalcGradients (int skinwidth)
 	p10_minus_p20 = r_p1[0] - r_p2[0];
 	p11_minus_p21 = r_p1[1] - r_p2[1];
 
-	xstepdenominv = 1.0f / (float)d_xdenom;
+	xstepdenominv = 1.0 / (float)d_xdenom;
 
 	ystepdenominv = -xstepdenominv;
 

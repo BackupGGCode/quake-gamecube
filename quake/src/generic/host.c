@@ -38,10 +38,10 @@ quakeparms_t host_parms;
 
 qboolean	host_initialized;		// true if into command execution
 
-float		host_frametime;
-float		host_time;
-float		realtime;				// without any filtering or bounding
-float		oldrealtime;			// last frame run
+double		host_frametime;
+double		host_time;
+double		realtime;				// without any filtering or bounding
+double		oldrealtime;			// last frame run
 int			host_framecount;
 
 int			host_hunklevel;
@@ -196,9 +196,9 @@ void	Host_FindMaxClients (void)
 	svs.clients = Hunk_AllocName (svs.maxclientslimit*sizeof(client_t), "clients");
 
 	if (svs.maxclients > 1)
-		Cvar_SetValue ("deathmatch", 1.0f);
+		Cvar_SetValue ("deathmatch", 1.0);
 	else
-		Cvar_SetValue ("deathmatch", 0.0f);
+		Cvar_SetValue ("deathmatch", 0.0);
 }
 
 
@@ -233,7 +233,7 @@ void Host_InitLocal (void)
 
 	Host_FindMaxClients ();
 	
-	host_time = 1.0f;		// so a think at time 0 won't get called
+	host_time = 1.0;		// so a think at time 0 won't get called
 }
 
 
@@ -409,7 +409,7 @@ void Host_ShutdownServer(qboolean crash)
 	int		count;
 	sizebuf_t	buf;
 	char		message[4];
-	float	start;
+	double	start;
 
 	if (!sv.active)
 		return;
@@ -503,7 +503,7 @@ qboolean Host_FilterTime (float time)
 {
 	realtime += time;
 
-	if (!cls.timedemo && realtime - oldrealtime < 1.0f/72.0)
+	if (!cls.timedemo && realtime - oldrealtime < 1.0/72.0)
 		return false;		// framerate is too high
 
 	host_frametime = realtime - oldrealtime;
@@ -513,10 +513,10 @@ qboolean Host_FilterTime (float time)
 		host_frametime = host_framerate.value;
 	else
 	{	// don't allow really long or short frames
-		if (host_frametime > 0.1f)
-			host_frametime = 0.1f;
-		if (host_frametime < 0.001f)
-			host_frametime = 0.001f;
+		if (host_frametime > 0.1)
+			host_frametime = 0.1;
+		if (host_frametime < 0.001)
+			host_frametime = 0.001;
 	}
 	
 	return true;
@@ -581,7 +581,7 @@ void Host_ServerFrame (void)
 	SV_CheckForNewClients ();
 
 	temp_host_frametime = save_host_frametime = host_frametime;
-	while(temp_host_frametime > (1.0f/72.0))
+	while(temp_host_frametime > (1.0/72.0))
 	{
 		if (temp_host_frametime > 0.05)
 			host_frametime = 0.05;
@@ -633,9 +633,9 @@ Runs all active servers
 */
 void _Host_Frame (float time)
 {
-	static float		time1 = 0;
-	static float		time2 = 0;
-	static float		time3 = 0;
+	static double		time1 = 0;
+	static double		time2 = 0;
+	static double		time3 = 0;
 	int			pass1, pass2, pass3;
 
 	if (setjmp (host_abortserver) )
@@ -729,8 +729,8 @@ void _Host_Frame (float time)
 
 void Host_Frame (float time)
 {
-	float	time1, time2;
-	static float	timetotal;
+	double	time1, time2;
+	static double	timetotal;
 	static int		timecount;
 	int		i, c, m;
 

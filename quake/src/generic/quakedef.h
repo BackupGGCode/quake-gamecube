@@ -68,7 +68,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	MAX_QPATH		64			// max length of a quake game pathname
 #define	MAX_OSPATH		128			// max length of a filesystem pathname
 
-#define	ON_EPSILON		0.1f			// point on plane side epsilon
+#define	ON_EPSILON		0.1			// point on plane side epsilon
 
 #define	MAX_MSGLEN		8000		// max length of a reliable message
 #define	MAX_DATAGRAM	1024		// max length of unreliable message
@@ -269,11 +269,11 @@ extern	cvar_t		sys_nostdout;
 extern	cvar_t		developer;
 
 extern	qboolean	host_initialized;		// true if into command execution
-extern	float		host_frametime;
+extern	double		host_frametime;
 extern	byte		*host_basepal;
 extern	byte		*host_colormap;
 extern	int			host_framecount;	// incremented every frame, never reset
-extern	float		realtime;			// not bounded in any way, changed at
+extern	double		realtime;			// not bounded in any way, changed at
 										// start of every frame, never reset
 
 void Host_ClearMemory (void);
