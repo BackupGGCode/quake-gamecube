@@ -473,10 +473,10 @@ void R_LeadingEdge (edge_t *edge)
 			if (surf->insubmodel && (surf->key == surf2->key))
 			{
 			// must be two bmodels in the same leaf; sort on 1/z
-				fu = (float)(edge->u - 0xFFFFF) * (1.0 / 0x100000);
+				fu = (edge->u - 0xFFFFF) * (1.0f / 0x100000);
 				newzi = surf->d_ziorigin + fv*surf->d_zistepv +
 						fu*surf->d_zistepu;
-				newzibottom = newzi * 0.99;
+				newzibottom = newzi * 0.99f;
 
 				testzi = surf2->d_ziorigin + fv*surf2->d_zistepv +
 						fu*surf2->d_zistepu;
@@ -486,7 +486,7 @@ void R_LeadingEdge (edge_t *edge)
 					goto newtop;
 				}
 
-				newzitop = newzi * 1.01;
+				newzitop = newzi * 1.01f;
 				if (newzitop >= testzi)
 				{
 					if (surf->d_zistepu >= surf2->d_zistepu)
@@ -511,10 +511,10 @@ continue_search:
 					goto continue_search;
 
 			// must be two bmodels in the same leaf; sort on 1/z
-				fu = (float)(edge->u - 0xFFFFF) * (1.0 / 0x100000);
+				fu = (edge->u - 0xFFFFF) * (1.0f / 0x100000);
 				newzi = surf->d_ziorigin + fv*surf->d_zistepv +
 						fu*surf->d_zistepu;
-				newzibottom = newzi * 0.99;
+				newzibottom = newzi * 0.99f;
 
 				testzi = surf2->d_ziorigin + fv*surf2->d_zistepv +
 						fu*surf2->d_zistepu;
@@ -524,7 +524,7 @@ continue_search:
 					goto gotposition;
 				}
 
-				newzitop = newzi * 1.01;
+				newzitop = newzi * 1.01f;
 				if (newzitop >= testzi)
 				{
 					if (surf->d_zistepu >= surf2->d_zistepu)
@@ -644,10 +644,12 @@ Output:
 Each surface has a linked list of its visible spans
 ==============
 */
+
+static byte	basespans[MAXSPANS*sizeof(espan_t)+CACHE_SIZE];
+
 void R_ScanEdges (void)
 {
 	int		iv, bottom;
-	byte	basespans[MAXSPANS*sizeof(espan_t)+CACHE_SIZE];
 	espan_t	*basespan_p;
 	surf_t	*s;
 
