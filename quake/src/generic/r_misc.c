@@ -157,7 +157,7 @@ void R_TimeGraph (void)
 	
 	r_time2 = Sys_FloatTime ();
 
-	a = (r_time2-r_time1)/0.01;
+	a = (r_time2-r_time1)/0.01f;
 //a = fabsf(mouse_y * 0.05);
 //a = (int)((r_refdef.vieworg[2] + 1024)/1)%(int)r_graphheight.value;
 //a = fabsf(velocity[0])/20;

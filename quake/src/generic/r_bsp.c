@@ -87,7 +87,7 @@ void R_RotateBmodel (void)
 
 // yaw
 	angle = currententity->angles[YAW];		
-	angle = angle * M_PI*2 / 360;
+	angle = angle * Q_PI*2 / 360;
 	s = sinf(angle);
 	c = cosf(angle);
 
@@ -104,7 +104,7 @@ void R_RotateBmodel (void)
 
 // pitch
 	angle = currententity->angles[PITCH];		
-	angle = angle * M_PI*2 / 360;
+	angle = angle * Q_PI*2 / 360;
 	s = sinf(angle);
 	c = cosf(angle);
 
@@ -122,7 +122,7 @@ void R_RotateBmodel (void)
 
 // roll
 	angle = currententity->angles[ROLL];		
-	angle = angle * M_PI*2 / 360;
+	angle = angle * Q_PI*2 / 360;
 	s = sinf(angle);
 	c = cosf(angle);
 

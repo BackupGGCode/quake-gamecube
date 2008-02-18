@@ -196,9 +196,9 @@ void	Host_FindMaxClients (void)
 	svs.clients = Hunk_AllocName (svs.maxclientslimit*sizeof(client_t), "clients");
 
 	if (svs.maxclients > 1)
-		Cvar_SetValue ("deathmatch", 1.0);
+		Cvar_SetValue ("deathmatch", 1.0f);
 	else
-		Cvar_SetValue ("deathmatch", 0.0);
+		Cvar_SetValue ("deathmatch", 0.0f);
 }
 
 
@@ -233,7 +233,7 @@ void Host_InitLocal (void)
 
 	Host_FindMaxClients ();
 	
-	host_time = 1.0;		// so a think at time 0 won't get called
+	host_time = 1.0f;		// so a think at time 0 won't get called
 }
 
 
@@ -503,7 +503,7 @@ qboolean Host_FilterTime (float time)
 {
 	realtime += time;
 
-	if (!cls.timedemo && realtime - oldrealtime < 1.0/72.0)
+	if (!cls.timedemo && realtime - oldrealtime < 1.0f/72.0f)
 		return false;		// framerate is too high
 
 	host_frametime = realtime - oldrealtime;
@@ -513,10 +513,10 @@ qboolean Host_FilterTime (float time)
 		host_frametime = host_framerate.value;
 	else
 	{	// don't allow really long or short frames
-		if (host_frametime > 0.1)
-			host_frametime = 0.1;
-		if (host_frametime < 0.001)
-			host_frametime = 0.001;
+		if (host_frametime > 0.1f)
+			host_frametime = 0.1f;
+		if (host_frametime < 0.001f)
+			host_frametime = 0.001f;
 	}
 	
 	return true;
@@ -581,7 +581,7 @@ void Host_ServerFrame (void)
 	SV_CheckForNewClients ();
 
 	temp_host_frametime = save_host_frametime = host_frametime;
-	while(temp_host_frametime > (1.0/72.0))
+	while(temp_host_frametime > (1.0f/72.0))
 	{
 		if (temp_host_frametime > 0.05)
 			host_frametime = 0.05;

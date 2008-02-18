@@ -38,7 +38,7 @@ void R_RotateSprite (float beamlength)
 {
 	vec3_t	vec;
 	
-	if (beamlength == 0.0)
+	if (beamlength == 0.0f)
 		return;
 
 	VectorScale (r_spritedesc.vpn, -beamlength, vec);
@@ -205,7 +205,7 @@ void R_SetupAndDrawSprite ()
 			transformed[2] = NEAR_CLIP;
 
 		pout = &outverts[i];
-		pout->zi = 1.0 / transformed[2];
+		pout->zi = 1.0f / transformed[2];
 		if (pout->zi > r_spritedesc.nearzi)
 			r_spritedesc.nearzi = pout->zi;
 
@@ -378,7 +378,7 @@ void R_DrawSprite (void)
 	// generate the sprite's axes, parallel to the viewplane, but rotated in
 	// that plane around the center according to the sprite entity's roll
 	// angle. So vpn stays the same, but vright and vup rotate
-		angle = currententity->angles[ROLL] * (M_PI*2 / 360);
+		angle = currententity->angles[ROLL] * (Q_PI*2 / 360);
 		sr = sinf(angle);
 		cr = cosf(angle);
 

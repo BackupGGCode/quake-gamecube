@@ -86,7 +86,7 @@ void VID_Init(unsigned char* palette)
 	SDL_WM_SetCaption(title, title);
 
 	// Create the screen.
-	screen = SDL_SetVideoMode(640, 480, 8, SDL_SWSURFACE);
+	screen = SDL_SetVideoMode(320, 200, 8, SDL_SWSURFACE);
 	if (!screen)
 	{
 		Sys_Error("SDL_SetVideoMode failed (%s)", SDL_GetError());

@@ -116,7 +116,7 @@ void SCR_EraseCenterString (void)
 	}
 
 	if (scr_center_lines <= 4)
-		y = vid.height*0.35;
+		y = vid.height*0.35f;
 	else
 		y = 48;
 
@@ -142,7 +142,7 @@ void SCR_DrawCenterString (void)
 	start = scr_centerstring;
 
 	if (scr_center_lines <= 4)
-		y = vid.height*0.35;
+		y = vid.height*0.35f;
 	else
 		y = 48;
 
@@ -202,11 +202,11 @@ float CalcFov (float fov_x, float width, float height)
         if (fov_x < 1 || fov_x > 179)
                 Sys_Error ("Bad fov: %f", fov_x);
 
-        x = width/tanf(fov_x/360*M_PI);
+        x = width/tanf(fov_x/360*Q_PI);
 
         a = atanf(height/x);
 
-        a = a*360/M_PI;
+        a = a*360/Q_PI;
 
         return a;
 }
@@ -368,7 +368,7 @@ void SCR_DrawTurtle (void)
 	if (!scr_showturtle.value)
 		return;
 
-	if (host_frametime < 0.1)
+	if (host_frametime < 0.1f)
 	{
 		count = 0;
 		return;
@@ -388,7 +388,7 @@ SCR_DrawNet
 */
 void SCR_DrawNet (void)
 {
-	if (realtime - cl.last_received_message < 0.3)
+	if (realtime - cl.last_received_message < 0.3f)
 		return;
 	if (cls.demoplayback)
 		return;
@@ -714,7 +714,7 @@ void SCR_DrawNotifyString (void)
 
 	start = scr_notifystring;
 
-	y = vid.height*0.35;
+	y = vid.height*0.35f;
 
 	do	
 	{

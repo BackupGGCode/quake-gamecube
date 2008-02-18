@@ -116,7 +116,7 @@ void CL_ParseStartSoundPacket(void)
 		volume = DEFAULT_SOUND_PACKET_VOLUME;
 	
     if (field_mask & SND_ATTENUATION)
-		attenuation = MSG_ReadByte () / 64.0;
+		attenuation = MSG_ReadByte () / 64.0f;
 	else
 		attenuation = DEFAULT_SOUND_PACKET_ATTENUATION;
 	
@@ -386,7 +386,7 @@ if (bits&(1<<i))
 			if (model->synctype == ST_RAND)
 				ent->syncbase = (float)(rand()&0x7fff) / 0x7fff;
 			else
-				ent->syncbase = 0.0;
+				ent->syncbase = 0.0f;
 		}
 		else
 			forcelink = true;	// hack to make null model players work

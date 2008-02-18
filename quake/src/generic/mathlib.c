@@ -29,7 +29,7 @@ int nanmask = 255<<23;
 
 /*-----------------------------------------------------------------*/
 
-#define DEG2RAD( a ) ( a * M_PI ) / 180.0F
+#define DEG2RAD( a ) ( a * Q_PI ) / 180.0F
 
 void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal )
 {
@@ -287,13 +287,13 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 	
-	angle = angles[YAW] * (M_PI*2 / 360);
+	angle = angles[YAW] * (Q_PI*2 / 360);
 	sy = sinf(angle);
 	cy = cosf(angle);
-	angle = angles[PITCH] * (M_PI*2 / 360);
+	angle = angles[PITCH] * (Q_PI*2 / 360);
 	sp = sinf(angle);
 	cp = cosf(angle);
-	angle = angles[ROLL] * (M_PI*2 / 360);
+	angle = angles[ROLL] * (Q_PI*2 / 360);
 	sr = sinf(angle);
 	cr = cosf(angle);
 
@@ -483,7 +483,7 @@ void FloorDivMod (float numer, float denom, int *quotient,
 	float	x;
 
 #ifndef PARANOID
-	if (denom <= 0.0)
+	if (denom <= 0.0f)
 		Sys_Error ("FloorDivMod: bad denominator %d\n", denom);
 
 //	if ((floorf(numer) != numer) || (floor(denom) != denom))
@@ -491,7 +491,7 @@ void FloorDivMod (float numer, float denom, int *quotient,
 //				numer, denom);
 #endif
 
-	if (numer >= 0.0)
+	if (numer >= 0.0f)
 	{
 
 		x = floorf(numer / denom);
@@ -556,5 +556,5 @@ fixed16_t Invert24To16(fixed16_t val)
 		return (0xFFFFFFFF);
 
 	return (fixed16_t)
-			(((float)0x10000 * (float)0x1000000 / (float)val) + 0.5);
+			(((float)0x10000 * (float)0x1000000 / (float)val) + 0.5f);
 }
