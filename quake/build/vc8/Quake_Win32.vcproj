@@ -329,7 +329,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\generic\d_scan.c"
+				RelativePath="..\..\src\generic\d_scan.cpp"
 				>
 			</File>
 			<File
