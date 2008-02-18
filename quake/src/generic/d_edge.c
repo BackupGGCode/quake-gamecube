@@ -304,7 +304,7 @@ void D_DrawSurfaces (void)
 
 				D_CalcGradients (pface);
 
-				(*d_drawspans) (s->spans);
+				D_DrawSpans (s->spans);
 
 				D_DrawZSpans (s->spans);
 
