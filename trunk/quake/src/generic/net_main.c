@@ -51,8 +51,8 @@ static int		slistLastShown;
 
 static void Slist_Send(void);
 static void Slist_Poll(void);
-PollProcedure	slistSendProcedure = {NULL, 0.0, Slist_Send};
-PollProcedure	slistPollProcedure = {NULL, 0.0, Slist_Poll};
+PollProcedure	slistSendProcedure = {NULL, 0.0f, Slist_Send};
+PollProcedure	slistPollProcedure = {NULL, 0.0f, Slist_Poll};
 
 
 sizebuf_t		net_message;
@@ -305,8 +305,8 @@ void NET_Slist_f (void)
 	slistInProgress = true;
 	slistStartTime = Sys_FloatTime();
 
-	SchedulePollProcedure(&slistSendProcedure, 0.0);
-	SchedulePollProcedure(&slistPollProcedure, 0.1);
+	SchedulePollProcedure(&slistSendProcedure, 0.0f);
+	SchedulePollProcedure(&slistPollProcedure, 0.1f);
 
 	hostCacheCount = 0;
 }
@@ -323,7 +323,7 @@ static void Slist_Send(void)
 		dfunc.SearchForHosts (true);
 	}
 
-	if ((Sys_FloatTime() - slistStartTime) < 0.5)
+	if ((Sys_FloatTime() - slistStartTime) < 0.5f)
 		SchedulePollProcedure(&slistSendProcedure, 0.75);
 }
 
@@ -344,7 +344,7 @@ static void Slist_Poll(void)
 
 	if ((Sys_FloatTime() - slistStartTime) < 1.5)
 	{
-		SchedulePollProcedure(&slistPollProcedure, 0.1);
+		SchedulePollProcedure(&slistPollProcedure, 0.1f);
 		return;
 	}
 
@@ -933,7 +933,7 @@ void NET_Poll(void)
 	{
 		if (serialAvailable)
 		{
-			if (config_com_modem.value == 1.0)
+			if (config_com_modem.value == 1.0f)
 				useModem = true;
 			else
 				useModem = false;
@@ -984,7 +984,7 @@ void SchedulePollProcedure(PollProcedure *proc, double timeOffset)
 
 qboolean IsID(struct qsockaddr *addr)
 {
-	if (idgods.value == 0.0)
+	if (idgods.value == 0.0f)
 		return false;
 
 	if (addr->sa_family != 2)
