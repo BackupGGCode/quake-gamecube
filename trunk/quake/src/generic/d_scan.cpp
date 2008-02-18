@@ -21,16 +21,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 // Portable C scan-level rasterization code, all pixel depths.
 
+extern "C"
+{
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"
+}
 
-unsigned char	*r_turb_pbase, *r_turb_pdest;
-fixed16_t		r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
-int				*r_turb_turb;
-int				r_turb_spancount;
-
-void D_DrawTurbulent8Span (void);
+static unsigned char	*r_turb_pbase, *r_turb_pdest;
+static fixed16_t		r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
+static int				*r_turb_turb;
+static int				r_turb_spancount;
 
 
 /*
@@ -95,7 +96,7 @@ void D_WarpScreen (void)
 D_DrawTurbulent8Span
 =============
 */
-void D_DrawTurbulent8Span (void)
+static void D_DrawTurbulent8Span (void)
 {
 	int		sturb, tturb;
 
@@ -245,10 +246,10 @@ void Turbulent8 (espan_t *pspan)
 
 /*
 =============
-D_DrawSpans8
+D_DrawSpans
 =============
 */
-void D_DrawSpans8 (espan_t *pspan)
+void D_DrawSpans (espan_t *pspan)
 {
 	int				count, spancount;
 	unsigned char	*pbase, *pdest;
