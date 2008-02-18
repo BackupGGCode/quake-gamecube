@@ -33,6 +33,27 @@ static fixed16_t		r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
 static int				*r_turb_turb;
 static int				r_turb_spancount;
 
+template<int other> static inline int Min(const int value)
+{
+	return (value < other) ? value : other;
+}
+
+template<int minimum> static inline int Clamp(const int maximum, const int value)
+{
+	if (value < minimum)
+	{
+		return minimum;
+	}
+	else if (value > maximum)
+	{
+		return maximum;
+	}
+	else
+	{
+		return value;
+	}
+}
+
 
 /*
 =============
@@ -249,132 +270,114 @@ void Turbulent8 (espan_t *pspan)
 D_DrawSpans
 =============
 */
-void D_DrawSpans (espan_t *pspan)
+template<int pixels_to_draw>
+static inline void DrawAffineRun(pixel_t*&, const pixel_t* const, fixed16_t&, fixed16_t&, const fixed16_t, const fixed16_t);
+
+template<>
+static inline void DrawAffineRun<0>(pixel_t*&, const pixel_t* const, fixed16_t&, fixed16_t&, const fixed16_t, const fixed16_t)
 {
-	int				count, spancount;
-	unsigned char	*pbase, *pdest;
-	fixed16_t		s, t, snext, tnext, sstep, tstep;
-	float			sdivz, tdivz, zi, z, du, dv, spancountminus1;
-	float			sdivz8stepu, tdivz8stepu, zi8stepu;
+}
 
-	sstep = 0;	// keep compiler happy
-	tstep = 0;	// ditto
+template<int pixels_to_draw>
+static inline void DrawAffineRun(pixel_t*& pdest, const pixel_t* const pbase, fixed16_t& s, fixed16_t& t, const fixed16_t sstep, const fixed16_t tstep)
+{
+	*pdest++ = *(pbase + (s >> 16) + ((t >> 16) * cachewidth));
+	s += sstep;
+	t += tstep;
 
-	pbase = (unsigned char *)cacheblock;
+	DrawAffineRun<pixels_to_draw - 1>(pdest, pbase, s, t, sstep, tstep);
+}
 
-	sdivz8stepu = d_sdivzstepu * 8;
-	tdivz8stepu = d_tdivzstepu * 8;
-	zi8stepu = d_zistepu * 8;
+static inline fixed16_t CalculateCoord(fixed16_t bbextent, fixed16_t divz, fixed16_t z, fixed16_t adjust)
+{
+	return Clamp<0>(bbextent, (divz >> 4) * (z >> 12) + adjust);
+}
 
+template<int affine_run_size>
+static void DrawSpans(const espan_t *span)
+{
+	// Variables that don't change for each span.
+	const pixel_t* const	pbase			= cacheblock;
+	const fixed16_t			sdivzstepu		= static_cast<fixed16_t>(d_sdivzstepu * 65536);
+	const fixed16_t			tdivzstepu		= static_cast<fixed16_t>(d_tdivzstepu * 65536);
+	const fixed16_t			sdivz16stepu	= sdivzstepu * affine_run_size;
+	const fixed16_t			tdivz16stepu	= tdivzstepu * affine_run_size;
+	const float				zi16stepu		= d_zistepu * affine_run_size;
+	const int				rowbytes		= vid.rowbytes;
+
+	// While there are spans to draw...
 	do
 	{
-		pdest = (unsigned char *)((byte *)d_viewbuffer +
-				(screenwidth * pspan->v) + pspan->u);
+		// Variables which change per span.
+		pixel_t*		pdest		= d_viewbuffer + (rowbytes * span->v) + span->u;
+		int				pixels_left	= span->count;
+		const int		du			= span->u;
+		const int		dv			= span->v;
+		fixed16_t		sdivz		= static_cast<fixed16_t>((d_sdivzorigin + (dv * d_sdivzstepv) + (du * d_sdivzstepu)) * 65536);
+		fixed16_t		tdivz		= static_cast<fixed16_t>((d_tdivzorigin + (dv * d_tdivzstepv) + (du * d_tdivzstepu)) * 65536);
+		float			zi			= d_ziorigin + (dv * d_zistepv) + (du * d_zistepu);
+		const fixed16_t	z			= static_cast<fixed16_t>(65536 / zi);
+		fixed16_t		s			= CalculateCoord(bbextents, sdivz, z, sadjust);
+		fixed16_t		t			= CalculateCoord(bbextentt, tdivz, z, tadjust);
 
-		count = pspan->count;
-
-	// calculate the initial s/z, t/z, 1/z, s, and t and clamp
-		du = (float)pspan->u;
-		dv = (float)pspan->v;
-
-		sdivz = d_sdivzorigin + dv*d_sdivzstepv + du*d_sdivzstepu;
-		tdivz = d_tdivzorigin + dv*d_tdivzstepv + du*d_tdivzstepu;
-		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
-		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
-
-		s = (int)(sdivz * z) + sadjust;
-		if (s > bbextents)
-			s = bbextents;
-		else if (s < 0)
-			s = 0;
-
-		t = (int)(tdivz * z) + tadjust;
-		if (t > bbextentt)
-			t = bbextentt;
-		else if (t < 0)
-			t = 0;
-
-		do
+		// Draw fixed size runs while we can...
+		while (pixels_left >= affine_run_size)
 		{
-		// calculate s and t at the far end of the span
-			if (count >= 8)
-				spancount = 8;
-			else
-				spancount = count;
+			// Interpolate S/Z, T/Z and 1/Z.
+			sdivz += sdivz16stepu;
+			tdivz += tdivz16stepu;
+			zi += zi16stepu;
 
-			count -= spancount;
+			// Calculate the S & T step.
+			const fixed16_t	z		= static_cast<fixed16_t>(65536 / zi);
+			const fixed16_t	snext	= CalculateCoord(bbextents, sdivz, z, sadjust);
+			const fixed16_t	tnext	= CalculateCoord(bbextentt, tdivz, z, tadjust);
+			const fixed16_t	sstep	= (snext - s) / affine_run_size;
+			const fixed16_t	tstep	= (tnext - t) / affine_run_size;
 
-			if (count)
-			{
-			// calculate s/z, t/z, zi->fixed s and t at far end of span,
-			// calculate s and t steps across span by shifting
-				sdivz += sdivz8stepu;
-				tdivz += tdivz8stepu;
-				zi += zi8stepu;
-				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
+			// Draw a run of pixels.
+			DrawAffineRun<affine_run_size>(pdest, pbase, s, t, sstep, tstep);
 
-				snext = (int)(sdivz * z) + sadjust;
-				if (snext > bbextents)
-					snext = bbextents;
-				else if (snext < 8)
-					snext = 8;	// prevent round-off error on <0 steps from
-								//  from causing overstepping & running off the
-								//  edge of the texture
+			// Update the number of pixels left to draw.
+			pixels_left -= affine_run_size;
+		}
 
-				tnext = (int)(tdivz * z) + tadjust;
-				if (tnext > bbextentt)
-					tnext = bbextentt;
-				else if (tnext < 8)
-					tnext = 8;	// guard against round-off error on <0 steps
+		// Draw any remaining pixels.
+		if (pixels_left)
+		{
+			// Interpolate S/Z, T/Z and 1/Z.
+			const int pixels_left_minus_one = pixels_left - 1;
+			sdivz += sdivzstepu * pixels_left_minus_one;
+			tdivz += tdivzstepu * pixels_left_minus_one;
+			zi += d_zistepu * pixels_left_minus_one;
 
-				sstep = (snext - s) >> 3;
-				tstep = (tnext - t) >> 3;
-			}
-			else
-			{
-			// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
-			// can't step off polygon), clamp, calculate s and t steps across
-			// span by division, biasing steps low so we don't run off the
-			// texture
-				spancountminus1 = (float)(spancount - 1);
-				sdivz += d_sdivzstepu * spancountminus1;
-				tdivz += d_tdivzstepu * spancountminus1;
-				zi += d_zistepu * spancountminus1;
-				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
-				snext = (int)(sdivz * z) + sadjust;
-				if (snext > bbextents)
-					snext = bbextents;
-				else if (snext < 8)
-					snext = 8;	// prevent round-off error on <0 steps from
-								//  from causing overstepping & running off the
-								//  edge of the texture
+			// Calculate the S & T step.
+			const fixed16_t	z		= static_cast<fixed16_t>(65536 / zi);
+			const fixed16_t snext	= CalculateCoord(bbextents, sdivz, z, sadjust);
+			const fixed16_t	tnext	= CalculateCoord(bbextentt, tdivz, z, tadjust);
+			const fixed16_t	sstep	= (snext - s) / pixels_left;
+			const fixed16_t	tstep	= (tnext - t) / pixels_left;
 
-				tnext = (int)(tdivz * z) + tadjust;
-				if (tnext > bbextentt)
-					tnext = bbextentt;
-				else if (tnext < 8)
-					tnext = 8;	// guard against round-off error on <0 steps
-
-				if (spancount > 1)
-				{
-					sstep = (snext - s) / (spancount - 1);
-					tstep = (tnext - t) / (spancount - 1);
-				}
-			}
-
+			// Draw the remaining pixels.
 			do
 			{
-				*pdest++ = *(pbase + (s >> 16) + (t >> 16) * cachewidth);
+				*pdest++ = *(pbase + (s >> 16) + ((t >> 16) * cachewidth));
 				s += sstep;
 				t += tstep;
-			} while (--spancount > 0);
+				--pixels_left;
+			}
+			while (pixels_left > 0);
+		}
 
-			s = snext;
-			t = tnext;
+		// Move on to the next span.
+		span = span->pnext;
+	}
+	while (span);
+}
 
-		} while (count > 0);
-
-	} while ((pspan = pspan->pnext) != NULL);
+void D_DrawSpans(espan_t *pspan)
+{
+	DrawSpans<16>(pspan);
 }
 
 
@@ -385,53 +388,50 @@ D_DrawZSpans
 */
 void D_DrawZSpans (espan_t *pspan)
 {
-	int				count, doublecount, izistep;
-	int				izi;
-	short			*pdest;
-	unsigned		ltemp;
-	float			zi;
-	float			du, dv;
+	// FIXME: check for clamping/range problems
+	// we count on FP exceptions being turned off to avoid range problems
+	const int izistep = static_cast<int>(d_zistepu * 0x8000 * 0x10000);
 
-// FIXME: check for clamping/range problems
-// we count on FP exceptions being turned off to avoid range problems
-	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
-
+	// While there are spans to draw...
 	do
 	{
-		pdest = d_pzbuffer + (d_zwidth * pspan->v) + pspan->u;
+		const int	du	= pspan->u;
+		const int	dv	= pspan->v;
+		const float	zi	= d_ziorigin + (dv * d_zistepv) + (du * d_zistepu);
 
-		count = pspan->count;
+		short*	pdest	= d_pzbuffer + (d_zwidth * dv) + du;
+		int		count	= pspan->count;
+		int		izi		= static_cast<int>(zi * 0x8000 * 0x10000);
 
-	// calculate the initial 1/z
-		du = (float)pspan->u;
-		dv = (float)pspan->v;
-
-		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
-	// we count on FP exceptions being turned off to avoid range problems
-		izi = (int)(zi * 0x8000 * 0x10000);
-
-		if ((long)pdest & 0x02)
+		if (reinterpret_cast<long>(pdest) & 0x02)
 		{
-			*pdest++ = (short)(izi >> 16);
+			*pdest++ = static_cast<short>(izi >> 16);
 			izi += izistep;
 			count--;
 		}
 
-		if ((doublecount = count >> 1) > 0)
+		int doublecount = count >> 1;
+		if (doublecount > 0)
 		{
 			do
 			{
-				ltemp = izi >> 16;
+				unsigned int ltemp = izi >> 16;
 				izi += izistep;
 				ltemp |= izi & 0xFFFF0000;
 				izi += izistep;
 				*(int *)pdest = ltemp;
 				pdest += 2;
-			} while (--doublecount > 0);
+			}
+			while (--doublecount > 0);
 		}
 
 		if (count & 1)
+		{
 			*pdest = (short)(izi >> 16);
+		}
 
-	} while ((pspan = pspan->pnext) != NULL);
+		// Next span.
+		pspan = pspan->pnext;
+	}
+	while (pspan);
 }
