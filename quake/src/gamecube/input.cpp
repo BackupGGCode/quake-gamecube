@@ -130,6 +130,7 @@ void IN_Shutdown (void)
 void IN_Commands (void)
 {
 	// Fetch the pad state.
+	PAD_ScanPads();
 	const u16 buttons = PAD_ButtonsHeld(0);
 
 	// Somewhere to store the key state.

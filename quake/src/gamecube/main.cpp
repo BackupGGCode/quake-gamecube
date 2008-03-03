@@ -35,13 +35,18 @@ extern "C"
 #define INTERLACED		0
 #define FORCE_PAL		1
 #define CONSOLE_DEBUG	0
-#define TIME_DEMO		0
+#define TIME_DEMO		1
+#define USE_THREAD		1
+
+#if USE_THREAD
+# include <ogc/lwp.h>
+#endif
 
 // Globals provided by the ogc.ld link script.
 extern const char __stack_addr;
 extern const char __stack_end;
-extern const char __ArenaLo;
-extern const char __ArenaHi;
+//extern const char __ArenaLo;
+//extern const char __ArenaHi;
 
 namespace quake
 {
@@ -115,9 +120,9 @@ namespace quake
 
 			// Initialise the controller library.
 			PAD_Init();
-			VIDEO_SetPostRetraceCallback(PAD_ScanPads);
 		}
 
+#if !USE_THREAD
 		static void check_stack_size()
 		{
 			const size_t stack_size		= &__stack_addr - &__stack_end;
@@ -129,6 +134,7 @@ namespace quake
 					stack_size / 1024);
 			}
 		}
+#endif
 
 		static void check_pak_file_exists()
 		{
@@ -154,6 +160,70 @@ namespace quake
 				Sys_FileClose(handle);
 			}
 		}
+
+		static void* main_thread_function(void*)
+		{
+			// Initialise.
+			init();
+#if !USE_THREAD
+			check_stack_size();
+#endif
+			check_pak_file_exists();
+
+			// Initialise the Common module.
+			char* args[] =
+			{
+				"Quake",
+#if CONSOLE_DEBUG
+				"-condebug",
+#endif
+			};
+			COM_InitArgv(sizeof(args) / sizeof(args[0]), args);
+
+#if 0
+			const size_t arena_size = &__ArenaHi - &__ArenaLo;
+			Sys_Printf("arena_size = %u\n", arena_size);
+#endif
+
+			// Initialise the Host module.
+			quakeparms_t parms;
+			memset(&parms, 0, sizeof(parms));
+			parms.argc		= com_argc;
+			parms.argv		= com_argv;
+			parms.basedir	= "";
+			parms.memsize	= heap_size;
+			parms.membase	= heap;
+			if (parms.membase == 0)
+			{
+				Sys_Error("Heap allocation failed");
+			}
+			memset(parms.membase, 0, parms.memsize);
+			Host_Init(&parms);
+
+#if TIME_DEMO
+			Cbuf_AddText("map start\n");
+			Cbuf_AddText("wait\n");
+			Cbuf_AddText("timedemo demo1\n");
+#endif
+
+			// Run the main loop.
+			u64 last_time = gettime();
+			for (;;)
+			{
+				// Get the frame time in ticks.
+				const u64		current_time	= gettime();
+				const u64		time_delta		= current_time - last_time;
+				const double	seconds	= time_delta * (0.001f / TB_TIMER_CLOCK);
+				last_time = current_time;
+
+				// Run the frame.
+				Host_Frame(seconds);
+			};
+
+			// Quit (this code is never reached).
+			Sys_Quit();
+			return 0;
+		}
 	}
 }
 
@@ -164,62 +234,12 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
-	// Initialise.
-	init();
-	check_stack_size();
-	check_pak_file_exists();
-
-	// Initialise the Common module.
-	char* args[] =
-	{
-		"Quake",
-#if CONSOLE_DEBUG
-		"-condebug",
+#if USE_THREAD
+	lwp_t thread;
+	LWP_CreateThread(&thread, &main_thread_function, 0, 0, 256 * 1024, 1);
+	void* result;
+	LWP_JoinThread(thread, &result);
+#else
+	return main_thread_function(0);
 #endif
-	};
-	COM_InitArgv(sizeof(args) / sizeof(args[0]), args);
-
-#if 0
-	const size_t arena_size = &__ArenaHi - &__ArenaLo;
-	Sys_Printf("arena_size = %u\n", arena_size);
-#endif
-
-	// Initialise the Host module.
-	quakeparms_t parms;
-	memset(&parms, 0, sizeof(parms));
-	parms.argc		= com_argc;
-	parms.argv		= com_argv;
-	parms.basedir	= "";
-	parms.memsize	= heap_size;
-	parms.membase	= heap;
-	if (parms.membase == 0)
-	{
-		Sys_Error("Heap allocation failed");
-	}
-	memset(parms.membase, 0, parms.memsize);
-	Host_Init(&parms);
-
-#if TIME_DEMO
-	Cbuf_AddText("map start\n");
-	Cbuf_AddText("wait\n");
-	Cbuf_AddText("timedemo demo1\n");
-#endif
-
-	// Run the main loop.
-	u64 last_time = gettime();
-	for (;;)
-	{
-		// Get the frame time in ticks.
-		const u64		current_time	= gettime();
-		const u64		time_delta		= current_time - last_time;
-		const double	seconds	= time_delta * (0.001f / TB_TIMER_CLOCK);
-		last_time = current_time;
-
-		// Run the frame.
-		Host_Frame(seconds);
-	};
-
-	// Quit (this code is never reached).
-	Sys_Quit();
-	return 0;
 }

@@ -14,26 +14,26 @@ ZIP_CONTENTS	:= Quake.dol ID1/CONFIG.CFG GPL.txt readme.html
 
 # Compiler flags.
 # Note that we MUST USE -fno-merge-constants, because the compiler generates crap otherwise.
-COMMON_FLAGS	:= -mcpu=750 -meabi -mhard-float -g -Wall -pipe
+COMMON_FLAGS	:= -mcpu=750 -meabi -mhard-float -g -Wall -pipe -mogc
 OPT_FLAGS		:= -Os -fno-merge-constants -fno-strict-aliasing -fsingle-precision-constant
 DEFINES			:= -DGEKKO
-CFLAGS			:= $(COMMON_FLAGS) $(OPT_FLAGS) $(DEFINES)
+CFLAGS			:= $(COMMON_FLAGS) $(OPT_FLAGS) $(DEFINES) -I$(DEVKITPRO)/libogc/include
 CXXFLAGS		:= $(CFLAGS) -Weffc++ -fno-exceptions -fno-rtti
-LDFLAGS			:= $(COMMON_FLAGS) -mogc
+LDFLAGS			:= $(COMMON_FLAGS) -L$(DEVKITPRO)/libogc/lib/cube
 
 # Linker info.
-LIBS := -logc -lm -logcsys -lsdcard
+LIBS := -logc -lsdcard
 
 # Files to compile.
 OBJS := \
-	$(OBJ_DIR)/gamecube/fileio/sdfileio.o \
-	$(OBJ_DIR)/gamecube/tffs/diskio.o \
-	$(OBJ_DIR)/gamecube/tffs/tff.o \
 	$(OBJ_DIR)/gamecube/input.o \
 	$(OBJ_DIR)/gamecube/main.o \
 	$(OBJ_DIR)/gamecube/sound.o \
 	$(OBJ_DIR)/gamecube/system.o \
 	$(OBJ_DIR)/gamecube/video_software.o \
+	$(OBJ_DIR)/gamecube/fileio/sdfileio.o \
+	$(OBJ_DIR)/gamecube/tffs/diskio.o \
+	$(OBJ_DIR)/gamecube/tffs/tff.o \
 	$(OBJ_DIR)/generic/cd_null.o \
 	$(OBJ_DIR)/generic/chase.o \
 	$(OBJ_DIR)/generic/cl_demo.o \

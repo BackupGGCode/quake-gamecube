@@ -406,23 +406,20 @@ void Sys_Error (char *error, ...)
 	printf("Press A to quit.\n");
 
 	// Wait for the user to release the button.
-	PADStatus pads[PAD_CHANMAX];
 	do
 	{
 		VIDEO_WaitVSync();
-		memset(&pads, 0, sizeof(pads));
-		PAD_Read(&pads[0]);
+		PAD_ScanPads();
 	}
-	while ((pads[0].err != PAD_ERR_NONE) || (pads[0].button & PAD_BUTTON_A));
+	while (PAD_ButtonsHeld(0) & PAD_BUTTON_A);
 
 	// Wait for the user to press the button.
 	do
 	{
 		VIDEO_WaitVSync();
-		memset(&pads, 0, sizeof(pads));
-		PAD_Read(&pads[0]);
+		PAD_ScanPads();
 	}
-	while ((pads[0].err != PAD_ERR_NONE) || ((pads[0].button & PAD_BUTTON_A) == 0));
+	while ((PAD_ButtonsHeld(0) & PAD_BUTTON_A) == 0);
 
 	// Quit.
 	Sys_Quit();
