@@ -106,32 +106,7 @@ int NUM_FOR_EDICT(edict_t *e);
 #define	G_EDICT(o) ((edict_t *)((byte *)sv.edicts+ *(int *)&pr_globals[o]))
 #define G_EDICTNUM(o) NUM_FOR_EDICT(G_EDICT(o))
 #define	G_VECTOR(o) (&pr_globals[o])
-
-#ifdef __GNUC__
-# define INLINE inline
-#else
-# define INLINE
-#endif
-
-static INLINE char* G_STRING(int o)
-{
-	float* pf = &pr_globals[o];
-	string_t* ps = (string_t *)pf;
-	string_t off = *ps;
-
-	if (off >= 0)
-	{
-		char* s = &pr_strings[off];
-		return s;
-	}
-	else
-	{
-		return "";
-	}
-}
-
-#undef INLINE
-
+#define	G_STRING(o) (pr_strings + *(string_t *)&pr_globals[o])
 #define	G_FUNCTION(o) (*(func_t *)&pr_globals[o])
 
 #define	E_FLOAT(e,o) (((float*)&e->v)[o])
