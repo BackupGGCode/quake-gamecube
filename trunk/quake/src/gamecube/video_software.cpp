@@ -267,15 +267,15 @@ void VID_Shutdown(void)
 
 void VID_Update(vrect_t* rects)
 {
-	// Finish any previous drawing.
-	GX_Flush();
-
 	// Copy Quake's frame buffer into the texture data and convert from linear
 	// to tiled.
 	copy_texture();
 
 	// Flush the CPU data cache.
 	DCFlushRange(&texture_data, sizeof(texture_data));
+
+	// Finish up any graphics operations.
+	GX_Flush();
 
 	// Clear the texture cache.
 	GX_InvalidateTexAll();
@@ -295,8 +295,8 @@ void VID_Update(vrect_t* rects)
 	// Mark the end of drawing.
 	GX_DrawDone();
 
-	// Copy the GX display to the external frame buffer.
-	GX_CopyDisp(xfb, GX_FALSE);
+	// Start copying the frame buffer every vsync.
+	GX_CopyDisp(xfb, GX_TRUE);
 }
 
 void D_BeginDirectRect(int x, int y, byte* pbitmap, int width, int height)

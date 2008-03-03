@@ -19,11 +19,7 @@ typedef unsigned long	ULONG;
 typedef unsigned long	DWORD;
 
 /* Boolean type */
-#ifndef BOOL
-# define BOOL int
-# define TRUE 1
-# define FALSE 0
-#endif
+#include <gctypes.h>
 
 #define _INTEGER
 #endif
