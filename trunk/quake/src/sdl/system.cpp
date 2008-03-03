@@ -328,7 +328,7 @@ void Sys_mkdir (const char *path)
 	Sys_Error("Mkdir: %s\n", path);
 }
 
-void Sys_Error (char *error, ...)
+void Sys_Error (const char *error, ...)
 {
 	// Clear the sound buffer.
 	S_ClearBuffer();
@@ -346,7 +346,7 @@ void Sys_Error (char *error, ...)
 	Sys_Quit();
 }
 
-void Sys_Printf (char *fmt, ...)
+void Sys_Printf (const char *fmt, ...)
 {
 #if ENABLE_PRINTF
 
