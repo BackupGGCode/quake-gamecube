@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cstdio>
 
 // OGC includes.
+#include <ogc/lwp.h>
 #include <ogc/lwp_watchdog.h>
 #include <ogcsys.h>
 
@@ -32,21 +33,10 @@ extern "C"
 }
 
 // Handy switches.
-#define INTERLACED		0
 #define FORCE_PAL		1
 #define CONSOLE_DEBUG	0
-#define TIME_DEMO		1
+#define TIME_DEMO		0
 #define USE_THREAD		1
-
-#if USE_THREAD
-# include <ogc/lwp.h>
-#endif
-
-// Globals provided by the ogc.ld link script.
-extern const char __stack_addr;
-extern const char __stack_end;
-//extern const char __ArenaLo;
-//extern const char __ArenaHi;
 
 namespace quake
 {
@@ -78,19 +68,11 @@ namespace quake
 			{
 			case VI_PAL:
 			case VI_MPAL:
-#if INTERLACED
-				rmode = &TVPal528IntDf;
-#else
 				rmode = &TVPal264Int;
-#endif
 				break;
 
 			default:
-#if INTERLACED
-				rmode = &TVNtsc480IntDf;
-#else
 				rmode = &TVNtsc240Int;
-#endif
 				break;
 			}
 
@@ -122,20 +104,6 @@ namespace quake
 			PAD_Init();
 		}
 
-#if !USE_THREAD
-		static void check_stack_size()
-		{
-			const size_t stack_size		= &__stack_addr - &__stack_end;
-			const size_t required_size	= 256 * 1024;
-			if (stack_size < required_size)
-			{
-				Sys_Error("Stack is too small. Should be >= %uK, but is only %uK in size.",
-					required_size / 1024,
-					stack_size / 1024);
-			}
-		}
-#endif
-
 		static void check_pak_file_exists()
 		{
 			int handle = -1;
@@ -165,9 +133,6 @@ namespace quake
 		{
 			// Initialise.
 			init();
-#if !USE_THREAD
-			check_stack_size();
-#endif
 			check_pak_file_exists();
 
 			// Initialise the Common module.
@@ -179,11 +144,6 @@ namespace quake
 #endif
 			};
 			COM_InitArgv(sizeof(args) / sizeof(args[0]), args);
-
-#if 0
-			const size_t arena_size = &__ArenaHi - &__ArenaLo;
-			Sys_Printf("arena_size = %u\n", arena_size);
-#endif
 
 			// Initialise the Host module.
 			quakeparms_t parms;
@@ -234,12 +194,11 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
-#if USE_THREAD
+	// Start the main thread.
 	lwp_t thread;
 	LWP_CreateThread(&thread, &main_thread_function, 0, 0, 256 * 1024, 1);
+
+	// Wait for it to finish.
 	void* result;
 	LWP_JoinThread(thread, &result);
-#else
-	return main_thread_function(0);
-#endif
 }

@@ -21,8 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <math.h>
 #include "quakedef.h"
-
-void Sys_Error (char *error, ...);
+#include "sys.h"
 
 vec3_t vec3_origin = {0,0,0};
 int nanmask = 255<<23;
@@ -157,7 +156,7 @@ float	anglemod(float a)
 	else
 		a += 360*( 1 + (int)(-a/360) );
 #endif
-	a = (360.0/65536) * ((int)(a*(65536/360.0)) & 65535);
+	a = (360.0f/65536) * ((int)(a*(65536/360.0f)) & 65535);
 	return a;
 }
 
