@@ -539,6 +539,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\gamecube\system_sdcard.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\gamecube\system_tffs.cpp"
 				>
 			</File>

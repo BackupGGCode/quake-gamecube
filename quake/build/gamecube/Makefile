@@ -27,13 +27,16 @@ LDFLAGS			:= $(COMMON_FLAGS) -L$(DEVKITPRO)/libogc/lib/cube
 # Linker info.
 LIBS := -logc -lsdcard
 
+# The filesystem to use.
+FILESYSTEM := tffs_caching
+
 # Files to compile.
 OBJS := \
 	$(OBJ_DIR)/gamecube/input.o \
 	$(OBJ_DIR)/gamecube/main.o \
 	$(OBJ_DIR)/gamecube/sound.o \
 	$(OBJ_DIR)/gamecube/system.o \
-	$(OBJ_DIR)/gamecube/system_tffs.o \
+	$(OBJ_DIR)/gamecube/system_$(FILESYSTEM).o \
 	$(OBJ_DIR)/gamecube/video_software.o \
 	$(OBJ_DIR)/gamecube/fileio/sdfileio.o \
 	$(OBJ_DIR)/gamecube/tffs/diskio.o \
@@ -141,7 +144,7 @@ $(ELF): $(OBJS)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo Compiling $(notdir $<)
 	@mkdir -p $(dir $@)
-	powerpc-gekko-g++ $(CXXFLAGS) -c $< -o $@ 2>&1 | $(SED)
+	@powerpc-gekko-g++ $(CXXFLAGS) -c $< -o $@ 2>&1 | $(SED)
 
 # How to compile a C source file.
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
