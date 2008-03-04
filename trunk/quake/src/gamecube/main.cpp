@@ -97,9 +97,6 @@ namespace quake
 			// Initialise the debug console.
 			console_init(xfb, 20, 10, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * 2);
 
-			// Initialise the SDCARD library.
-			SDInit();
-
 			// Initialise the controller library.
 			PAD_Init();
 		}
