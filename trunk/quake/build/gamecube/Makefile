@@ -12,6 +12,9 @@ ELF				:= $(OBJ_DIR)/Quake.elf
 ZIP_FILE		:= Quake_$(VERSION).zip
 ZIP_CONTENTS	:= Quake.dol ID1/CONFIG.CFG GPL.txt readme.html
 
+# Tools.
+SED = sed "s/:\([0-9]*\):/\(\1\) :/"
+
 # Compiler flags.
 # Note that we MUST USE -fno-merge-constants, because the compiler generates crap otherwise.
 COMMON_FLAGS	:= -mcpu=750 -meabi -mhard-float -g -Wall -pipe -mogc
@@ -30,6 +33,7 @@ OBJS := \
 	$(OBJ_DIR)/gamecube/main.o \
 	$(OBJ_DIR)/gamecube/sound.o \
 	$(OBJ_DIR)/gamecube/system.o \
+	$(OBJ_DIR)/gamecube/system_tffs.o \
 	$(OBJ_DIR)/gamecube/video_software.o \
 	$(OBJ_DIR)/gamecube/fileio/sdfileio.o \
 	$(OBJ_DIR)/gamecube/tffs/diskio.o \
@@ -137,10 +141,10 @@ $(ELF): $(OBJS)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo Compiling $(notdir $<)
 	@mkdir -p $(dir $@)
-	@powerpc-gekko-g++ $(CXXFLAGS) -c $< -o $@
+	powerpc-gekko-g++ $(CXXFLAGS) -c $< -o $@ 2>&1 | $(SED)
 
 # How to compile a C source file.
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo Compiling $(notdir $<)
 	@mkdir -p $(dir $@)
-	@powerpc-gekko-gcc $(CFLAGS) -c $< -o $@
+	@powerpc-gekko-gcc $(CFLAGS) -c $< -o $@ 2>&1 | $(SED)
