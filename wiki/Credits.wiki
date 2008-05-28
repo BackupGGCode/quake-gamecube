@@ -4,6 +4,7 @@
 
  * Original game by [http://www.idsofware.com id Software]
  * !GameCube conversion by Peter Mackay
+ * Wii conversion by Eluan Miranda
  * Testing by:
   * 00Nash
   * eke-eke
