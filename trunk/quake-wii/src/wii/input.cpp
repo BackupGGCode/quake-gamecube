@@ -248,8 +248,19 @@ void IN_Move (usercmd_t *cmd)
 	const u8 nunchuk_stick_x = pad.exp.nunchuk.js.pos.x;
 	const u8 nunchuk_stick_y = pad.exp.nunchuk.js.pos.y;
 	// TODO: sensor bar position correct? aspect ratio correctly set? etc...
-	const int wiimote_ir_x = pad.ir.x;
-	const int wiimote_ir_y = pad.ir.y;
+	static int last_wiimote_ir_x = pad.ir.x;
+	static int last_wiimote_ir_y = pad.ir.y;
+	int wiimote_ir_x, wiimote_ir_y;;
+	if (pad.ir.x < 1 || (unsigned int)pad.ir.x > pad.ir.vres[0] - 1)
+		wiimote_ir_x = last_wiimote_ir_x;
+	else
+		wiimote_ir_x = pad.ir.x;
+	if (pad.ir.y < 1 || (unsigned int)pad.ir.y > pad.ir.vres[1] - 1)
+		wiimote_ir_y = last_wiimote_ir_y;
+	else
+		wiimote_ir_y = pad.ir.y;
+	last_wiimote_ir_x = wiimote_ir_x;
+	last_wiimote_ir_y = wiimote_ir_y;
 
 	// Convert the inputs to floats in the range [-1, 1].
 #if 0
@@ -275,16 +286,19 @@ void IN_Move (usercmd_t *cmd)
 
 	// Now the gamecube C-stick has the priority
 	float x2;
-	if (sub_stick_x < 6 || sub_stick_x > -6 && pad.ir.num_dots >= 2)
+	if (sub_stick_x < 6 || sub_stick_x > -6)
 		x2 = clamp((float)wiimote_ir_x / (pad.ir.vres[0] / 2.0f) - 1.0f, -1.0f, 1.0f);
 	else
 		x2 = clamp(sub_stick_x / 80.0f, -1.0f, 1.0f);
 
 	float y2;
-	if (sub_stick_y < 6 || sub_stick_y > -6 && pad.ir.num_dots >= 2)
+	if (sub_stick_y < 6 || sub_stick_y > -6)
 		y2 = clamp((float)wiimote_ir_y / (pad.ir.vres[1] / 2.0f) - 1.0f, -1.0f, 1.0f);
 	else
 		y2 = clamp(sub_stick_y / -80.0f, -1.0f, 1.0f);
+
+	Cvar_SetValue("cl_crossx", scr_vrect.width / 2 * x2);
+	Cvar_SetValue("cl_crossy", scr_vrect.height / 2 * y2);
 
 	// Apply the dead zone.
 	const float dead_zone = 0.1f;
@@ -296,9 +310,6 @@ void IN_Move (usercmd_t *cmd)
 	{
 		V_StopPitchDrift();
 	}
-
-	Cvar_SetValue("cl_crossx", scr_vrect.width / 2 * x2);
-	Cvar_SetValue("cl_crossy", scr_vrect.height / 2 * y2);
 
 	// Look using the main stick?
 	float yaw_rate;
