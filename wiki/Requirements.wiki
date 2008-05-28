@@ -6,14 +6,19 @@
 Any of the following are supported:
 
  * Nintendo !GameCube (PAL or NTSC)
- * Nintendo Wii (without the recent [WiiSystemUpdate Wii system update])
+ * Nintendo Wii (if running the Wii version, the recent [WiiSystemUpdate Wii system update] won't cause problems)
 
 = Supported launch methods =
 
 Any of the following are supported:
 
+ Gamecube Version:
  * Datel SD Media Launcher.
  * Datel Action Replay MAX (old version)
+
+ Wii Version:
+ * Twilight Hack
+ * The Homebrew Channel
 
 = Software requirements =
 
