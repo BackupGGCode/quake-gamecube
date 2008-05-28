@@ -3,7 +3,8 @@ VERSION	:= WIP
 
 # Directories.
 SRC_DIR		:= ../../src
-OBJ_DIR		:= ../../obj/wii
+OBJ_DIR_TOP	:= ../../obj
+OBJ_DIR		:= $(OBJ_DIR_TOP)/wii
 DIST_DIR	:= ../../dist/wii
 
 # Key files.
@@ -122,6 +123,7 @@ all: $(DOL)
 clean:
 	@echo Cleaning
 	@rm -f $(OBJS) $(DOL) $(ELF) $(dir $(DOL))$(notdir $(ELF))
+	@rm -rf $(OBJ_DIR_TOP)
 
 # How to build the distribution.
 dist: clean all

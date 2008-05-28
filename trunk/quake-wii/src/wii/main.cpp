@@ -32,9 +32,11 @@ extern "C"
 #include "../generic/quakedef.h"
 }
 
+int want_to_reset = 0;
+
 void reset_system(void)
 {
-	SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
+	want_to_reset = 1;
 }
 
 // Handy switches.
@@ -217,6 +219,9 @@ namespace quake
 			u64 last_time = gettime();
 			for (;;)
 			{
+				if (want_to_reset)
+					SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
+
 				// Get the frame time in ticks.
 				const u64		current_time	= gettime();
 				const u64		time_delta		= current_time - last_time;
