@@ -7,12 +7,13 @@
   * `/ID1/PAK0.PAK`
   * `/ID1/PAK1.PAK` (if you own the full version of Quake)
   * `/ID1/CONFIG.CFG` (this file is not absolutely required, but will make it easier to get started)
-  * `/Quake.dol`
-  * `/SDLOAD.DOL` (if you use SD Media Launcher)
+  * `/SDLOAD.DOL` (only if you use SD Media Launcher)
  # Please ensure that the `ID1` folder and `PAK*.PAK` files are in the correct locations and are named only in UPPER CASE. The SD card library which Quake uses to read the data files requires that the file names are in upper case _only_.
+ # The Quake.dol/Quake.elf files need to be installed accordingly to your boot method. Consult your launch method documentation for specifics. SD Media Launcher for !GameCube should have the Quake.dol somewhere inside the SD Card and Twilight Hack should have the Quake.elf renamed boot.elf into the SD card root.
 
 = Launching the game =
 
+ * Gamecube Version:
  # Insert your SD card into its adaptor and into *slot 1* of your !GameCube. Slot 2 is not supported.
  # If you use SD Media Launcher:
   # Insert the SD Media Launcher disc into your console and switch on your console.
@@ -21,3 +22,11 @@
  # If you use Action Replay MAX:
   # Insert the Action Replay MAX disc into your console and switch on your console.
   # Section to be completed (I do not have an Action Replay MAX).
+
+ * Wii Version:
+ # Insert your SD card into the Wii front SD slot.
+ # If you use the Twilight Hack:
+  # Quake.elf should be renamed to boot.elf and be into your SD card root.
+  # Run Twilight Hack
+ # If you use The Homebrew Channel:
+  # You can load via wiiload or create an folder for Quake in apps/ according to The Homebrew Channel instructions.
