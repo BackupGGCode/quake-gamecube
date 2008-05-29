@@ -150,7 +150,7 @@ namespace quake
 			}
 			WPAD_SetVRes(WPAD_CHAN_0, rmode->fbWidth, rmode->xfbHeight);
 			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_CORE_ACC_IR);
-			WPAD_SetSleepTime(30); // TODO: does this do what I think i does?
+			WPAD_SetSleepTime(10); // thanks eke-eke for the confirmation that this is the timeout in seconds
 		}
 
 		static void check_pak_file_exists()

@@ -154,13 +154,36 @@ void IN_Shutdown (void)
     WPAD_Shutdown();
 }
 
+bool wiimote_connected;
+bool nunchuk_connected;
+
 void IN_Commands (void)
 {
 	// Fetch the pad state.
 	PAD_ScanPads();
 	const u16 buttons = PAD_ButtonsHeld(0);
 
-	WPAD_Read(WPAD_CHAN_0, &pad);
+	u32 conn_dev;
+	if (WPAD_Probe(WPAD_CHAN_0, &conn_dev) != WPAD_ERR_NONE)
+	{
+		wiimote_connected = false;
+		nunchuk_connected = false;
+	}
+	else
+	{
+		wiimote_connected = true;
+		if (conn_dev == WPAD_DEV_NUNCHAKU)
+		{
+			nunchuk_connected = true;
+		}
+		else
+		{
+			nunchuk_connected = false;
+		}
+	}
+	if (wiimote_connected)
+		WPAD_Read(WPAD_CHAN_0, &pad);
+
 	const u16 wiimote_buttons = pad.btns_d;
 	const u16 nunchuk_buttons = pad.exp.nunchuk.btns;
 
@@ -180,32 +203,34 @@ void IN_Commands (void)
 			key_state[key] |= buttons & mask;
 		}
 	}
-	for (size_t button = 0; button < wiimote_button_count; ++button)
-	{
-		// Is this mapping defined?
-		size_t key = wiimote_game_button_map[button];
-		if (key)
+	if (wiimote_connected)
+		for (size_t button = 0; button < wiimote_button_count; ++button)
 		{
-			// Set the key state.
-			const size_t mask = 1 << button;
-			key_state[key] |= wiimote_buttons & mask;
+			// Is this mapping defined?
+			size_t key = wiimote_game_button_map[button];
+			if (key)
+			{
+				// Set the key state.
+				const size_t mask = 1 << button;
+				key_state[key] |= wiimote_buttons & mask;
+			}
 		}
-	}
-	for (size_t button = 0; button < nunchuk_button_count; ++button)
-	{
-		// Is this mapping defined?
-		size_t key = nunchuk_game_button_map[button];
-		if (key)
+	if (nunchuk_connected)
+		for (size_t button = 0; button < nunchuk_button_count; ++button)
 		{
-			// Set the key state.
-			const size_t mask = 1 << button;
-			key_state[key] |= nunchuk_buttons & mask;
+			// Is this mapping defined?
+			size_t key = nunchuk_game_button_map[button];
+			if (key)
+			{
+				// Set the key state.
+				const size_t mask = 1 << button;
+				key_state[key] |= nunchuk_buttons & mask;
+			}
 		}
-	}
 
 	// Accelerometers
 	// TODO: something fancy like the button interface
-	if (pad.exp.nunchuk.gforce.z < -0.55f)
+	if (nunchuk_connected && pad.exp.nunchuk.gforce.z < -0.55f)
 	{
 		key_state[K_JOY1] |= 1;
 	}
@@ -244,7 +269,7 @@ void IN_Move (usercmd_t *cmd)
 	const s8 sub_stick_x = PAD_SubStickX(0);
 	const s8 sub_stick_y = PAD_SubStickY(0);
 
-	// TODO: IN_Move is called prior to IN_Commands? maybe we are using data from the previous frame? set to signed here?
+	// IN_Move always called after IN_Commands on the same frame, this is valid data
 	const u8 nunchuk_stick_x = pad.exp.nunchuk.js.pos.x;
 	const u8 nunchuk_stick_y = pad.exp.nunchuk.js.pos.y;
 	// TODO: sensor bar position correct? aspect ratio correctly set? etc...
@@ -273,26 +298,26 @@ void IN_Move (usercmd_t *cmd)
 
 	// If the nunchuk is centered, read from the left gamecube pad stick
 	float x1;
-	if (nunchuk_stick_x < 133 && nunchuk_stick_x > 121)
+	if (!nunchuk_connected || (nunchuk_stick_x < 133 && nunchuk_stick_x > 121))
 		x1 = clamp(stick_x / 90.0f, -1.0f, 1.0f);
 	else
 		x1 = clamp(((float)nunchuk_stick_x / 128.0f - 1.0f) * 1.5, -1.0f, 1.0f);
 
 	float y1;
-	if (nunchuk_stick_y < 133 && nunchuk_stick_y > 121)
+	if (!nunchuk_connected || (nunchuk_stick_y < 133 && nunchuk_stick_y > 121))
 		y1 = clamp(stick_y / -90.0f, -1.0f, 1.0f);
 	else
 		y1 = clamp(((float)nunchuk_stick_y / (-128.0f) + 1.0f) * 1.5, -1.0f, 1.0f);
 
 	// Now the gamecube C-stick has the priority
 	float x2;
-	if (sub_stick_x < 6 || sub_stick_x > -6)
+	if ((sub_stick_x < 6 || sub_stick_x > -6) && wiimote_connected)
 		x2 = clamp((float)wiimote_ir_x / (pad.ir.vres[0] / 2.0f) - 1.0f, -1.0f, 1.0f);
 	else
 		x2 = clamp(sub_stick_x / 80.0f, -1.0f, 1.0f);
 
 	float y2;
-	if (sub_stick_y < 6 || sub_stick_y > -6)
+	if ((sub_stick_y < 6 || sub_stick_y > -6) && wiimote_connected)
 		y2 = clamp((float)wiimote_ir_y / (pad.ir.vres[1] / 2.0f) - 1.0f, -1.0f, 1.0f);
 	else
 		y2 = clamp(sub_stick_y / -80.0f, -1.0f, 1.0f);
