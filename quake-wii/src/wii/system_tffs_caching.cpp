@@ -185,9 +185,6 @@ int Sys_FileOpenWrite (const char *path)
 {
 	init();
 
-// TODO: check it
-Sys_Printf("Write disabled.\n");
-return -1;
 	// Translate the file name into one which works for the SDCARD library?
 	char translated_path[MAX_OSPATH + 1];
 	translate_path(path, translated_path);
@@ -350,9 +347,6 @@ int Sys_FileRead(int handle, void *dest, int count)
 
 int Sys_FileWrite (int handle, const void *data, int count)
 {
-// TODO: check it
-Sys_Printf("Write disabled.\n");
-return 0;
 	// Get the file.
 	file_slot& file = index_to_file(handle, __FUNCTION__);
 
