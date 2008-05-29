@@ -125,7 +125,7 @@ void Sys_Quit (void)
 	}
 
 	// Exit.
-	SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
+	exit(0);
 }
 
 double Sys_FloatTime (void)

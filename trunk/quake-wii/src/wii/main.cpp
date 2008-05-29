@@ -256,4 +256,7 @@ int main(int argc, char* argv[])
 	// Wait for it to finish.
 	void* result;
 	LWP_JoinThread(thread, &result);
+
+	exit(0);
+	return 0;
 }
