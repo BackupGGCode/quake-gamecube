@@ -30,7 +30,13 @@ typedef unsigned char 		byte;
 #ifdef __cplusplus
 typedef enum {qfalse, qtrue}	qboolean;
 #else
-typedef enum {false, true}	qboolean;
+	#ifndef HW_RVL
+	typedef enum {false, true}	qboolean;
+	#else
+	// libogc
+	#include <gctypes.h>
+	typedef bool qboolean;
+	#endif
 #endif
 
 //============================================================================

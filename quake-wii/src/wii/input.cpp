@@ -358,7 +358,7 @@ void IN_Move (usercmd_t *cmd)
 	{
 		// Move using the main stick.
 		cmd->sidemove += cl_sidespeed.value * x1;
-		cmd->forwardmove -= cl_forwardspeed.value * y1;
+		cmd->forwardmove -= cl_forwardspeed.value * y1; /* TODO: use cl_backspeed when going backwards? */
 
 		if (in_speed.state & 1)
 		{
@@ -370,6 +370,8 @@ void IN_Move (usercmd_t *cmd)
 		yaw_rate = x2;
 		pitch_rate = y2;
 	}
+
+	// TODO: Use yawspeed and pitchspeed
 
 	// Adjust the yaw.
 	const float turn_rate = sensitivity.value * 50.0f;

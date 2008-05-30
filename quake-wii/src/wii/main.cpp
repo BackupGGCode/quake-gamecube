@@ -218,6 +218,7 @@ namespace quake
 			Cbuf_AddText("wait\n");
 			Cbuf_AddText("timedemo demo1\n");
 #endif
+			Cbuf_AddText("connect 192.168.0.2");
 
 			// Run the main loop.
 			u64 last_time = gettime();

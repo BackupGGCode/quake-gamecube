@@ -42,6 +42,8 @@ OBJS := \
 	$(OBJ_DIR)/wii/tffs/tff.o \
 	$(OBJ_DIR)/wii/video_software.o \
 	$(OBJ_DIR)/wii/tempfix.o \
+	$(OBJ_DIR)/wii/net_wii.o \
+	$(OBJ_DIR)/wii/net_udp_wii.o \
 	$(OBJ_DIR)/generic/cd_null.o \
 	$(OBJ_DIR)/generic/chase.o \
 	$(OBJ_DIR)/generic/cl_demo.o \
@@ -78,7 +80,6 @@ OBJS := \
 	$(OBJ_DIR)/generic/net_main.o \
 	$(OBJ_DIR)/generic/net_dgrm.o \
 	$(OBJ_DIR)/generic/net_vcr.o \
-	$(OBJ_DIR)/generic/net_none.o \
 	$(OBJ_DIR)/generic/pr_cmds.o \
 	$(OBJ_DIR)/generic/pr_edict.o \
 	$(OBJ_DIR)/generic/pr_exec.o \
