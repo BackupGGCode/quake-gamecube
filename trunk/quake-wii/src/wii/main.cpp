@@ -107,24 +107,26 @@ namespace quake
 
 			// Initialise the controller library.
 			PAD_Init();
+			WPAD_Shutdown();
 			WPAD_Init();
 
-			// TODO: wiimote(s) initialized correctly?
-
-			WPAD_Disconnect(WPAD_CHAN_0);
+			//WPAD_Disconnect(WPAD_CHAN_0);
 			WPAD_Disconnect(WPAD_CHAN_1);
 			WPAD_Disconnect(WPAD_CHAN_2);
 			WPAD_Disconnect(WPAD_CHAN_3);
 			u32 conn_dev;
 
+			bool wiimote_warning = false;
+			bool nunchuk_warning = false;
 			while (1)
 			{
 				if (WPAD_Probe(WPAD_CHAN_0, &conn_dev) != WPAD_ERR_NONE)
 				{
-					// Clear screen
-					console_init(xfb, 20, 10, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * 2);
-					printf("\nPlease sync the wiimote (with nunchuk)\nPress A on the gamecube controller to skip\n");
-
+					if (!wiimote_warning)
+					{
+						printf("\nPlease sync the wiimote (with nunchuk)\nPress A on the gamecube controller to skip\n");
+						wiimote_warning = true;
+					}
 					VIDEO_WaitVSync();
 					PAD_ScanPads();
 					if (PAD_ButtonsHeld(0) & PAD_BUTTON_A)
@@ -136,10 +138,11 @@ namespace quake
 				}
 				else
 				{
-					// Clear screen
-					console_init(xfb, 20, 10, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * 2);
-					printf("\nPlease connect the nunchuk to the wiimote.\nPress A to continue without the nunchuk.\n");
-
+					if (!nunchuk_warning)
+					{
+						printf("\nPlease connect the nunchuk to the wiimote.\nPress A to continue without the nunchuk.\n");
+						nunchuk_warning = true;
+					}
 					VIDEO_WaitVSync();
 					PAD_ScanPads();
 					if (PAD_ButtonsHeld(0) & PAD_BUTTON_A)
