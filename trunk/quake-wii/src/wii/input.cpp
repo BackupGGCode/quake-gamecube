@@ -25,6 +25,7 @@ extern "C"
 
 #include <ogc/pad.h>
 #include <wiiuse/wpad.h>
+#include "input_wiimote.h"
 
 #define FORCE_KEY_BINDINGS 0
 
@@ -171,6 +172,14 @@ void IN_Commands (void)
 	}
 	else
 	{
+		// TODO: better way to do this? a callback or something
+		if (!wiimote_connected)
+		{
+			WPAD_SetVRes(WPAD_CHAN_0, WIIMOTE_IR_RES_X, WIIMOTE_IR_RES_Y);
+			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_CORE_ACC_IR);
+			WPAD_SetSleepTime(60); // thanks eke-eke for the confirmation that this is the timeout in seconds
+		}
+
 		wiimote_connected = true;
 		if (conn_dev == WPAD_DEV_NUNCHAKU)
 		{

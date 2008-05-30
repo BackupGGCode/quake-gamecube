@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ogc/lwp_watchdog.h>
 #include <ogcsys.h>
 #include <wiiuse/wpad.h>
+#include "input_wiimote.h"
 
 extern "C"
 {
@@ -148,7 +149,7 @@ namespace quake
 						break;
 				}
 			}
-			WPAD_SetVRes(WPAD_CHAN_0, rmode->fbWidth, rmode->xfbHeight);
+			WPAD_SetVRes(WPAD_CHAN_0, WIIMOTE_IR_RES_X, WIIMOTE_IR_RES_Y);
 			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_CORE_ACC_IR);
 			WPAD_SetSleepTime(60); // thanks eke-eke for the confirmation that this is the timeout in seconds
 		}
