@@ -360,6 +360,12 @@ void IN_Move (usercmd_t *cmd)
 		cmd->sidemove += cl_sidespeed.value * x1;
 		cmd->forwardmove -= cl_forwardspeed.value * y1;
 
+		if (in_speed.state & 1)
+		{
+			cmd->forwardmove *= cl_movespeedkey.value;
+			cmd->sidemove *= cl_movespeedkey.value; /* TODO: always seem to be at the max and I'm too sleepy now to figure out why */
+		}
+
 		// Turn using the substick.
 		yaw_rate = x2;
 		pitch_rate = y2;
@@ -367,10 +373,17 @@ void IN_Move (usercmd_t *cmd)
 
 	// Adjust the yaw.
 	const float turn_rate = sensitivity.value * 50.0f;
-	cl.viewangles[YAW] -= turn_rate * yaw_rate * host_frametime;
+	if (in_speed.state & 1)
+		cl.viewangles[YAW] -= turn_rate * yaw_rate * host_frametime * cl_anglespeedkey.value;
+	else
+		cl.viewangles[YAW] -= turn_rate * yaw_rate * host_frametime;
 
 	// How fast to pitch?
-	const float pitch_offset = turn_rate * pitch_rate * host_frametime;
+	float pitch_offset;
+	if (in_speed.state & 1)
+		pitch_offset = turn_rate * pitch_rate * host_frametime * cl_anglespeedkey.value;
+	else
+		pitch_offset = turn_rate * pitch_rate * host_frametime;
 
 	// Do the pitch.
 	const bool	invert_pitch = m_pitch.value < 0;

@@ -365,14 +365,16 @@ void CL_SendMove (usercmd_t *cmd)
 	for (i=0 ; i<3 ; i++)
 		MSG_WriteAngle (&buf, cl.viewangles[i]);
 #else
-	/* TODO: Not perfect, due to come gimbal lock issues, it will shoot where the shotgun is aiming, not where the
+	/* TODO: Not perfect, due to some gimbal lock issues, it will shoot where the shotgun is aiming, not where the
 	 * crosshair is (maybe it's better this way, until the gimbal issues are addressed on the viewmodel too.) It will
-	 * also change the moviments a bit (maybe that's better too.)
+	 * also change the movements a bit (maybe that's better too.)
 	 *
 	 * Another issue is that networked players/demo watchers will see where YOUR gun is facing, not where YOU are facing.
+	 *
+	 * It's also possible to bypass the client-side PITCH limits
 	 */
-	MSG_WriteAngle (&buf, cl.viewangles[PITCH] + cl_crossy.value/scr_vrect.height * IR_PITCHRANGE * 1.3f);
-	MSG_WriteAngle (&buf, cl.viewangles[YAW] - cl_crossx.value/scr_vrect.width * IR_YAWRANGE * 1.1f);
+	MSG_WriteAngle (&buf, cl.viewangles[PITCH] + cl_crossy.value/scr_vrect.height * IR_PITCHRANGE);
+	MSG_WriteAngle (&buf, cl.viewangles[YAW] - cl_crossx.value/scr_vrect.width * IR_YAWRANGE);
 	MSG_WriteAngle (&buf, cl.viewangles[ROLL]);
 #endif
 	
