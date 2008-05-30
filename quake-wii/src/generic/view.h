@@ -27,8 +27,8 @@ extern float v_blend[4];
 
 extern cvar_t lcd_x;
 
-#define IR_YAWRANGE	90.0f
-#define IR_PITCHRANGE	45.0f
+#define IR_YAWRANGE	100.0f
+#define IR_PITCHRANGE	60.0f
 
 void V_Init (void);
 void V_RenderView (void);
