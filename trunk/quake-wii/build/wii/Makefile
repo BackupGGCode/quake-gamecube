@@ -137,7 +137,7 @@ $(DOL): $(ELF)
 	@echo Creating $(notdir $@)
 	@mkdir -p $(dir $@)
 	@powerpc-gekko-objcopy -O binary $< $@
-	@mv $< $(dir $@)
+	@cp $< $(dir $@)
 
 # How to link the ELF.
 $(ELF): $(OBJS)
