@@ -41,7 +41,6 @@ OBJS := \
 	$(OBJ_DIR)/wii/tffs/diskio.o \
 	$(OBJ_DIR)/wii/tffs/tff.o \
 	$(OBJ_DIR)/wii/video_software.o \
-	$(OBJ_DIR)/wii/tempfix.o \
 	$(OBJ_DIR)/wii/net_wii.o \
 	$(OBJ_DIR)/wii/net_udp_wii.o \
 	$(OBJ_DIR)/generic/cd_null.o \
