@@ -751,9 +751,18 @@ void CalcGunAngle (void)
 	cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw;
 	cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch);
 #else
-	// Some small gimbal lock issues
-	cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw - cl_crossx.value/scr_vrect.width * IR_YAWRANGE;
-	cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch + cl_crossy.value/scr_vrect.height * IR_PITCHRANGE);
+	if (!cls.demoplayback)
+	{
+		// Some small gimbal lock issues
+		cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw - cl_crossx.value/scr_vrect.width * IR_YAWRANGE;
+		cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch + cl_crossy.value/scr_vrect.height * IR_PITCHRANGE);
+	}
+	else
+	{
+		// TODO: Maybe there are other cases besides demo playback
+		cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw;
+		cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch);
+	}
 #endif
 
 	cl.viewent.angles[ROLL] -= v_idlescale.value * sinf(cl.time*v_iroll_cycle.value) * v_iroll_level.value;

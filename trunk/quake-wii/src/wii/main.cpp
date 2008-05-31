@@ -42,9 +42,10 @@ void reset_system(void)
 
 // Handy switches.
 #define FORCE_PAL		0
-#define CONSOLE_DEBUG	0
+#define CONSOLE_DEBUG		0
 #define TIME_DEMO		0
 #define USE_THREAD		1
+#define TEST_CONNECTION		0
 
 namespace quake
 {
@@ -218,7 +219,9 @@ namespace quake
 			Cbuf_AddText("wait\n");
 			Cbuf_AddText("timedemo demo1\n");
 #endif
+#if TEST_CONNECTION
 			Cbuf_AddText("connect 192.168.0.2");
+#endif
 
 			// Run the main loop.
 			u64 last_time = gettime();
