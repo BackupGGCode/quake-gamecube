@@ -76,6 +76,8 @@ int UDP_Init (void)
 	if (COM_CheckParm ("-noudp"))
 		return -1;
 
+	printf("UDP_Init: Starting network driver...\n");
+
 	if ((error = net_init()))
 	{
 		Con_Printf("UDP_Init: net_init() failed with %d\n", error);
