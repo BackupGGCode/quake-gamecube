@@ -335,6 +335,7 @@ void CL_ParseUpdate (int bits)
 	qboolean	forcelink;
 	entity_t	*ent;
 	int			num;
+	int			skin;
 
 	if (cls.signon == SIGNONS - 1)
 	{	// first update is the final signon stage
@@ -390,10 +391,8 @@ if (bits&(1<<i))
 		}
 		else
 			forcelink = true;	// hack to make null model players work
-#ifdef GLQUAKE
 		if (num > 0 && num <= cl.maxclients)
 			R_TranslatePlayerSkin (num - 1);
-#endif
 	}
 	
 	if (bits & U_FRAME)
@@ -414,7 +413,6 @@ if (bits&(1<<i))
 		ent->colormap = cl.scores[i-1].translations;
 	}
 
-#ifdef GLQUAKE
 	if (bits & U_SKIN)
 		skin = MSG_ReadByte();
 	else
@@ -424,14 +422,6 @@ if (bits&(1<<i))
 		if (num > 0 && num <= cl.maxclients)
 			R_TranslatePlayerSkin (num - 1);
 	}
-
-#else
-
-	if (bits & U_SKIN)
-		ent->skinnum = MSG_ReadByte();
-	else
-		ent->skinnum = ent->baseline.skin;
-#endif
 
 	if (bits & U_EFFECTS)
 		ent->effects = MSG_ReadByte();
@@ -639,9 +629,7 @@ void CL_NewTranslation (int slot)
 	memcpy (dest, vid.colormap, sizeof(cl.scores[slot].translations));
 	top = cl.scores[slot].colors & 0xf0;
 	bottom = (cl.scores[slot].colors &15)<<4;
-#ifdef GLQUAKE
 	R_TranslatePlayerSkin (slot);
-#endif
 
 	for (i=0 ; i<VID_GRADES ; i++, dest += 256, source+=256)
 	{
