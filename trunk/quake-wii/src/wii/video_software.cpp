@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// TODO: someone could please test it with a PAL TV? That includes going underwater, for the warp buffer.
+
 // Standard includes.
 #include <cstddef>
 #include <malloc.h>
