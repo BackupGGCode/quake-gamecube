@@ -214,13 +214,8 @@ typedef struct
 #include "progs.h"
 #include "server.h"
 
-#if GXQUAKE && HW_RVL
-#include "../wii/gx/gx_model.h"
-#include "../wii/gx/gxquake.h"
-#else
 #include "model.h"
 #include "d_iface.h"
-#endif
 
 #include "input.h"
 #include "world.h"

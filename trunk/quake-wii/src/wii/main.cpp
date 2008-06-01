@@ -116,47 +116,12 @@ namespace quake
 			WPAD_Disconnect(WPAD_CHAN_2);
 			WPAD_Disconnect(WPAD_CHAN_3);
 
-			WPAD_SetVRes(WPAD_CHAN_0, WIIMOTE_IR_RES_X, WIIMOTE_IR_RES_Y);
-			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_CORE_ACC_IR);
-			WPAD_SetSleepTime(60);
+			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
+					Oh, and don't forget to put your wrist wrap! :)\n\n");
+			VIDEO_WaitVSync();
+			struct timespec sleeptime = {3, 0};
+			nanosleep(&sleeptime);
 
-			u32 conn_dev;
-			bool wiimote_warning = false;
-			bool nunchuk_warning = false;
-			while (1)
-			{
-				if (WPAD_Probe(WPAD_CHAN_0, &conn_dev) != WPAD_ERR_NONE)
-				{
-					if (!wiimote_warning)
-					{
-						printf("\nPlease sync the wiimote (with nunchuk)\nPress A on the gamecube controller to skip\n");
-						wiimote_warning = true;
-					}
-					VIDEO_WaitVSync();
-					PAD_ScanPads();
-					if (PAD_ButtonsHeld(0) & PAD_BUTTON_A)
-						break;
-				}
-				else if (conn_dev == WPAD_DEV_NUNCHAKU)
-				{
-					break;
-				}
-				else
-				{
-					if (!nunchuk_warning)
-					{
-						printf("\nPlease connect the nunchuk to the wiimote.\nPress A to continue without the nunchuk.\n");
-						nunchuk_warning = true;
-					}
-					VIDEO_WaitVSync();
-					PAD_ScanPads();
-					if (PAD_ButtonsHeld(0) & PAD_BUTTON_A)
-						break;
-					WPAD_ScanPads();
-					if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)
-						break;
-				}
-			}
 			WPAD_SetVRes(WPAD_CHAN_0, WIIMOTE_IR_RES_X, WIIMOTE_IR_RES_Y);
 			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_CORE_ACC_IR);
 			WPAD_SetSleepTime(60); // thanks eke-eke for the confirmation that this is the timeout in seconds

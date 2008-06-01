@@ -155,8 +155,8 @@ void IN_Shutdown (void)
     WPAD_Shutdown();
 }
 
-bool wiimote_connected;
-bool nunchuk_connected;
+bool wiimote_connected = false;
+bool nunchuk_connected = false;
 
 void IN_Commands (void)
 {
@@ -319,20 +319,38 @@ void IN_Move (usercmd_t *cmd)
 		y1 = clamp(((float)nunchuk_stick_y / (-128.0f) + 1.0f) * 1.5, -1.0f, 1.0f);
 
 	// Now the gamecube C-stick has the priority
+	static bool using_c_stick = false;
+	static int last_irx = -1, last_iry = -1;
 	float x2;
-	if ((sub_stick_x < 6 || sub_stick_x > -6) && wiimote_connected)
+	if ((sub_stick_x < 6 && sub_stick_x > -6) && wiimote_connected && (using_c_stick == false || (using_c_stick == true && last_irx != wiimote_ir_x)))
+	{
 		x2 = clamp((float)wiimote_ir_x / (pad.ir.vres[0] / 2.0f) - 1.0f, -1.0f, 1.0f);
+		Cvar_SetValue("cl_crossx", scr_vrect.width / 2 * x2);
+		using_c_stick = false;
+	}
 	else
+	{
 		x2 = clamp(sub_stick_x / 80.0f, -1.0f, 1.0f);
+		Cvar_SetValue("cl_crossx", 0);
+		using_c_stick = true;
+	}
 
 	float y2;
-	if ((sub_stick_y < 6 || sub_stick_y > -6) && wiimote_connected)
+	if ((sub_stick_y < 6 && sub_stick_y > -6) && wiimote_connected && (using_c_stick == false || (using_c_stick == true && last_iry != wiimote_ir_y)))
+	{
 		y2 = clamp((float)wiimote_ir_y / (pad.ir.vres[1] / 2.0f) - 1.0f, -1.0f, 1.0f);
+		Cvar_SetValue("cl_crossy", scr_vrect.height / 2 * y2);
+		using_c_stick = false;
+	}
 	else
+	{
 		y2 = clamp(sub_stick_y / -80.0f, -1.0f, 1.0f);
+		Cvar_SetValue("cl_crossy", 0);
+		using_c_stick = true;
+	}
 
-	Cvar_SetValue("cl_crossx", scr_vrect.width / 2 * x2);
-	Cvar_SetValue("cl_crossy", scr_vrect.height / 2 * y2);
+	last_irx = wiimote_ir_x;
+	last_iry = wiimote_ir_y;
 
 	// Apply the dead zone.
 	const float dead_zone = 0.1f;
