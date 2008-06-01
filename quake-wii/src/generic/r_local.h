@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+#if !(HW_RVL && GXQUAKE)
 // r_local.h -- private refresh defs
 
 #include "r_shared.h"
@@ -301,3 +302,4 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1);
 void R_ClipEdge (mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip);
 void R_SplitEntityOnNode2 (mnode_t *node);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
+#endif
