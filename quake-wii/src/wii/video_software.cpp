@@ -45,7 +45,7 @@ namespace quake
 		typedef u32 pixel_pair;
 
 		// Globals.
-		extern pixel_pair	(*xfb)[][320];
+		extern pixel_pair	(*xfb)[][640];
 		extern GXRModeObj*	rmode;
 	}
 
@@ -55,8 +55,8 @@ namespace quake
 		using main::xfb;
 
 		// Quake constants.
-		static const size_t		max_screen_width	= 320;
-		static const size_t		max_screen_height	= 264;
+		static const size_t		max_screen_width	= 640;
+		static const size_t		max_screen_height	= 528;
 		static const size_t		surface_cache_size	= SURFCACHE_SIZE_AT_320X200 + ((max_screen_width - 320) * (max_screen_height - 200) * 3);
 
 		// Quake render buffers.

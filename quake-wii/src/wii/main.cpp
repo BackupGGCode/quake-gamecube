@@ -55,7 +55,7 @@ namespace quake
 		typedef u32 pixel_pair;
 
 		// Video globals.
-		pixel_pair	(*xfb)[][320]	= 0;
+		pixel_pair	(*xfb)[][640]	= 0;
 		GXRModeObj*	rmode			= 0;
 
 		// Set up the heap.
@@ -77,16 +77,16 @@ namespace quake
 			{
 			case VI_PAL:
 			case VI_MPAL:
-				rmode = &TVPal264Int;
+				rmode = &TVPal528IntDf;
 				break;
 
 			default:
-				rmode = &TVNtsc240Int;
+				rmode = &TVNtsc480IntDf;
 				break;
 			}
 
 			// Allocate the frame buffer.
-			xfb = static_cast<pixel_pair (*)[][320]>(MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode)));
+			xfb = static_cast<pixel_pair (*)[][640]>(MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode)));
 
 			// Set up the video system with the chosen mode.
 			VIDEO_Configure(rmode);
@@ -115,8 +115,12 @@ namespace quake
 			WPAD_Disconnect(WPAD_CHAN_1);
 			WPAD_Disconnect(WPAD_CHAN_2);
 			WPAD_Disconnect(WPAD_CHAN_3);
-			u32 conn_dev;
 
+			WPAD_SetVRes(WPAD_CHAN_0, WIIMOTE_IR_RES_X, WIIMOTE_IR_RES_Y);
+			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_CORE_ACC_IR);
+			WPAD_SetSleepTime(60);
+
+			u32 conn_dev;
 			bool wiimote_warning = false;
 			bool nunchuk_warning = false;
 			while (1)
