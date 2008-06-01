@@ -279,6 +279,7 @@ void IN_Move (usercmd_t *cmd)
 	const s8 sub_stick_y = PAD_SubStickY(0);
 
 	// IN_Move always called after IN_Commands on the same frame, this is valid data
+	// TODO: new issue, if the wiimote gets resynced during game, we get invalid nunchuk data!
 	const u8 nunchuk_stick_x = pad.exp.nunchuk.js.pos.x;
 	const u8 nunchuk_stick_y = pad.exp.nunchuk.js.pos.y;
 	// TODO: sensor bar position correct? aspect ratio correctly set? etc...
