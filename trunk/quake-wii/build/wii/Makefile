@@ -106,6 +106,7 @@ OBJS := \
 	$(OBJ_DIR)/generic/sv_phys.o \
 	$(OBJ_DIR)/generic/sv_user.o \
 	$(OBJ_DIR)/generic/view.o \
+	$(OBJ_DIR)/generic/v_soft.o \
 	$(OBJ_DIR)/generic/wad.o \
 	$(OBJ_DIR)/generic/world.o \
 	$(OBJ_DIR)/generic/zone.o
