@@ -29,12 +29,17 @@ extern "C"
 
 #define FORCE_KEY_BINDINGS 0
 
+u32 wiimote_ir_res_x;
+u32 wiimote_ir_res_y;
+
 namespace quake
 {
 	namespace input
 	{
 		// wiimote info
-		WPADData pad;
+		WPADData *pad;
+		bool wiimote_connected = false;
+		bool nunchuk_connected = false;
 
 		// A map from button mask to Quake key.
 		static const size_t	button_count	= sizeof(u16) * 8;
@@ -121,8 +126,8 @@ static s8 WPAD_StickX(WPADData *data,u8 which)
 
 	switch (data->exp.type)
 	{
-		case WPAD_EXP_NUNCHAKU:
-		case WPAD_EXP_GUITAR_HERO3:
+		case WPAD_EXP_NUNCHUK:
+		case WPAD_EXP_GUITARHERO3:
 			if (which == 0)
 			{
 				mag = data->exp.nunchuk.js.mag;
@@ -162,8 +167,8 @@ static s8 WPAD_StickY(WPADData *data,u8 which)
 
 	switch (data->exp.type)
 	{
-		case WPAD_EXP_NUNCHAKU:
-		case WPAD_EXP_GUITAR_HERO3:
+		case WPAD_EXP_NUNCHUK:
+		case WPAD_EXP_GUITARHERO3:
 			if (which == 0)
 			{
 				mag = data->exp.nunchuk.js.mag;
@@ -241,9 +246,6 @@ void IN_Shutdown (void)
     WPAD_Shutdown();
 }
 
-bool wiimote_connected = false;
-bool nunchuk_connected = false;
-
 void IN_Commands (void)
 {
 	// Fetch the pad state.
@@ -261,13 +263,13 @@ void IN_Commands (void)
 		// TODO: better way to do this? a callback or something
 		if (!wiimote_connected)
 		{
-			WPAD_SetVRes(WPAD_CHAN_0, WIIMOTE_IR_RES_X, WIIMOTE_IR_RES_Y);
-			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_CORE_ACC_IR);
-			WPAD_SetSleepTime(60); // thanks eke-eke for the confirmation that this is the timeout in seconds
+			WPAD_SetVRes(WPAD_CHAN_0, wiimote_ir_res_x, wiimote_ir_res_y);
+			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR);
+			WPAD_SetIdleTimeout(60); // thanks eke-eke for the confirmation that this is the timeout in seconds
 		}
 
 		wiimote_connected = true;
-		if (conn_dev == WPAD_DEV_NUNCHAKU)
+		if (conn_dev == WPAD_EXP_NUNCHUK)
 		{
 			nunchuk_connected = true;
 		}
@@ -277,10 +279,13 @@ void IN_Commands (void)
 		}
 	}
 	if (wiimote_connected)
-		WPAD_Read(WPAD_CHAN_0, &pad);
+	{
+		WPAD_ScanPads();
+		pad = WPAD_Data(WPAD_CHAN_0);
+	}
 
-	const u16 wiimote_buttons = pad.btns_d;
-	const u16 nunchuk_buttons = pad.exp.nunchuk.btns;
+	const u16 wiimote_buttons = pad->btns_h;
+	const u16 nunchuk_buttons = pad->exp.nunchuk.btns_held;
 
 	// Somewhere to store the key state.
 	bool key_state[KEY_COUNT];
@@ -325,7 +330,7 @@ void IN_Commands (void)
 
 	// Accelerometers
 	// TODO: something fancy like the button interface
-	if (nunchuk_connected && pad.exp.nunchuk.gforce.z < -0.50f)
+	if (nunchuk_connected && pad->exp.nunchuk.gforce.z < -0.50f)
 	{
 		key_state[K_JOY1] |= 1;
 	}
@@ -354,8 +359,6 @@ void IN_Commands (void)
 	}
 }
 
-extern vrect_t  scr_vrect;
-
 void IN_Move (usercmd_t *cmd)
 {
 	// Read the stick values.
@@ -366,20 +369,20 @@ void IN_Move (usercmd_t *cmd)
 
 	// IN_Move always called after IN_Commands on the same frame, this is valid data
 	// TODO: new issue, if the wiimote gets resynced during game, we get invalid nunchuk data!
-	const s8 nunchuk_stick_x = WPAD_StickX(&pad, 0);
-	const s8 nunchuk_stick_y = WPAD_StickY(&pad, 0);
+	const s8 nunchuk_stick_x = WPAD_StickX(pad, 0);
+	const s8 nunchuk_stick_y = WPAD_StickY(pad, 0);
 	// TODO: sensor bar position correct? aspect ratio correctly set? etc...
-	static int last_wiimote_ir_x = pad.ir.x;
-	static int last_wiimote_ir_y = pad.ir.y;
+	static int last_wiimote_ir_x = pad->ir.x;
+	static int last_wiimote_ir_y = pad->ir.y;
 	int wiimote_ir_x, wiimote_ir_y;;
-	if (pad.ir.x < 1 || (unsigned int)pad.ir.x > pad.ir.vres[0] - 1)
+	if (pad->ir.x < 1 || (unsigned int)pad->ir.x > pad->ir.vres[0] - 1)
 		wiimote_ir_x = last_wiimote_ir_x;
 	else
-		wiimote_ir_x = pad.ir.x;
-	if (pad.ir.y < 1 || (unsigned int)pad.ir.y > pad.ir.vres[1] - 1)
+		wiimote_ir_x = pad->ir.x;
+	if (pad->ir.y < 1 || (unsigned int)pad->ir.y > pad->ir.vres[1] - 1)
 		wiimote_ir_y = last_wiimote_ir_y;
 	else
-		wiimote_ir_y = pad.ir.y;
+		wiimote_ir_y = pad->ir.y;
 	last_wiimote_ir_x = wiimote_ir_x;
 	last_wiimote_ir_y = wiimote_ir_y;
 
@@ -411,7 +414,7 @@ void IN_Move (usercmd_t *cmd)
 	float x2;
 	if ((sub_stick_x < 6 && sub_stick_x > -6) && wiimote_connected && (using_c_stick == false || (using_c_stick == true && last_irx != wiimote_ir_x)))
 	{
-		x2 = clamp((float)wiimote_ir_x / (pad.ir.vres[0] / 2.0f) - 1.0f, -1.0f, 1.0f);
+		x2 = clamp((float)wiimote_ir_x / (pad->ir.vres[0] / 2.0f) - 1.0f, -1.0f, 1.0f);
 		Cvar_SetValue("cl_crossx", scr_vrect.width / 2 * x2);
 		using_c_stick = false;
 	}
@@ -425,7 +428,7 @@ void IN_Move (usercmd_t *cmd)
 	float y2;
 	if ((sub_stick_y < 6 && sub_stick_y > -6) && wiimote_connected && (using_c_stick == false || (using_c_stick == true && last_iry != wiimote_ir_y)))
 	{
-		y2 = clamp((float)wiimote_ir_y / (pad.ir.vres[1] / 2.0f) - 1.0f, -1.0f, 1.0f);
+		y2 = clamp((float)wiimote_ir_y / (pad->ir.vres[1] / 2.0f) - 1.0f, -1.0f, 1.0f);
 		Cvar_SetValue("cl_crossy", scr_vrect.height / 2 * y2);
 		using_c_stick = false;
 	}

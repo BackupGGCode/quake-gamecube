@@ -41,7 +41,6 @@ void reset_system(void)
 }
 
 // Handy switches.
-#define FORCE_PAL		0
 #define CONSOLE_DEBUG		0
 #define TIME_DEMO		0
 #define USE_THREAD		1
@@ -67,23 +66,7 @@ namespace quake
 			// Initialise the video system.
 			VIDEO_Init();
 
-			// Detect the correct video mode to use.
-#if FORCE_PAL
-			const int mode = VI_PAL;
-#else
-			const int mode = VIDEO_GetCurrentTvMode();
-#endif
-			switch (mode)
-			{
-			case VI_PAL:
-			case VI_MPAL:
-				rmode = &TVPal528IntDf;
-				break;
-
-			default:
-				rmode = &TVNtsc480IntDf;
-				break;
-			}
+			rmode = VIDEO_GetPreferredMode(NULL);
 
 			// Allocate the frame buffer.
 			xfb = static_cast<pixel_pair (*)[][640]>(MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode)));
@@ -116,15 +99,14 @@ namespace quake
 			WPAD_Disconnect(WPAD_CHAN_2);
 			WPAD_Disconnect(WPAD_CHAN_3);
 
+			wiimote_ir_res_x = rmode->fbWidth;
+			wiimote_ir_res_y = rmode->xfbHeight;
+
 			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
 					Oh, and don't forget to put your wrist wrap! :)\n\n");
 			VIDEO_WaitVSync();
 			struct timespec sleeptime = {3, 0};
 			nanosleep(&sleeptime);
-
-			WPAD_SetVRes(WPAD_CHAN_0, WIIMOTE_IR_RES_X, WIIMOTE_IR_RES_Y);
-			WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_CORE_ACC_IR);
-			WPAD_SetSleepTime(60); // thanks eke-eke for the confirmation that this is the timeout in seconds
 		}
 
 		static void check_pak_file_exists()
