@@ -110,6 +110,92 @@ namespace quake
 using namespace quake;
 using namespace quake::input;
 
+/*
+ * [QUOTE=eke-eke]
+ * the nunchuk analog stick seems to act weird sometime, here's the functions I added for reading the Sticks values like the old PAD_ library, maybe you would find this useful:
+ */
+static s8 WPAD_StickX(WPADData *data,u8 which)
+{
+	float mag = 0.0;
+	float ang = 0.0;
+
+	switch (data->exp.type)
+	{
+		case WPAD_EXP_NUNCHAKU:
+		case WPAD_EXP_GUITAR_HERO3:
+			if (which == 0)
+			{
+				mag = data->exp.nunchuk.js.mag;
+				ang = data->exp.nunchuk.js.ang;
+			}
+			break;
+
+		case WPAD_EXP_CLASSIC:
+			if (which == 0)
+			{
+				mag = data->exp.classic.ljs.mag;
+				ang = data->exp.classic.ljs.ang;
+			}
+			else
+			{
+				mag = data->exp.classic.rjs.mag;
+				ang = data->exp.classic.rjs.ang;
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	/* calculate X value (angle needs to be converted into radians) */
+	if (mag > 1.0) mag = 1.0;
+	else if (mag < -1.0) mag = -1.0;
+	double val = mag * sin(M_PI * ang/180.0f);
+
+	return (s8)(val * 128.0f);
+}
+
+static s8 WPAD_StickY(WPADData *data,u8 which)
+{
+	float mag = 0.0;
+	float ang = 0.0;
+
+	switch (data->exp.type)
+	{
+		case WPAD_EXP_NUNCHAKU:
+		case WPAD_EXP_GUITAR_HERO3:
+			if (which == 0)
+			{
+				mag = data->exp.nunchuk.js.mag;
+				ang = data->exp.nunchuk.js.ang;
+			}
+			break;
+
+		case WPAD_EXP_CLASSIC:
+			if (which == 0)
+			{
+				mag = data->exp.classic.ljs.mag;
+				ang = data->exp.classic.ljs.ang;
+			}
+			else
+			{
+				mag = data->exp.classic.rjs.mag;
+				ang = data->exp.classic.rjs.ang;
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	/* calculate X value (angle need to be converted into radian) */
+	if (mag > 1.0) mag = 1.0;
+	else if (mag < -1.0) mag = -1.0;
+	double val = mag * cos(M_PI * ang/180.0f);
+
+	return (s8)(val * 128.0f);
+}
+
 void IN_Init (void)
 {
 	// PAD_Init and WPAD_Init are called from main() as they are required to "OK" error messages.
@@ -239,7 +325,7 @@ void IN_Commands (void)
 
 	// Accelerometers
 	// TODO: something fancy like the button interface
-	if (nunchuk_connected && pad.exp.nunchuk.gforce.z < -0.55f)
+	if (nunchuk_connected && pad.exp.nunchuk.gforce.z < -0.50f)
 	{
 		key_state[K_JOY1] |= 1;
 	}
@@ -280,8 +366,8 @@ void IN_Move (usercmd_t *cmd)
 
 	// IN_Move always called after IN_Commands on the same frame, this is valid data
 	// TODO: new issue, if the wiimote gets resynced during game, we get invalid nunchuk data!
-	const u8 nunchuk_stick_x = pad.exp.nunchuk.js.pos.x;
-	const u8 nunchuk_stick_y = pad.exp.nunchuk.js.pos.y;
+	const s8 nunchuk_stick_x = WPAD_StickX(&pad, 0);
+	const s8 nunchuk_stick_y = WPAD_StickY(&pad, 0);
 	// TODO: sensor bar position correct? aspect ratio correctly set? etc...
 	static int last_wiimote_ir_x = pad.ir.x;
 	static int last_wiimote_ir_y = pad.ir.y;
@@ -308,16 +394,16 @@ void IN_Move (usercmd_t *cmd)
 
 	// If the nunchuk is centered, read from the left gamecube pad stick
 	float x1;
-	if (!nunchuk_connected || (nunchuk_stick_x < 133 && nunchuk_stick_x > 121))
+	if (!nunchuk_connected || (nunchuk_stick_x < 6 && nunchuk_stick_x > -6))
 		x1 = clamp(stick_x / 90.0f, -1.0f, 1.0f);
 	else
-		x1 = clamp(((float)nunchuk_stick_x / 128.0f - 1.0f) * 1.5, -1.0f, 1.0f);
+		x1 = clamp(((float)nunchuk_stick_x / 128.0f) * 1.5, -1.0f, 1.0f);
 
 	float y1;
-	if (!nunchuk_connected || (nunchuk_stick_y < 133 && nunchuk_stick_y > 121))
+	if (!nunchuk_connected || (nunchuk_stick_y < 6 && nunchuk_stick_y > -6))
 		y1 = clamp(stick_y / -90.0f, -1.0f, 1.0f);
 	else
-		y1 = clamp(((float)nunchuk_stick_y / (-128.0f) + 1.0f) * 1.5, -1.0f, 1.0f);
+		y1 = clamp(((float)nunchuk_stick_y / (-128.0f)) * 1.5, -1.0f, 1.0f);
 
 	// Now the gamecube C-stick has the priority
 	static bool using_c_stick = false;
