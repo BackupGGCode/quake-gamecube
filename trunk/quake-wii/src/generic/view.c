@@ -536,6 +536,7 @@ void CalcGunAngle (void)
 	cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw;
 	cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch);
 #else
+	// TODO: all around the code: scr_vrect.height doesn't count the status bar
 	if (!cls.demoplayback)
 	{
 		// Some small gimbal lock issues
