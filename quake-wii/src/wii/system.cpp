@@ -20,6 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define ENABLE_PRINTF 0
 
+#include <sys/unistd.h>
+
 #include <ogc/gx_struct.h>
 #include <ogc/pad.h>
 #include <ogc/system.h>
@@ -90,7 +92,9 @@ void Sys_Error (const char *error, ...)
 		PAD_ScanPads();
 		WPAD_ScanPads();
 	}
-	while ((PAD_ButtonsHeld(0) & PAD_BUTTON_A) == 0 || (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) == 0);
+	while (((PAD_ButtonsHeld(0) & PAD_BUTTON_A) == 0) && ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) == 0));
+
+	printf("Sys_Qui();\n");
 
 	// Quit.
 	Sys_Quit();
@@ -162,9 +166,4 @@ void Sys_LowFPPrecision (void)
 
 void Sys_HighFPPrecision (void)
 {
-}
-
-extern "C" int unlink(char* path)
-{
-	return 0;
 }
