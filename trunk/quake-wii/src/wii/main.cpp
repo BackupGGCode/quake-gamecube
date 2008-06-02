@@ -45,6 +45,7 @@ void reset_system(void)
 #define TIME_DEMO		0
 #define USE_THREAD		1
 #define TEST_CONNECTION		0
+#define DISABLE_NETWORK		0
 
 namespace quake
 {
@@ -146,6 +147,9 @@ namespace quake
 				"Quake",
 #if CONSOLE_DEBUG
 				"-condebug",
+#endif
+#if DISABLED_NETWORK
+				"-noudp",
 #endif
 			};
 			COM_InitArgv(sizeof(args) / sizeof(args[0]), args);

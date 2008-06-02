@@ -26,9 +26,9 @@ CXXFLAGS		:= $(CFLAGS) -Weffc++ -fno-exceptions -fno-rtti
 LDFLAGS			:= $(COMMON_FLAGS) -L$(DEVKITPRO)/libogc/lib/wii
 
 # Linker info.
-LIBS := -lwiiuse -lbte -logc
+LIBS := -lwiiuse -lbte -lfat -logc
 
-FILESYSTEM := tffs_caching
+FILESYSTEM := libfat
 
 # Files to compile.
 OBJS := \
@@ -37,9 +37,6 @@ OBJS := \
 	$(OBJ_DIR)/wii/sound.o \
 	$(OBJ_DIR)/wii/system.o \
 	$(OBJ_DIR)/wii/system_$(FILESYSTEM).o \
-	$(OBJ_DIR)/wii/fileio/sdfileio.o \
-	$(OBJ_DIR)/wii/tffs/diskio.o \
-	$(OBJ_DIR)/wii/tffs/tff.o \
 	$(OBJ_DIR)/wii/video_software.o \
 	$(OBJ_DIR)/wii/net_wii.o \
 	$(OBJ_DIR)/wii/net_udp_wii.o \
