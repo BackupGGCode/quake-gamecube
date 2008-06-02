@@ -94,7 +94,7 @@ void Sys_Error (const char *error, ...)
 	}
 	while (((PAD_ButtonsHeld(0) & PAD_BUTTON_A) == 0) && ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) == 0));
 
-	printf("Sys_Qui();\n");
+	printf("Sys_Quit();\n");
 
 	// Quit.
 	Sys_Quit();

@@ -122,11 +122,11 @@ namespace quake
 					"and is necessary for the game to run.\n"
 					"\n"
 					"Please make sure it is on your SD card in the correct\n"
-					"location and is named only in UPPER CASE.\n"
+					"location.\n"
 					"\n"
 					"If you are absolutely sure the file is correct, your SD\n"
-					"card adaptor may not be compatible with the SD card\n"
-					"library which Quake uses. Please check the issue tracker.");
+					"card may not be compatible with the SD card lib which\n"
+					"Quake uses, or the Wii. Please check the issue tracker.");
 				return;
 			}
 			else
