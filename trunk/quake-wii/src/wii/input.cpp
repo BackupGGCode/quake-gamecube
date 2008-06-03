@@ -284,8 +284,8 @@ void IN_Commands (void)
 		pad = WPAD_Data(WPAD_CHAN_0);
 	}
 
-	const u16 wiimote_buttons = pad->btns_h;
-	const u16 nunchuk_buttons = pad->exp.nunchuk.btns_held;
+	const u16 wiimote_buttons = wiimote_connected ? pad->btns_h : 0;
+	const u16 nunchuk_buttons = nunchuk_connected ? pad->exp.nunchuk.btns_held : 0;
 
 	// Somewhere to store the key state.
 	bool key_state[KEY_COUNT];
@@ -368,21 +368,24 @@ void IN_Move (usercmd_t *cmd)
 	const s8 sub_stick_y = PAD_SubStickY(0);
 
 	// IN_Move always called after IN_Commands on the same frame, this is valid data
-	// TODO: new issue, if the wiimote gets resynced during game, we get invalid nunchuk data!
-	const s8 nunchuk_stick_x = WPAD_StickX(pad, 0);
-	const s8 nunchuk_stick_y = WPAD_StickY(pad, 0);
+	// TODO: new issue, if the wiimote gets resynced during game, sometimes we get invalid nunchuk data! Has it been fixed?
+	const s8 nunchuk_stick_x = nunchuk_connected ? WPAD_StickX(pad, 0) : 0;
+	const s8 nunchuk_stick_y = nunchuk_connected ? WPAD_StickY(pad, 0) : 0;
 	// TODO: sensor bar position correct? aspect ratio correctly set? etc...
-	static int last_wiimote_ir_x = pad->ir.x;
-	static int last_wiimote_ir_y = pad->ir.y;
-	int wiimote_ir_x, wiimote_ir_y;;
-	if (pad->ir.x < 1 || (unsigned int)pad->ir.x > pad->ir.vres[0] - 1)
-		wiimote_ir_x = last_wiimote_ir_x;
-	else
-		wiimote_ir_x = pad->ir.x;
-	if (pad->ir.y < 1 || (unsigned int)pad->ir.y > pad->ir.vres[1] - 1)
-		wiimote_ir_y = last_wiimote_ir_y;
-	else
-		wiimote_ir_y = pad->ir.y;
+	static int last_wiimote_ir_x = wiimote_connected ? pad->ir.x : 0;
+	static int last_wiimote_ir_y = wiimote_connected ? pad->ir.y : 0;
+	int wiimote_ir_x = 0, wiimote_ir_y = 0;
+	if (wiimote_connected)
+	{
+		if (pad->ir.x < 1 || (unsigned int)pad->ir.x > pad->ir.vres[0] - 1)
+			wiimote_ir_x = last_wiimote_ir_x;
+		else
+			wiimote_ir_x = pad->ir.x;
+		if (pad->ir.y < 1 || (unsigned int)pad->ir.y > pad->ir.vres[1] - 1)
+			wiimote_ir_y = last_wiimote_ir_y;
+		else
+			wiimote_ir_y = pad->ir.y;
+	}
 	last_wiimote_ir_x = wiimote_ir_x;
 	last_wiimote_ir_y = wiimote_ir_y;
 
@@ -397,13 +400,13 @@ void IN_Move (usercmd_t *cmd)
 
 	// If the nunchuk is centered, read from the left gamecube pad stick
 	float x1;
-	if (!nunchuk_connected || (nunchuk_stick_x < 6 && nunchuk_stick_x > -6))
+	if (nunchuk_stick_x < 6 && nunchuk_stick_x > -6)
 		x1 = clamp(stick_x / 90.0f, -1.0f, 1.0f);
 	else
 		x1 = clamp(((float)nunchuk_stick_x / 128.0f) * 1.5, -1.0f, 1.0f);
 
 	float y1;
-	if (!nunchuk_connected || (nunchuk_stick_y < 6 && nunchuk_stick_y > -6))
+	if (nunchuk_stick_y < 6 && nunchuk_stick_y > -6)
 		y1 = clamp(stick_y / -90.0f, -1.0f, 1.0f);
 	else
 		y1 = clamp(((float)nunchuk_stick_y / (-128.0f)) * 1.5, -1.0f, 1.0f);
