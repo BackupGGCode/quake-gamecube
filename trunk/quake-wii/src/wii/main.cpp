@@ -148,7 +148,7 @@ namespace quake
 #if CONSOLE_DEBUG
 				"-condebug",
 #endif
-#if DISABLED_NETWORK
+#if DISABLE_NETWORK
 				"-noudp",
 #endif
 			};
