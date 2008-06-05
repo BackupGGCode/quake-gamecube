@@ -132,6 +132,8 @@ namespace quake
 using namespace quake;
 using namespace quake::video;
 
+cvar_t  vid_tvborder = {"vid_tvborder","0", (qboolean)true};
+
 // Globals required by Quake.
 unsigned short	d_8to16table[256];
 
@@ -161,7 +163,7 @@ void VID_Init(unsigned char* palette)
 	memset(gp_fifo, 0, fifo_size);
 	GX_Init(gp_fifo, fifo_size);
 
-	GXColor	backgroundColor	= {32, 64, 128,	255};
+	GXColor	backgroundColor	= {0, 0, 0,	255};
 
 	GX_SetCopyClear(backgroundColor, GX_MAX_Z24);
 	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
@@ -184,20 +186,10 @@ void VID_Init(unsigned char* palette)
 	GX_LoadProjectionMtx(projection, GX_ORTHOGRAPHIC);
 
 	GX_ClearVtxDesc();
-	GX_SetVtxDesc(GX_VA_POS, GX_INDEX8);
+	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
 	GX_SetVtxDesc(GX_VA_TEX0, GX_INDEX8);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS,	GX_POS_XYZ,	GX_F32,	0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32,	0);
-
-	static float vertices[4][3] ATTRIBUTE_ALIGN(32) =
-	{
-		{0, 0, 0},
-		{1, 0, 0},
-		{1, 1, 0},
-		{0, 1, 0}
-	};
-
-	GX_SetArray(GX_VA_POS, vertices, sizeof(vertices[0]));
 
 	// Get some constants.
 	const size_t	screen_width	= field_rendering ? (main::rmode->fbWidth / 2) : main::rmode->fbWidth;
@@ -256,6 +248,8 @@ void VID_Init(unsigned char* palette)
 
 	// Set the palette.
 	VID_SetPalette(palette);
+
+	Cvar_RegisterVariable (&vid_tvborder);
 }
 
 void VID_Shutdown(void)
@@ -269,6 +263,14 @@ void VID_Shutdown(void)
 
 void VID_Update(vrect_t* rects)
 {
+	static float vertices[4][3] =
+	{
+		{0, 0, 0},
+		{1, 0, 0},
+		{1, 1, 0},
+		{0, 1, 0}
+	};
+
 	// Copy Quake's frame buffer into the texture data and convert from linear
 	// to tiled.
 	copy_texture();
@@ -287,11 +289,16 @@ void VID_Update(vrect_t* rects)
 
 	// Draw a fullscreen quad.
 	GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT0, 4);
-	for (u8 index = 0; index < 4; ++index)
-	{
-		GX_Position1x8(index);
-		GX_TexCoord1x8(index);
-	}
+
+	GX_Position3f32(vertices[0][0], vertices[0][1] + vid_tvborder.value, vertices[0][2]);
+	GX_TexCoord1x8(0);
+	GX_Position3f32(vertices[1][0], vertices[1][1] + vid_tvborder.value, vertices[1][2]);
+	GX_TexCoord1x8(1);
+	GX_Position3f32(vertices[2][0], vertices[2][1] - vid_tvborder.value, vertices[2][2]);
+	GX_TexCoord1x8(2);
+	GX_Position3f32(vertices[3][0], vertices[3][1] - vid_tvborder.value, vertices[3][2]);
+	GX_TexCoord1x8(3);
+
 	GX_End();
 
 	// Mark the end of drawing.
