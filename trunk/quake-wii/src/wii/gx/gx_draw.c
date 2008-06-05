@@ -58,6 +58,7 @@ typedef struct
 	GXTexObj	gx_tex;
 	char		identifier[64];
 	int			width, height;
+	qboolean	mipmap;
 	unsigned	*data;
 	void		*allocated_area;
 } gltexture_t;
@@ -198,13 +199,13 @@ void Draw_Init (void)
 {
 	int		i;
 	qpic_t	*cb;
-	byte	*dest, *src;
+	qpic_t	*player_pic;
+	byte	*dest;
 	int		x, y;
 	char	ver[40];
 	glpic_t	*gl;
 	int		start;
 	byte	*ncdata;
-	int		f, fstep;
 
 	numgltextures = 0;
 
@@ -253,8 +254,10 @@ void Draw_Init (void)
 	// free loaded console
 	Hunk_FreeToLowMark(start);
 
+	player_pic = Draw_CachePic("gfx/menuplyr.lmp");
 	// save a texture slot for translated picture
-	// ELUTODO translate_texture = texture_extension_number++;
+	translate_texture = GL_LoadTexture("player_translate", player_pic->width, player_pic->height, player_pic->data,
+		false, false);
 
 	//
 	// get the other pics we need
@@ -276,10 +279,6 @@ smoothly scrolled off.
 */
 void Draw_Character (int x, int y, int num)
 {
-	byte			*dest;
-	byte			*source;
-	unsigned short	*pusdest;
-	int				drawline;	
 	int				row, col;
 	float			frow, fcol, size;
 
@@ -302,19 +301,19 @@ void Draw_Character (int x, int y, int num)
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(x, y, 0.0f);
-	GX_Color1u32(0xffffffff);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(fcol, frow);
 
 	GX_Position3f32(x + 8, y, 0.0f);
-	GX_Color1u32(0xffffffff);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(fcol + size, frow);
 
 	GX_Position3f32(x + 8, y + 8, 0.0f);
-	GX_Color1u32(0xffffffff);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(fcol + size, frow + size);
 
 	GX_Position3f32(x, y + 8, 0.0f);
-	GX_Color1u32(0xffffffff);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(fcol, frow + size);
 	GX_End();
 }
@@ -354,31 +353,35 @@ Draw_AlphaPic
 */
 void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 {
-	byte			*dest, *source;
-	unsigned short	*pusdest;
-	int				v, u;
 	glpic_t			*gl;
 
-/* ELUTODO
 	gl = (glpic_t *)pic->data;
-	glDisable(GL_ALPHA_TEST);
-	glEnable (GL_BLEND);
-	glColor4f (1,1,1,alpha);
+
+	GX_SetAlphaCompare(GX_ALWAYS,0,GX_AOP_AND,GX_ALWAYS,0);
+	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+
 	GL_Bind (gl->texnum);
-	glBegin (GL_QUADS);
-	glTexCoord2f (gl->sl, gl->tl);
-	glVertex2f (x, y);
-	glTexCoord2f (gl->sh, gl->tl);
-	glVertex2f (x+pic->width, y);
-	glTexCoord2f (gl->sh, gl->th);
-	glVertex2f (x+pic->width, y+pic->height);
-	glTexCoord2f (gl->sl, gl->th);
-	glVertex2f (x, y+pic->height);
-	glEnd ();
-	glColor4f (1,1,1,1);
-	glEnable(GL_ALPHA_TEST);
-	glDisable (GL_BLEND);
-*/
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+	GX_Position3f32(x, y, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, (u8)(0xff * alpha));
+	GX_TexCoord2f32(gl->sl, gl->tl);
+
+	GX_Position3f32(x + pic->width, y, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, (u8)(0xff * alpha));
+	GX_TexCoord2f32(gl->sh, gl->tl);
+
+	GX_Position3f32(x + pic->width, y + pic->height, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, (u8)(0xff * alpha));
+	GX_TexCoord2f32(gl->sh, gl->th);
+
+	GX_Position3f32(x, y + pic->height, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, (u8)(0xff * alpha));
+	GX_TexCoord2f32(gl->sl, gl->th);
+	GX_End();
+
+	GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_CLEAR);
+	GX_SetAlphaCompare(GX_GREATER,0,GX_AOP_AND,GX_ALWAYS,0);
 }
 
 
@@ -389,9 +392,6 @@ Draw_Pic
 */
 void Draw_Pic (int x, int y, qpic_t *pic)
 {
-	byte			*dest, *source;
-	unsigned short	*pusdest;
-	int				v, u;
 	glpic_t			*gl;
 
 	gl = (glpic_t *)pic->data;
@@ -400,19 +400,19 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(x, y, 0.0f);
-	GX_Color1u32(0xffffffff);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(gl->sl, gl->tl);
 
 	GX_Position3f32(x + pic->width, y, 0.0f);
-	GX_Color1u32(0xffffffff);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(gl->sh, gl->tl);
 
 	GX_Position3f32(x + pic->width, y + pic->height, 0.0f);
-	GX_Color1u32(0xffffffff);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(gl->sh, gl->th);
 
 	GX_Position3f32(x, y + pic->height, 0.0f);
-	GX_Color1u32(0xffffffff);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(gl->sl, gl->th);
 	GX_End();
 }
@@ -425,10 +425,6 @@ Draw_TransPic
 */
 void Draw_TransPic (int x, int y, qpic_t *pic)
 {
-	byte	*dest, *source, tbyte;
-	unsigned short	*pusdest;
-	int				v, u;
-
 	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
 		 (unsigned)(y + pic->height) > vid.height)
 	{
@@ -448,47 +444,43 @@ Only used for the player color selection menu
 */
 void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 {
-	int				v, u, c;
-	unsigned		trans[64*64], *dest;
-	byte			*src;
+	int				v, c;
+	byte			trans[64*64];
 	int				p;
-
-	// ELUTODO GL_Bind (translate_texture);
 
 	c = pic->width * pic->height;
 
-	dest = trans;
-	for (v=0 ; v<64 ; v++, dest += 64)
+	for (v = 0; v < c; v++)
 	{
-		src = &menuplyr_pixels[ ((v*pic->height)>>6) *pic->width];
-		for (u=0 ; u<64 ; u++)
-		{
-			p = src[(u*pic->width)>>6];
-			if (p == 255)
-				dest[u] = p;
-			else
-				dest[u] =  d_8to24table[translation[p]];
-		}
+		p = menuplyr_pixels[v];
+		if (p == 255)
+			trans[v] = p;
+		else
+			trans[v] = translation[p];
 	}
 
-/* ELUTODO
-	glTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, trans);
+	GL_UpdateTexture (translate_texture, gltextures[translate_texture].identifier, gltextures[translate_texture].width,
+		gltextures[translate_texture].height, trans, gltextures[translate_texture].mipmap, false);
 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	GL_Bind (translate_texture);
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
-	glColor3f (1,1,1);
-	glBegin (GL_QUADS);
-	glTexCoord2f (0, 0);
-	glVertex2f (x, y);
-	glTexCoord2f (1, 0);
-	glVertex2f (x+pic->width, y);
-	glTexCoord2f (1, 1);
-	glVertex2f (x+pic->width, y+pic->height);
-	glTexCoord2f (0, 1);
-	glVertex2f (x, y+pic->height);
-	glEnd ();
-*/
+	GX_Position3f32(x, y, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(0, 0);
+
+	GX_Position3f32(x + pic->width, y, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(1, 0);
+
+	GX_Position3f32(x + pic->width, y + pic->height, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(1, 1);
+
+	GX_Position3f32(x, y + pic->height, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(0, 1);
+	GX_End();
 }
 
 
@@ -502,13 +494,10 @@ void Draw_ConsoleBackground (int lines)
 {
 	int y = (vid.height * 3) >> 2;
 
-/* ELUTODO
 	if (lines > y)
 		Draw_Pic(0, lines - vid.height, conback);
 	else
 		Draw_AlphaPic (0, lines - vid.height, conback, (float)(1.2 * lines)/y);
-*/
-Draw_Pic(0, lines - vid.height, conback);
 }
 
 
@@ -522,20 +511,25 @@ refresh window.
 */
 void Draw_TileClear (int x, int y, int w, int h)
 {
-/* ELUTODO
-	glColor3f (1,1,1);
 	GL_Bind (*(int *)draw_backtile->data);
-	glBegin (GL_QUADS);
-	glTexCoord2f (x/64.0, y/64.0);
-	glVertex2f (x, y);
-	glTexCoord2f ( (x+w)/64.0, y/64.0);
-	glVertex2f (x+w, y);
-	glTexCoord2f ( (x+w)/64.0, (y+h)/64.0);
-	glVertex2f (x+w, y+h);
-	glTexCoord2f ( x/64.0, (y+h)/64.0 );
-	glVertex2f (x, y+h);
-	glEnd ();
-*/
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+	GX_Position3f32(x, y, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(x / 64.0, y / 64.0);
+
+	GX_Position3f32(x + w, y, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32((x + w) / 64.0, y / 64.0);
+
+	GX_Position3f32(x + w, y + h, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32((x + w) / 64.0, (y + h) / 64.0);
+
+	GX_Position3f32(x, y + h, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(x / 64.0, (y + h) / 64.0);
+	GX_End();
 }
 
 
@@ -639,16 +633,17 @@ void GL_Set2D (void)
 {
 	// glViewport (glx, gly, glwidth, glheight);
 
-	guOrtho(perspective,0, vid.height,0,vid.width,-99999,99999);
+	guOrtho(perspective,0, vid.conheight,0,vid.conwidth,-99999,99999);
 	GX_LoadProjectionMtx(perspective, GX_ORTHOGRAPHIC);
 
 	guMtxIdentity(modelview);
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
-	GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_SET);
+	GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_CLEAR);
 	GX_SetCullMode(GX_CULL_NONE);
-	// ELUTODO GX_SetAlphaCompare(u8 comp0,u8 ref0,GX_AOP_AND,u8 comp1,u8 ref1);
+	GX_SetAlphaCompare(GX_GREATER,0,GX_AOP_AND,GX_ALWAYS,0); // ELUTODO: how to do alpha compare before stretching the
+	// textures?	
 }
 
 //====================================================================
@@ -750,12 +745,18 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	}
 
 	// ELUTODO: is this right?
-	destination->allocated_area = Hunk_AllocName (scaled_width * scaled_height * sizeof(unsigned) + 32, "texture_data");
-	destination->data = MEM_K0_TO_K1(Align_To_32_Bytes(destination->allocated_area));
+	/*destination->allocated_area = Hunk_AllocName (scaled_width * scaled_height * sizeof(unsigned) + 32, "texture_data");
+	destination->data = MEM_K0_TO_K1(Align_To_32_Bytes(destination->allocated_area));*/
+	destination->data = MEM_K0_TO_K1(memalign(32, scaled_width * scaled_height * sizeof(unsigned)));
 
 	s = scaled_width * scaled_height;
-	if (s & 3)
-		Sys_Error ("GL_Upload32: s&3");
+	if (s & 31)
+		Sys_Error ("GL_Upload32: s&31");
+
+	if ((int)destination->data & 31)
+		Sys_Error ("GL_Upload32: destination->data&31");
+
+	// ELUTODO: some data corruption seems to be taking place, maybe we are crossing some barriers here
 
 	pos = (u8 *)destination->data;
 	for (y = 0; y < scaled_height; y += 4)
@@ -860,8 +861,7 @@ GL_LoadTexture
 */
 int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha)
 {
-	qboolean	noalpha;
-	int			i, p, s;
+	int			i;
 	gltexture_t	*glt;
 
 	// see if the texture is allready present
@@ -883,10 +883,176 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 	glt->texnum = numgltextures;
 	glt->width = width;
 	glt->height = height;
+	glt->mipmap = mipmap;
 
 	GL_Upload8 (glt, data, width, height, mipmap, alpha);
 
 	numgltextures++;
+
+	return glt->texnum;
+}
+
+/*
+===============
+GL_Update32
+===============
+*/
+void GL_Update32 (gltexture_t *destination, unsigned *data, int width, int height,  qboolean mipmap, qboolean alpha)
+{
+	int			i, x, y, s;
+	u8			*pos;
+	int			samples;
+	static	unsigned	scaled[1024*512];	// [512*256];
+	int			scaled_width, scaled_height;
+
+	for (scaled_width = 1 << 5 ; scaled_width < width ; scaled_width<<=1)
+		;
+	for (scaled_height = 1 << 5 ; scaled_height < height ; scaled_height<<=1)
+		;
+
+	if (scaled_width > gl_max_size.value)
+		scaled_width = gl_max_size.value;
+	if (scaled_height > gl_max_size.value)
+		scaled_height = gl_max_size.value;
+
+	// ELUTODO: gl_max_size should be multiple of 32?
+	// ELUTODO: mipmaps
+
+	if (scaled_width * scaled_height > sizeof(scaled)/4)
+		Sys_Error ("GL_LoadTexture: too big");
+
+	// ELUTODO samples = alpha ? GX_TF_RGBA8 : GX_TF_RGBA8;
+
+	texels += scaled_width * scaled_height;
+
+	if (scaled_width != width || scaled_height != height)
+	{
+		GL_ResampleTexture (data, width, height, scaled, scaled_width, scaled_height);
+	}
+	else
+	{
+		memcpy(scaled, data, scaled_width * scaled_height * sizeof(unsigned));
+	}
+
+	s = scaled_width * scaled_height;
+	if (s & 31)
+		Sys_Error ("GL_Upload32: s&31");
+
+	if ((int)destination->data & 31)
+		Sys_Error ("GL_Upload32: destination->data&31");
+
+	// ELUTODO: some data corruption seems to be taking place, maybe we are crossing some barriers here
+
+	pos = (u8 *)destination->data;
+	for (y = 0; y < scaled_height; y += 4)
+	{
+		u8* row1 = (u8 *)&(scaled[scaled_width * (y + 0)]);
+		u8* row2 = (u8 *)&(scaled[scaled_width * (y + 1)]);
+		u8* row3 = (u8 *)&(scaled[scaled_width * (y + 2)]);
+		u8* row4 = (u8 *)&(scaled[scaled_width * (y + 3)]);
+
+		for (x = 0; x < scaled_width; x += 4)
+		{
+			u8 AR[32];
+			u8 GB[32];
+
+			for (i = 0; i < 4; i++)
+			{
+				u8* ptr1 = &(row1[(x + i) * 4]);
+				u8* ptr2 = &(row2[(x + i) * 4]);
+				u8* ptr3 = &(row3[(x + i) * 4]);
+				u8* ptr4 = &(row4[(x + i) * 4]);
+
+				AR[(i * 2) +  0] = ptr1[0];
+				AR[(i * 2) +  1] = ptr1[3];
+				AR[(i * 2) +  8] = ptr2[0];
+				AR[(i * 2) +  9] = ptr2[3];
+				AR[(i * 2) + 16] = ptr3[0];
+				AR[(i * 2) + 17] = ptr3[3];
+				AR[(i * 2) + 24] = ptr4[0];
+				AR[(i * 2) + 25] = ptr4[3];
+
+				GB[(i * 2) +  0] = ptr1[2];
+				GB[(i * 2) +  1] = ptr1[1];
+				GB[(i * 2) +  8] = ptr2[2];
+				GB[(i * 2) +  9] = ptr2[1];
+				GB[(i * 2) + 16] = ptr3[2];
+				GB[(i * 2) + 17] = ptr3[1];
+				GB[(i * 2) + 24] = ptr4[2];
+				GB[(i * 2) + 25] = ptr4[1];
+			}
+
+			memcpy(pos, AR, sizeof(AR));
+			pos += sizeof(AR);
+			memcpy(pos, GB, sizeof(GB));
+			pos += sizeof(GB);
+		}
+	}
+
+	GX_InvalidateTexAll(); // ELUTODO: invalidate region
+}
+
+/*
+===============
+GL_Update8
+===============
+*/
+void GL_Update8 (gltexture_t *destination, byte *data, int width, int height,  qboolean mipmap, qboolean alpha)
+{
+	static	unsigned	trans[640*480];		// FIXME, temporary
+	int			i, s;
+	qboolean	noalpha;
+	int			p;
+
+	s = width*height;
+	// if there are no transparent pixels, make it a 3 component
+	// texture even if it was specified as otherwise
+	if (alpha)
+	{
+		noalpha = true;
+		for (i=0 ; i<s ; i++)
+		{
+			p = data[i];
+			if (p == 255)
+				noalpha = false;
+			trans[i] = d_8to24table[p];
+		}
+
+		if (alpha && noalpha)
+			alpha = false;
+	}
+	else
+	{
+		if (s&3)
+			Sys_Error ("GL_Upload8: s&3");
+		for (i=0 ; i<s ; i+=4)
+		{
+			trans[i] = d_8to24table[data[i]];
+			trans[i+1] = d_8to24table[data[i+1]];
+			trans[i+2] = d_8to24table[data[i+2]];
+			trans[i+3] = d_8to24table[data[i+3]];
+		}
+	}
+
+	GL_Update32 (destination, trans, width, height, mipmap, alpha);
+}
+
+/*
+================
+GL_UpdateTexture
+================
+*/
+int GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha)
+{
+	gltexture_t	*glt;
+
+	// see if the texture is allready present
+	glt = &gltextures[pic_id];
+
+	if (strcmp (identifier, glt->identifier) || width != glt->width || height != glt->height || mipmap != glt->mipmap)
+			Sys_Error ("GL_UpdateTexture: cache mismatch");
+
+	GL_Update8 (glt, data, width, height, mipmap, alpha);
 
 	return glt->texnum;
 }

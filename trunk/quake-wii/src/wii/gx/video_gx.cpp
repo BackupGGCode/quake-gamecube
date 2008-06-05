@@ -79,6 +79,8 @@ Mtx view;
 Mtx44 perspective;
 Mtx model, modelview;
 
+cvar_t vid_tvborder = {"vid_tvborder", "0", (qboolean)true};
+
 using namespace quake;
 using namespace quake::video;
 
@@ -133,7 +135,7 @@ void	VID_SetPalette (unsigned char *palette)
 		v = (255<<24) + (r<<0) + (g<<8) + (b<<16);
 		*table++ = v;
 	}
-	d_8to24table[255] &= 0xffffff00;	// 255 is transparent
+	d_8to24table[255] &= 0xffffff;	// 255 is transparent
 
 	for (i=0; i < (1<<15); i++) {
 		/* Maps
@@ -182,7 +184,7 @@ void GL_Init (void)
 	GX_Init(gp_fifo, fifo_size);
 
 	// clears the bg to color and clears the z buffer
-	GX_SetCopyClear(background, 0x00ffffff);
+	GX_SetCopyClear(background, GX_MAX_Z24);
 
 	// other gx setup
 	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
@@ -228,6 +230,8 @@ void GL_Init (void)
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
 	GX_InvalidateTexAll();
+
+	Cvar_RegisterVariable(&vid_tvborder);
 }
 
 /*
@@ -243,6 +247,8 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 	*height = scr_height;
 
 	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
+
+	// ELUTODO: really necessary?
 	GX_InvVtxCache();
 	GX_InvalidateTexAll();
 }
@@ -257,6 +263,8 @@ void GL_EndRendering (void)
 
 		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 		GX_SetColorUpdate(GX_TRUE);
+		GX_SetAlphaUpdate(GX_TRUE);
+		GX_SetDstAlpha(GX_DISABLE, 0xFF);
         // Start copying the frame buffer every vsync.
         GX_CopyDisp(xfb, GX_TRUE);
 
@@ -306,12 +314,12 @@ void VID_Init(unsigned char *palette)
 // interpret command-line params
 
 // set vid parameters
-	vid.conwidth = 640;
+	vid.conwidth = 320;
 	vid.conwidth &= 0xfff8; // make it a multiple of eight
 	if (vid.conwidth < 320)
 		vid.conwidth = 320;
 	// pick a conheight that matches with correct aspect
-	vid.conheight = vid.conwidth*3 / 4;
+	vid.conheight = 200;
 	if (vid.conheight < 200)
 		vid.conheight = 200;
 
