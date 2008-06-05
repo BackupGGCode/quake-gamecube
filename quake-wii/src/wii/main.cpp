@@ -58,7 +58,7 @@ namespace quake
 		pixel_pair	(*xfb)[][640]	= 0;
 		GXRModeObj*	rmode			= 0;
 
-		#define ARENA_LO	0x90000000
+		#define ARENA_LO	0x91000000
 		#define ARENA_HI	0x92000000
 		// Set up the heap.
 		//static const size_t	heap_size	= 12 * 1024 * 1024;
