@@ -61,7 +61,7 @@ namespace quake
 		#define ARENA_LO	0x90000000
 		#define ARENA_HI	0x92000000
 		// Set up the heap.
-		static const size_t	heap_size	= 12 * 1024 * 1024
+		//static const size_t	heap_size	= 12 * 1024 * 1024;
 		static const size_t	heap_size	= (ARENA_HI - ARENA_LO);
 		//static char			heap[heap_size] __attribute__((aligned(8)));
 		static char		*heap = (char *)ARENA_LO;
