@@ -1,0 +1,902 @@
+/*
+Copyright (C) 1996-1997 Id Software, Inc.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+*/
+
+// draw.c -- this is the only file outside the refresh that touches the
+// vid buffer
+
+#include <ogc/system.h>
+#include <malloc.h>
+
+#include "../../generic/quakedef.h"
+
+extern unsigned char d_15to8table[65536];
+
+cvar_t		gl_max_size = {"gl_max_size", "1024"};
+
+byte		*draw_chars;				// 8*8 graphic characters
+qpic_t		*draw_disc;
+qpic_t		*draw_backtile;
+
+int			translate_texture;
+int			char_texture;
+
+typedef struct
+{
+	int			texnum;
+	float		sl, tl, sh, th;
+} glpic_t;
+
+byte		conback_buffer[sizeof(qpic_t) + sizeof(glpic_t)];
+qpic_t		*conback = (qpic_t *)&conback_buffer;
+
+int		gl_lightmap_format = 4;
+int		gl_solid_format = 3;
+int		gl_alpha_format = 4;
+
+int		texels;
+
+typedef struct
+{
+	int			texnum;
+	GXTexObj	gx_tex;
+	char		identifier[64];
+	int			width, height;
+	unsigned	*data;
+	void		*allocated_area;
+} gltexture_t;
+
+#define	MAX_GLTEXTURES	1024
+gltexture_t	gltextures[MAX_GLTEXTURES];
+int			numgltextures;
+
+
+void GL_Bind (int texnum)
+{
+	if (currenttexture == texnum)
+		return;
+	currenttexture = texnum;
+	// ELUTODO multitexture, should load to GX_TEXMAP1?
+	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP0);
+}
+
+
+//=============================================================================
+/* Support Routines */
+
+typedef struct cachepic_s
+{
+	char		name[MAX_QPATH];
+	qpic_t		pic;
+	byte		padding[32];	// for appended glpic
+} cachepic_t;
+
+#define	MAX_CACHED_PICS		128
+cachepic_t	menu_cachepics[MAX_CACHED_PICS];
+int			menu_numcachepics;
+
+byte		menuplyr_pixels[4096];
+
+int		pic_texels;
+int		pic_count;
+
+int GL_LoadPicTexture (qpic_t *pic);
+
+qpic_t *Draw_PicFromWad (char *name)
+{
+	qpic_t	*p;
+	glpic_t	*gl;
+
+	p = W_GetLumpName (name);
+	gl = (glpic_t *)p->data;
+
+	gl->texnum = GL_LoadPicTexture (p);
+	gl->sl = 0;
+	gl->sh = 1;
+	gl->tl = 0;
+	gl->th = 1;
+
+	return p;
+}
+
+
+/*
+================
+Draw_CachePic
+================
+*/
+qpic_t	*Draw_CachePic (char *path)
+{
+	cachepic_t	*pic;
+	int			i;
+	qpic_t		*dat;
+	glpic_t		*gl;
+
+	for (pic=menu_cachepics, i=0 ; i<menu_numcachepics ; pic++, i++)
+		if (!strcmp (path, pic->name))
+			return &pic->pic;
+
+	if (menu_numcachepics == MAX_CACHED_PICS)
+		Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
+	menu_numcachepics++;
+	strcpy (pic->name, path);
+
+//
+// load the pic from disk
+//
+	dat = (qpic_t *)COM_LoadTempFile (path);	
+	if (!dat)
+		Sys_Error ("Draw_CachePic: failed to load %s", path);
+	SwapPic (dat);
+
+	// HACK HACK HACK --- we need to keep the bytes for
+	// the translatable player picture just for the menu
+	// configuration dialog
+	if (!strcmp (path, "gfx/menuplyr.lmp"))
+		memcpy (menuplyr_pixels, dat->data, dat->width*dat->height);
+
+	pic->pic.width = dat->width;
+	pic->pic.height = dat->height;
+
+	gl = (glpic_t *)pic->pic.data;
+	gl->texnum = GL_LoadPicTexture (dat);
+	gl->sl = 0;
+	gl->sh = 1;
+	gl->tl = 0;
+	gl->th = 1;
+
+	return &pic->pic;
+}
+
+
+void Draw_CharToConback (int num, byte *dest)
+{
+	int		row, col;
+	byte	*source;
+	int		drawline;
+	int		x;
+
+	row = num>>4;
+	col = num&15;
+	source = draw_chars + (row<<10) + (col<<3);
+
+	drawline = 8;
+
+	while (drawline--)
+	{
+		for (x=0 ; x<8 ; x++)
+			if (source[x] != 255)
+				dest[x] = 0x60 + source[x];
+		source += 128;
+		dest += 320;
+	}
+
+}
+
+/*
+===============
+Draw_Init
+===============
+*/
+void Draw_Init (void)
+{
+	int		i;
+	qpic_t	*cb;
+	byte	*dest, *src;
+	int		x, y;
+	char	ver[40];
+	glpic_t	*gl;
+	int		start;
+	byte	*ncdata;
+	int		f, fstep;
+
+	numgltextures = 0;
+
+	Cvar_RegisterVariable (&gl_max_size);
+
+	// load the console background and the charset
+	// by hand, because we need to write the version
+	// string into the background before turning
+	// it into a texture
+	draw_chars = W_GetLumpName ("conchars");
+	for (i=0 ; i<256*64 ; i++)
+		if (draw_chars[i] == 0)
+			draw_chars[i] = 255;	// proper transparent color
+
+	// now turn them into textures
+	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
+
+	start = Hunk_LowMark();
+
+	cb = (qpic_t *)COM_LoadTempFile ("gfx/conback.lmp");	
+	if (!cb)
+		Sys_Error ("Couldn't load gfx/conback.lmp");
+	SwapPic (cb);
+
+	// hack the version number directly into the pic
+	sprintf (ver, "(gl) %4.2f", (float)VERSION);
+
+	dest = cb->data + 320*186 + 320 - 11 - 8*strlen(ver);
+	y = strlen(ver);
+	for (x=0 ; x<y ; x++)
+		Draw_CharToConback (ver[x], dest+(x<<3));
+
+	conback->width = cb->width;
+	conback->height = cb->height;
+	ncdata = cb->data;
+
+	gl = (glpic_t *)conback->data;
+	gl->texnum = GL_LoadTexture ("conback", conback->width, conback->height, ncdata, false, false);
+	gl->sl = 0;
+	gl->sh = 1;
+	gl->tl = 0;
+	gl->th = 1;
+	conback->width = vid.width;
+	conback->height = vid.height;
+
+	// free loaded console
+	Hunk_FreeToLowMark(start);
+
+	// save a texture slot for translated picture
+	// ELUTODO translate_texture = texture_extension_number++;
+
+	//
+	// get the other pics we need
+	//
+	draw_disc = Draw_PicFromWad ("disc");
+	draw_backtile = Draw_PicFromWad ("backtile");
+}
+
+
+
+/*
+================
+Draw_Character
+
+Draws one 8*8 graphics character with 0 being transparent.
+It can be clipped to the top of the screen to allow the console to be
+smoothly scrolled off.
+================
+*/
+void Draw_Character (int x, int y, int num)
+{
+	byte			*dest;
+	byte			*source;
+	unsigned short	*pusdest;
+	int				drawline;	
+	int				row, col;
+	float			frow, fcol, size;
+
+	if (num == 32)
+		return;		// space
+
+	num &= 255;
+	
+	if (y <= -8)
+		return;			// totally off screen
+
+	row = num>>4;
+	col = num&15;
+
+	frow = row*0.0625;
+	fcol = col*0.0625;
+	size = 0.0625;
+
+	GL_Bind (char_texture);
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+	GX_Position3f32(x, y, 0.0f);
+	GX_Color1u32(0xffffffff);
+	GX_TexCoord2f32(fcol, frow);
+
+	GX_Position3f32(x + 8, y, 0.0f);
+	GX_Color1u32(0xffffffff);
+	GX_TexCoord2f32(fcol + size, frow);
+
+	GX_Position3f32(x + 8, y + 8, 0.0f);
+	GX_Color1u32(0xffffffff);
+	GX_TexCoord2f32(fcol + size, frow + size);
+
+	GX_Position3f32(x, y + 8, 0.0f);
+	GX_Color1u32(0xffffffff);
+	GX_TexCoord2f32(fcol, frow + size);
+	GX_End();
+}
+
+/*
+================
+Draw_String
+================
+*/
+void Draw_String (int x, int y, char *str)
+{
+	while (*str)
+	{
+		Draw_Character (x, y, *str);
+		str++;
+		x += 8;
+	}
+}
+
+/*
+================
+Draw_DebugChar
+
+Draws a single character directly to the upper right corner of the screen.
+This is for debugging lockups by drawing different chars in different parts
+of the code.
+================
+*/
+void Draw_DebugChar (char num)
+{
+}
+
+/*
+=============
+Draw_AlphaPic
+=============
+*/
+void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
+{
+	byte			*dest, *source;
+	unsigned short	*pusdest;
+	int				v, u;
+	glpic_t			*gl;
+
+/* ELUTODO
+	gl = (glpic_t *)pic->data;
+	glDisable(GL_ALPHA_TEST);
+	glEnable (GL_BLEND);
+	glColor4f (1,1,1,alpha);
+	GL_Bind (gl->texnum);
+	glBegin (GL_QUADS);
+	glTexCoord2f (gl->sl, gl->tl);
+	glVertex2f (x, y);
+	glTexCoord2f (gl->sh, gl->tl);
+	glVertex2f (x+pic->width, y);
+	glTexCoord2f (gl->sh, gl->th);
+	glVertex2f (x+pic->width, y+pic->height);
+	glTexCoord2f (gl->sl, gl->th);
+	glVertex2f (x, y+pic->height);
+	glEnd ();
+	glColor4f (1,1,1,1);
+	glEnable(GL_ALPHA_TEST);
+	glDisable (GL_BLEND);
+*/
+}
+
+
+/*
+=============
+Draw_Pic
+=============
+*/
+void Draw_Pic (int x, int y, qpic_t *pic)
+{
+	byte			*dest, *source;
+	unsigned short	*pusdest;
+	int				v, u;
+	glpic_t			*gl;
+
+	gl = (glpic_t *)pic->data;
+
+	GL_Bind (gl->texnum);
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+	GX_Position3f32(x, y, 0.0f);
+	GX_Color1u32(0xffffffff);
+	GX_TexCoord2f32(gl->sl, gl->tl);
+
+	GX_Position3f32(x + pic->width, y, 0.0f);
+	GX_Color1u32(0xffffffff);
+	GX_TexCoord2f32(gl->sh, gl->tl);
+
+	GX_Position3f32(x + pic->width, y + pic->height, 0.0f);
+	GX_Color1u32(0xffffffff);
+	GX_TexCoord2f32(gl->sh, gl->th);
+
+	GX_Position3f32(x, y + pic->height, 0.0f);
+	GX_Color1u32(0xffffffff);
+	GX_TexCoord2f32(gl->sl, gl->th);
+	GX_End();
+}
+
+
+/*
+=============
+Draw_TransPic
+=============
+*/
+void Draw_TransPic (int x, int y, qpic_t *pic)
+{
+	byte	*dest, *source, tbyte;
+	unsigned short	*pusdest;
+	int				v, u;
+
+	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
+		 (unsigned)(y + pic->height) > vid.height)
+	{
+		Sys_Error ("Draw_TransPic: bad coordinates");
+	}
+		
+	Draw_Pic (x, y, pic);
+}
+
+
+/*
+=============
+Draw_TransPicTranslate
+
+Only used for the player color selection menu
+=============
+*/
+void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
+{
+	int				v, u, c;
+	unsigned		trans[64*64], *dest;
+	byte			*src;
+	int				p;
+
+	// ELUTODO GL_Bind (translate_texture);
+
+	c = pic->width * pic->height;
+
+	dest = trans;
+	for (v=0 ; v<64 ; v++, dest += 64)
+	{
+		src = &menuplyr_pixels[ ((v*pic->height)>>6) *pic->width];
+		for (u=0 ; u<64 ; u++)
+		{
+			p = src[(u*pic->width)>>6];
+			if (p == 255)
+				dest[u] = p;
+			else
+				dest[u] =  d_8to24table[translation[p]];
+		}
+	}
+
+/* ELUTODO
+	glTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, trans);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glColor3f (1,1,1);
+	glBegin (GL_QUADS);
+	glTexCoord2f (0, 0);
+	glVertex2f (x, y);
+	glTexCoord2f (1, 0);
+	glVertex2f (x+pic->width, y);
+	glTexCoord2f (1, 1);
+	glVertex2f (x+pic->width, y+pic->height);
+	glTexCoord2f (0, 1);
+	glVertex2f (x, y+pic->height);
+	glEnd ();
+*/
+}
+
+
+/*
+================
+Draw_ConsoleBackground
+
+================
+*/
+void Draw_ConsoleBackground (int lines)
+{
+	int y = (vid.height * 3) >> 2;
+
+/* ELUTODO
+	if (lines > y)
+		Draw_Pic(0, lines - vid.height, conback);
+	else
+		Draw_AlphaPic (0, lines - vid.height, conback, (float)(1.2 * lines)/y);
+*/
+Draw_Pic(0, lines - vid.height, conback);
+}
+
+
+/*
+=============
+Draw_TileClear
+
+This repeats a 64*64 tile graphic to fill the screen around a sized down
+refresh window.
+=============
+*/
+void Draw_TileClear (int x, int y, int w, int h)
+{
+/* ELUTODO
+	glColor3f (1,1,1);
+	GL_Bind (*(int *)draw_backtile->data);
+	glBegin (GL_QUADS);
+	glTexCoord2f (x/64.0, y/64.0);
+	glVertex2f (x, y);
+	glTexCoord2f ( (x+w)/64.0, y/64.0);
+	glVertex2f (x+w, y);
+	glTexCoord2f ( (x+w)/64.0, (y+h)/64.0);
+	glVertex2f (x+w, y+h);
+	glTexCoord2f ( x/64.0, (y+h)/64.0 );
+	glVertex2f (x, y+h);
+	glEnd ();
+*/
+}
+
+
+/*
+=============
+Draw_Fill
+
+Fills a box of pixels with a single color
+=============
+*/
+void Draw_Fill (int x, int y, int w, int h, int c)
+{
+/* ELUTODO
+	glDisable (GL_TEXTURE_2D);
+	glColor3f (host_basepal[c*3]/255.0,
+		host_basepal[c*3+1]/255.0,
+		host_basepal[c*3+2]/255.0);
+
+	glBegin (GL_QUADS);
+
+	glVertex2f (x,y);
+	glVertex2f (x+w, y);
+	glVertex2f (x+w, y+h);
+	glVertex2f (x, y+h);
+
+	glEnd ();
+	glColor3f (1,1,1);
+	glEnable (GL_TEXTURE_2D);
+*/
+}
+//=============================================================================
+
+/*
+================
+Draw_FadeScreen
+
+================
+*/
+void Draw_FadeScreen (void)
+{
+/* ELUTODO
+	glEnable (GL_BLEND);
+	glDisable (GL_TEXTURE_2D);
+	glColor4f (0, 0, 0, 0.8);
+	glBegin (GL_QUADS);
+
+	glVertex2f (0,0);
+	glVertex2f (vid.width, 0);
+	glVertex2f (vid.width, vid.height);
+	glVertex2f (0, vid.height);
+
+	glEnd ();
+	glColor4f (1,1,1,1);
+	glEnable (GL_TEXTURE_2D);
+	glDisable (GL_BLEND);
+*/
+
+	Sbar_Changed();
+}
+
+//=============================================================================
+
+/*
+================
+Draw_BeginDisc
+
+Draws the little blue disc in the corner of the screen.
+Call before beginning any disc IO.
+================
+*/
+void Draw_BeginDisc (void)
+{
+	if (!draw_disc)
+		return;
+	// ELUTODO glDrawBuffer  (GL_FRONT);
+	Draw_Pic (vid.width - 24, 0, draw_disc);
+	// ELUTODO glDrawBuffer  (GL_BACK);
+}
+
+
+/*
+================
+Draw_EndDisc
+
+Erases the disc icon.
+Call after completing any disc IO
+================
+*/
+void Draw_EndDisc (void)
+{
+}
+
+/*
+================
+GL_Set2D
+
+Setup as if the screen was 320*200
+================
+*/
+void GL_Set2D (void)
+{
+	// glViewport (glx, gly, glwidth, glheight);
+
+	guOrtho(perspective,0, vid.height,0,vid.width,-99999,99999);
+	GX_LoadProjectionMtx(perspective, GX_ORTHOGRAPHIC);
+
+	guMtxIdentity(modelview);
+	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
+
+	GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
+	GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_SET);
+	GX_SetCullMode(GX_CULL_NONE);
+	// ELUTODO GX_SetAlphaCompare(u8 comp0,u8 ref0,GX_AOP_AND,u8 comp1,u8 ref1);
+}
+
+//====================================================================
+
+/*
+================
+GL_FindTexture
+================
+*/
+int GL_FindTexture (char *identifier)
+{
+	int		i;
+	gltexture_t	*glt;
+
+	for (i=0, glt=gltextures ; i<numgltextures ; i++, glt++)
+	{
+		if (!strcmp (identifier, glt->identifier))
+			return gltextures[i].texnum;
+	}
+
+	return -1;
+}
+
+/*
+================
+GL_ResampleTexture
+================
+*/
+void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight)
+{
+	int		i, j;
+	unsigned	*inrow;
+	unsigned	frac, fracstep;
+
+	fracstep = inwidth*0x10000/outwidth;
+	for (i=0 ; i<outheight ; i++, out += outwidth)
+	{
+		inrow = in + inwidth*(i*inheight/outheight);
+		frac = fracstep >> 1;
+		for (j=0 ; j<outwidth ; j+=4)
+		{
+			out[j] = inrow[frac>>16];
+			frac += fracstep;
+			out[j+1] = inrow[frac>>16];
+			frac += fracstep;
+			out[j+2] = inrow[frac>>16];
+			frac += fracstep;
+			out[j+3] = inrow[frac>>16];
+			frac += fracstep;
+		}
+	}
+}
+
+inline void *Align_To_32_Bytes (void *p)
+{
+	return (void*)(((int)(p + 31)) & 0xffffffe0);
+}
+
+/*
+===============
+GL_Upload32
+===============
+*/
+void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int height,  qboolean mipmap, qboolean alpha)
+{
+	int			i, x, y, s;
+	u8			*pos;
+	int			samples;
+	static	unsigned	scaled[1024*512];	// [512*256];
+	int			scaled_width, scaled_height;
+
+	for (scaled_width = 1 << 5 ; scaled_width < width ; scaled_width<<=1)
+		;
+	for (scaled_height = 1 << 5 ; scaled_height < height ; scaled_height<<=1)
+		;
+
+	if (scaled_width > gl_max_size.value)
+		scaled_width = gl_max_size.value;
+	if (scaled_height > gl_max_size.value)
+		scaled_height = gl_max_size.value;
+
+	// ELUTODO: gl_max_size should be multiple of 32?
+	// ELUTODO: mipmaps
+
+	if (scaled_width * scaled_height > sizeof(scaled)/4)
+		Sys_Error ("GL_LoadTexture: too big");
+
+	// ELUTODO samples = alpha ? GX_TF_RGBA8 : GX_TF_RGBA8;
+
+	texels += scaled_width * scaled_height;
+
+	if (scaled_width != width || scaled_height != height)
+	{
+		GL_ResampleTexture (data, width, height, scaled, scaled_width, scaled_height);
+	}
+	else
+	{
+		memcpy(scaled, data, scaled_width * scaled_height * sizeof(unsigned));
+	}
+
+	// ELUTODO: is this right?
+	destination->allocated_area = Hunk_AllocName (scaled_width * scaled_height * sizeof(unsigned) + 32, "texture_data");
+	destination->data = MEM_K0_TO_K1(Align_To_32_Bytes(destination->allocated_area));
+
+	s = scaled_width * scaled_height;
+	if (s & 3)
+		Sys_Error ("GL_Upload32: s&3");
+
+	pos = (u8 *)destination->data;
+	for (y = 0; y < scaled_height; y += 4)
+	{
+		u8* row1 = (u8 *)&(scaled[scaled_width * (y + 0)]);
+		u8* row2 = (u8 *)&(scaled[scaled_width * (y + 1)]);
+		u8* row3 = (u8 *)&(scaled[scaled_width * (y + 2)]);
+		u8* row4 = (u8 *)&(scaled[scaled_width * (y + 3)]);
+
+		for (x = 0; x < scaled_width; x += 4)
+		{
+			u8 AR[32];
+			u8 GB[32];
+
+			for (i = 0; i < 4; i++)
+			{
+				u8* ptr1 = &(row1[(x + i) * 4]);
+				u8* ptr2 = &(row2[(x + i) * 4]);
+				u8* ptr3 = &(row3[(x + i) * 4]);
+				u8* ptr4 = &(row4[(x + i) * 4]);
+
+				AR[(i * 2) +  0] = ptr1[0];
+				AR[(i * 2) +  1] = ptr1[3];
+				AR[(i * 2) +  8] = ptr2[0];
+				AR[(i * 2) +  9] = ptr2[3];
+				AR[(i * 2) + 16] = ptr3[0];
+				AR[(i * 2) + 17] = ptr3[3];
+				AR[(i * 2) + 24] = ptr4[0];
+				AR[(i * 2) + 25] = ptr4[3];
+
+				GB[(i * 2) +  0] = ptr1[2];
+				GB[(i * 2) +  1] = ptr1[1];
+				GB[(i * 2) +  8] = ptr2[2];
+				GB[(i * 2) +  9] = ptr2[1];
+				GB[(i * 2) + 16] = ptr3[2];
+				GB[(i * 2) + 17] = ptr3[1];
+				GB[(i * 2) + 24] = ptr4[2];
+				GB[(i * 2) + 25] = ptr4[1];
+			}
+
+			memcpy(pos, AR, sizeof(AR));
+			pos += sizeof(AR);
+			memcpy(pos, GB, sizeof(GB));
+			pos += sizeof(GB);
+		}
+	}
+
+	GX_InitTexObj(&destination->gx_tex, destination->data, scaled_width, scaled_height, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, /*mipmap ? GX_TRUE :*/ GX_FALSE);
+
+	/* ELUTODO powercallback SYS_SetPowerCallback(powercallback cb);*/
+}
+
+/*
+===============
+GL_Upload8
+===============
+*/
+void GL_Upload8 (gltexture_t *destination, byte *data, int width, int height,  qboolean mipmap, qboolean alpha)
+{
+	static	unsigned	trans[640*480];		// FIXME, temporary
+	int			i, s;
+	qboolean	noalpha;
+	int			p;
+
+	s = width*height;
+	// if there are no transparent pixels, make it a 3 component
+	// texture even if it was specified as otherwise
+	if (alpha)
+	{
+		noalpha = true;
+		for (i=0 ; i<s ; i++)
+		{
+			p = data[i];
+			if (p == 255)
+				noalpha = false;
+			trans[i] = d_8to24table[p];
+		}
+
+		if (alpha && noalpha)
+			alpha = false;
+	}
+	else
+	{
+		if (s&3)
+			Sys_Error ("GL_Upload8: s&3");
+		for (i=0 ; i<s ; i+=4)
+		{
+			trans[i] = d_8to24table[data[i]];
+			trans[i+1] = d_8to24table[data[i+1]];
+			trans[i+2] = d_8to24table[data[i+2]];
+			trans[i+3] = d_8to24table[data[i+3]];
+		}
+	}
+
+	GL_Upload32 (destination, trans, width, height, mipmap, alpha);
+}
+
+/*
+================
+GL_LoadTexture
+================
+*/
+int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha)
+{
+	qboolean	noalpha;
+	int			i, p, s;
+	gltexture_t	*glt;
+
+	// see if the texture is allready present
+	if (identifier[0])
+	{
+		for (i=0, glt=gltextures ; i<numgltextures ; i++, glt++)
+		{
+			if (!strcmp (identifier, glt->identifier))
+			{
+				if (width != glt->width || height != glt->height)
+					Sys_Error ("GL_LoadTexture: cache mismatch");
+				return gltextures[i].texnum;
+			}
+		}
+	}
+
+	glt = &gltextures[numgltextures];
+	strcpy (glt->identifier, identifier);
+	glt->texnum = numgltextures;
+	glt->width = width;
+	glt->height = height;
+
+	GL_Upload8 (glt, data, width, height, mipmap, alpha);
+
+	numgltextures++;
+
+	return glt->texnum;
+}
+
+/*
+================
+GL_LoadPicTexture
+================
+*/
+int GL_LoadPicTexture (qpic_t *pic)
+{
+	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true);
+}
