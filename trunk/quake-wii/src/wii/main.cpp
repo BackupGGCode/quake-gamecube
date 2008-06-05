@@ -44,7 +44,7 @@ void reset_system(void)
 #define CONSOLE_DEBUG		0
 #define TIME_DEMO		0
 #define USE_THREAD		1
-#define TEST_CONNECTION		0
+#define TEST_CONNECTION		1
 #define DISABLE_NETWORK		1
 
 namespace quake
@@ -58,9 +58,13 @@ namespace quake
 		pixel_pair	(*xfb)[][640]	= 0;
 		GXRModeObj*	rmode			= 0;
 
+		#define ARENA_LO	0x90000000
+		#define ARENA_HI	0x92000000
 		// Set up the heap.
-		static const size_t	heap_size	= 12 * 1024 * 1024;
-		static char			heap[heap_size] __attribute__((aligned(8)));
+		static const size_t	heap_size	= 12 * 1024 * 1024
+		static const size_t	heap_size	= (ARENA_HI - ARENA_LO);
+		//static char			heap[heap_size] __attribute__((aligned(8)));
+		static char		*heap = (char *)ARENA_LO;
 
 		static void init()
 		{
@@ -88,7 +92,7 @@ namespace quake
 			}
 
 			// Initialise the debug console.
-			console_init(xfb, 20, 10, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * 2);
+			console_init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * 2);
 
 			// Initialise the controller library.
 			PAD_Init();
@@ -105,9 +109,16 @@ namespace quake
 
 			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
 					Oh, and don't forget to put your wrist wrap! :)\n\n");
+
+			/*printf("Arena1Lo: %u\n", (unsigned)SYS_GetArena1Lo());
+			printf("Arena1Hi: %u\n", (unsigned)SYS_GetArena1Hi());
+			printf("Arena2Lo: %u\n", (unsigned)SYS_GetArena2Lo());
+			printf("Arena2Hi: %u\n", (unsigned)SYS_GetArena2Hi());*/
 			VIDEO_WaitVSync();
 			struct timespec sleeptime = {3, 0};
 			nanosleep(&sleeptime);
+
+			SYS_SetArena2Lo((void *)ARENA_HI);
 		}
 
 		static void check_pak_file_exists()

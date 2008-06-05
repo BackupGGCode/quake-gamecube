@@ -3,6 +3,8 @@
 
 #include <fat.h>
 
+#define DISABLE_WRITING 0
+
 extern "C"
 {
 #include <sys/stat.h>
@@ -126,6 +128,9 @@ int Sys_FileOpenRead (const char *path, int *hndl)
 
 int Sys_FileOpenWrite (const char *path)
 {
+#if DISABLE_WRITING
+	return -1;
+#endif
 	init();
 
 	Sys_Printf("Sys_FileOpenWrite: %s\n", path);
@@ -207,6 +212,9 @@ int Sys_FileRead(int handle, void *dest, int count)
 
 int Sys_FileWrite (int handle, const void *data, int count)
 {
+#if DISABLE_WRITING
+	return 0;
+#endif
 	// Get the file.
 	file_slot& file = index_to_file(handle, __FUNCTION__);
 
