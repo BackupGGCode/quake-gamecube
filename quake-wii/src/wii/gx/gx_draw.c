@@ -77,6 +77,24 @@ void GL_Bind (int texnum)
 	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP0);
 }
 
+/*
+void QGX_Alpha(qboolean state)
+{
+	if (state)
+		GX_SetAlphaCompare(GX_GREATER,0,GX_AOP_AND,GX_ALWAYS,0);
+	else
+		GX_SetAlphaCompare(GX_ALWAYS,0,GX_AOP_AND,GX_ALWAYS,0);
+}
+*/
+
+void QGX_Blend(qboolean state)
+{
+	if (state)
+		GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+	else
+		GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_CLEAR);
+}
+
 
 //=============================================================================
 /* Support Routines */
@@ -357,8 +375,8 @@ void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 
 	gl = (glpic_t *)pic->data;
 
-	GX_SetAlphaCompare(GX_ALWAYS,0,GX_AOP_AND,GX_ALWAYS,0);
-	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+	// QGX_Alpha(false);
+	QGX_Blend(true);
 
 	GL_Bind (gl->texnum);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
@@ -380,8 +398,8 @@ void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	GX_TexCoord2f32(gl->sl, gl->th);
 	GX_End();
 
-	GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_CLEAR);
-	GX_SetAlphaCompare(GX_GREATER,0,GX_AOP_AND,GX_ALWAYS,0);
+	QGX_Blend(false);
+	// QGX_Alpha(true);
 }
 
 
@@ -570,22 +588,33 @@ Draw_FadeScreen
 */
 void Draw_FadeScreen (void)
 {
-/* ELUTODO
-	glEnable (GL_BLEND);
-	glDisable (GL_TEXTURE_2D);
-	glColor4f (0, 0, 0, 0.8);
-	glBegin (GL_QUADS);
+	// ELUTODO: do not use a texture
 
-	glVertex2f (0,0);
-	glVertex2f (vid.width, 0);
-	glVertex2f (vid.width, vid.height);
-	glVertex2f (0, vid.height);
+	// QGX_Alpha(false);
+	QGX_Blend(true);
 
-	glEnd ();
-	glColor4f (1,1,1,1);
-	glEnable (GL_TEXTURE_2D);
-	glDisable (GL_BLEND);
-*/
+	GL_Bind (*(int *)draw_backtile->data);
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+	GX_Position3f32(0, 0, 0.0f);
+	GX_Color4u8(0x00, 0x00, 0x00, 0xcc);
+	GX_TexCoord2f32(0, 0);
+
+	GX_Position3f32(vid.width, 0, 0.0f);
+	GX_Color4u8(0x00, 0x00, 0x00, 0xcc);
+	GX_TexCoord2f32(1, 0);
+
+	GX_Position3f32(vid.width, vid.height, 0.0f);
+	GX_Color4u8(0x00, 0x00, 0x00, 0xcc);
+	GX_TexCoord2f32(1, 1);
+
+	GX_Position3f32(0, vid.height, 0.0f);
+	GX_Color4u8(0x00, 0x00, 0x00, 0xcc);
+	GX_TexCoord2f32(0, 1);
+	GX_End();
+
+	QGX_Blend(false);
+	// QGX_Alpha(true);
 
 	Sbar_Changed();
 }
@@ -640,10 +669,9 @@ void GL_Set2D (void)
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
-	GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_CLEAR);
+	QGX_Blend(true); // ELUODO: filtering is making some borders
 	GX_SetCullMode(GX_CULL_NONE);
-	GX_SetAlphaCompare(GX_GREATER,0,GX_AOP_AND,GX_ALWAYS,0); // ELUTODO: how to do alpha compare before stretching the
-	// textures?	
+	// QGX_Alpha(true);
 }
 
 //====================================================================
