@@ -773,9 +773,13 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	}
 
 	// ELUTODO: is this right?
-	/*destination->allocated_area = Hunk_AllocName (scaled_width * scaled_height * sizeof(unsigned) + 32, "texture_data");
-	destination->data = MEM_K0_TO_K1(Align_To_32_Bytes(destination->allocated_area));*/
-	destination->data = MEM_K0_TO_K1(memalign(32, scaled_width * scaled_height * sizeof(unsigned)));
+	//destination->allocated_area = Hunk_AllocName (scaled_width * scaled_height * sizeof(unsigned) + 32, "gx_textures");
+	//destination->data = MEM_K0_TO_K1(Align_To_32_Bytes(destination->allocated_area));
+	destination->allocated_area = memalign(32, scaled_width * scaled_height * sizeof(unsigned));
+	if (destination->allocated_area)
+		destination->data = MEM_K0_TO_K1(destination->allocated_area);
+	else
+		Sys_Error("GL_Upload32: Out of memory. numgltextures = %d\n", numgltextures);
 
 	s = scaled_width * scaled_height;
 	if (s & 31)
