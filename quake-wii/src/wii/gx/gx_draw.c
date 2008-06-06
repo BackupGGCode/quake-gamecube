@@ -77,7 +77,6 @@ void GL_Bind (int texnum)
 	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP0);
 }
 
-/*
 void QGX_Alpha(qboolean state)
 {
 	if (state)
@@ -85,7 +84,6 @@ void QGX_Alpha(qboolean state)
 	else
 		GX_SetAlphaCompare(GX_ALWAYS,0,GX_AOP_AND,GX_ALWAYS,0);
 }
-*/
 
 void QGX_Blend(qboolean state)
 {
@@ -249,7 +247,7 @@ void Draw_Init (void)
 	SwapPic (cb);
 
 	// hack the version number directly into the pic
-	sprintf (ver, "(gl) %4.2f", (float)VERSION);
+	sprintf (ver, "(WiiGX %4.2f) Quake %4.2f", (float)WIIGX_VERSION, (float)VERSION);
 
 	dest = cb->data + 320*186 + 320 - 11 - 8*strlen(ver);
 	y = strlen(ver);
@@ -375,7 +373,7 @@ void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 
 	gl = (glpic_t *)pic->data;
 
-	// QGX_Alpha(false);
+	QGX_Alpha(false);
 	QGX_Blend(true);
 
 	GL_Bind (gl->texnum);
@@ -399,7 +397,7 @@ void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	GX_End();
 
 	QGX_Blend(false);
-	// QGX_Alpha(true);
+	QGX_Alpha(true);
 }
 
 
@@ -590,7 +588,7 @@ void Draw_FadeScreen (void)
 {
 	// ELUTODO: do not use a texture
 
-	// QGX_Alpha(false);
+	QGX_Alpha(false);
 	QGX_Blend(true);
 
 	GL_Bind (*(int *)draw_backtile->data);
@@ -614,7 +612,7 @@ void Draw_FadeScreen (void)
 	GX_End();
 
 	QGX_Blend(false);
-	// QGX_Alpha(true);
+	QGX_Alpha(true);
 
 	Sbar_Changed();
 }
@@ -668,10 +666,11 @@ void GL_Set2D (void)
 	guMtxIdentity(modelview);
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
+	// ELUODO: filtering is making some borders
 	GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
-	QGX_Blend(true); // ELUODO: filtering is making some borders
+	QGX_Blend(true);
 	GX_SetCullMode(GX_CULL_NONE);
-	// QGX_Alpha(true);
+	QGX_Alpha(true);
 }
 
 //====================================================================
@@ -779,7 +778,10 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	if (destination->allocated_area)
 		destination->data = MEM_K0_TO_K1(destination->allocated_area);
 	else
-		Sys_Error("GL_Upload32: Out of memory. numgltextures = %d\n", numgltextures);
+	{
+		Sys_Error("GL_Upload32: Out of memory.\nnumgltextures = %d\narena1lo = %.8x\narena1hi = %.8x",
+			numgltextures, (u32)SYS_GetArena1Lo(), (u32)SYS_GetArena1Hi());
+	}
 
 	s = scaled_width * scaled_height;
 	if (s & 31)

@@ -251,6 +251,10 @@ void IN_Commands (void)
 	PAD_ScanPads();
 	const u16 buttons = PAD_ButtonsHeld(0);
 
+#ifdef DISABLE_WIIMOTE
+	wiimote_connected = false;
+	nunchuk_connected = false;
+#else
 	u32 conn_dev;
 	if (WPAD_Probe(WPAD_CHAN_0, &conn_dev) != WPAD_ERR_NONE)
 	{
@@ -277,6 +281,7 @@ void IN_Commands (void)
 			nunchuk_connected = false;
 		}
 	}
+#endif
 	if (wiimote_connected)
 	{
 		WPAD_ScanPads();
