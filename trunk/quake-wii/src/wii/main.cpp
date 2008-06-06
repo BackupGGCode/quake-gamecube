@@ -44,7 +44,7 @@ void reset_system(void)
 #define CONSOLE_DEBUG		0
 #define TIME_DEMO		0
 #define USE_THREAD		1
-#define TEST_CONNECTION		0
+#define TEST_CONNECTION		1
 #define DISABLE_NETWORK		1
 
 namespace quake

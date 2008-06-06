@@ -135,7 +135,8 @@ void	VID_SetPalette (unsigned char *palette)
 		v = (255<<24) + (r<<0) + (g<<8) + (b<<16);
 		*table++ = v;
 	}
-	d_8to24table[255] &= 0xffffff;	// 255 is transparent
+	//d_8to24table[255] &= 0xffffff;	// 255 is transparent
+	d_8to24table[255] = 0;				// ELUTODO: will look prettier until we solve the filtering issue
 
 	for (i=0; i < (1<<15); i++) {
 		/* Maps

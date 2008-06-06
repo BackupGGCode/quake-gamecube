@@ -3,7 +3,7 @@
 
 #include <fat.h>
 
-#define DISABLE_WRITING 0
+#define DISABLE_WRITING 1
 
 extern "C"
 {
