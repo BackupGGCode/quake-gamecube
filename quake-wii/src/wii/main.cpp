@@ -113,6 +113,10 @@ namespace quake
 			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
 					Oh, and don't forget to put your wrist wrap! :)\n\n");
 
+			printf("Free MEM1: %d bytes\nFree MEM2: %d bytes\n",
+				(u32)SYS_GetArena1Hi() - (u32)SYS_GetArena1Lo(),
+				(u32)SYS_GetArena2Hi() - (u32)SYS_GetArena2Lo());
+
 			/*printf("Arena1Lo: %u\n", (unsigned)SYS_GetArena1Lo());
 			printf("Arena1Hi: %u\n", (unsigned)SYS_GetArena1Hi());
 			printf("Arena2Lo: %u\n", (unsigned)SYS_GetArena2Lo());
@@ -120,8 +124,6 @@ namespace quake
 			VIDEO_WaitVSync();
 			struct timespec sleeptime = {3, 0};
 			nanosleep(&sleeptime);
-
-			SYS_SetArena2Lo((void *)ARENA_HI);
 		}
 
 		static void check_pak_file_exists()
@@ -223,6 +225,7 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
+	SYS_SetArena2Lo((void *)ARENA_HI);
 	__STM_Init();
 	SYS_SetResetCallback(reset_system);
 
