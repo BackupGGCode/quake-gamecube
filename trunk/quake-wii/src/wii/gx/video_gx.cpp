@@ -226,7 +226,7 @@ void GL_Init (void)
 
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
-	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
 	GX_InvalidateTexAll();
@@ -264,7 +264,7 @@ void GL_EndRendering (void)
 		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 		GX_SetColorUpdate(GX_TRUE);
 		GX_SetAlphaUpdate(GX_TRUE);
-		GX_SetDstAlpha(GX_DISABLE, 0xFF);
+		//GX_SetDstAlpha(GX_DISABLE, 0xFF); // ELUTODO
         // Start copying the frame buffer every vsync.
         GX_CopyDisp(xfb, GX_TRUE);
 
