@@ -96,6 +96,8 @@ namespace quake
 
 			// Initialise the controller library.
 			PAD_Init();
+
+#ifdef DISABLE_WIIMOTE
 			WPAD_Shutdown();
 			WPAD_Init();
 
@@ -103,6 +105,7 @@ namespace quake
 			WPAD_Disconnect(WPAD_CHAN_1);
 			WPAD_Disconnect(WPAD_CHAN_2);
 			WPAD_Disconnect(WPAD_CHAN_3);
+#endif
 
 			wiimote_ir_res_x = rmode->fbWidth;
 			wiimote_ir_res_y = rmode->xfbHeight;
