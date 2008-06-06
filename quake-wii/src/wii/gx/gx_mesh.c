@@ -32,22 +32,22 @@ ALIAS MODEL DISPLAY LIST GENERATION
 model_t		*aliasmodel;
 aliashdr_t	*paliashdr;
 
-qboolean	*used;
+qboolean	used[8192];
 
 // the command list holds counts and s/t values that are valid for
 // every frame
-int		*commands;
+int		commands[8192];
 int		numcommands;
 
 // all frames will have their vertexes rearranged and expanded
 // so they are in the order expected by the command list
-int		*vertexorder;
+int		vertexorder[8192];
 int		numorder;
 
 int		allverts, alltris;
 
-int		*stripverts;
-int		*striptris;
+int		stripverts[128];
+int		striptris[128];
 int		stripcount;
 
 /*
@@ -295,7 +295,6 @@ void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 	trivertx_t	*verts;
 	int		len;
 	byte	*data;
-	static qboolean initialized = false;
 
 	aliasmodel = m;
 	paliashdr = hdr;	// (aliashdr_t *)Mod_Extradata (m);
@@ -305,19 +304,7 @@ void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 	//
 	Con_Printf ("meshing %s...\n",m->name);
 
-	if (!initialized)
-	{
-		used = Hunk_AllocName (8192 * sizeof(qboolean), "meshtemp");
-		commands = Hunk_AllocName (8192 * sizeof(int), "meshtemp");
-		vertexorder = Hunk_AllocName (8192 * sizeof(int), "meshtemp");
-		stripverts = Hunk_AllocName (128 * sizeof(int), "meshtemp");
-		striptris = Hunk_AllocName (128 * sizeof(int), "meshtemp");
-
-		initialized = true;
-	}
-
 	BuildTris ();		// trifans or lists
-
 
 	// save the data out
 
