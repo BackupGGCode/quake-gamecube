@@ -140,11 +140,14 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 
 void R_RotateForEntity (entity_t *e)
 {
-	// ELUTODO: works? angles are really deg?
+	Vector axis2 = {0,0,1};
+	Vector axis1 = {0,1,0};
+	Vector axis0 = {1,0,0};
+
 	guMtxTrans(modelview, e->origin[0],  e->origin[1],  e->origin[2]);
-	guMtxRotRad(modelview, 2, DegToRad(e->angles[1]));
-	guMtxRotRad(modelview, 1, -DegToRad(e->angles[0]));
-	guMtxRotRad(modelview, 0, DegToRad(e->angles[2]));
+	guMtxRotAxisDeg(modelview, &axis2, e->angles[1]);
+	guMtxRotAxisDeg(modelview, &axis1, -e->angles[0]);
+	guMtxRotAxisDeg(modelview, &axis0, e->angles[2]);
 
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 }
@@ -888,12 +891,13 @@ void R_SetupGL (void)
 	int		i;
 	extern	int glwidth, glheight;
 	int		x, x2, y2, y, w, h;
+	Vector axis2 = {0,0,1};
+	Vector axis1 = {0,1,0};
+	Vector axis0 = {1,0,0};
 
 	//
 	// set up viewpoint
 	//
-	guMtxIdentity (perspective);
-
 	x = r_refdef.vrect.x * glwidth/vid.width;
 	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * glwidth/vid.width;
 	y = (vid.height-r_refdef.vrect.y) * glheight/vid.height;
@@ -920,7 +924,7 @@ void R_SetupGL (void)
 
 	GX_SetViewport(glx + x, gly + y, w, h, ZMIN3D, ZMAX3D);
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
-	MYgluPerspective (r_refdef.fov_y,  screenaspect, ZMIN3D, ZMAX3D);
+	MYgluPerspective (r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 
 	if (mirror)
 	{
@@ -936,13 +940,12 @@ void R_SetupGL (void)
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
 	guMtxIdentity(modelview);
-	// ELUTODO: deg?
-	guMtxRotRad(modelview, 0, DegToRad(-90));	// put Z going up
-    guMtxRotRad(modelview, 2, DegToRad(90));	// put Z going up
+	guMtxRotAxisDeg(modelview, &axis0, -90);	// put Z going up
+    guMtxRotAxisDeg(modelview, &axis2, 90);	// put Z going up
 
-	guMtxRotRad(modelview, 0, DegToRad(-r_refdef.viewangles[2]));
-	guMtxRotRad(modelview, 1, DegToRad(-r_refdef.viewangles[0]));
-	guMtxRotRad(modelview, 2, DegToRad(-r_refdef.viewangles[1]));
+	guMtxRotAxisDeg(modelview, &axis0, -r_refdef.viewangles[2]);
+	guMtxRotAxisDeg(modelview, &axis1, -r_refdef.viewangles[0]);
+	guMtxRotAxisDeg(modelview, &axis2, -r_refdef.viewangles[1]);
 	guMtxTrans(modelview, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
 
 	// ELUTODOglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
