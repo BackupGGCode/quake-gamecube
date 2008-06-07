@@ -922,7 +922,7 @@ void R_SetupGL (void)
 		w = h = 256;
 	}
 
-	GX_SetViewport(glx + x, gly + y, w, h, ZMIN3D, ZMAX3D);
+	GX_SetViewport(glx + x, gly + y2, w, h, ZMIN3D, ZMAX3D);
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
 	MYgluPerspective (r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 
@@ -940,6 +940,7 @@ void R_SetupGL (void)
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
 	guMtxIdentity(modelview);
+
 	guMtxRotAxisDeg(modelview, &axis0, -90);	// put Z going up
     guMtxRotAxisDeg(modelview, &axis2, 90);	// put Z going up
 

@@ -305,10 +305,9 @@ void R_DrawSequentialPoly (msurface_t *s)
 		// Binds world to texture env 0
 		// ELUTODO GL_SelectTexture(TEXTURE0_SGIS);
 		GL_Bind (t->gl_texturenum);
-		// ELUTODO glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		// Binds lightmap to texenv 1
 		// ELUTODO GL_EnableMultitexture(); // Same as SelectTexture (TEXTURE1)
-		GL_Bind (lightmap_textures + s->lightmaptexturenum);
+		// ELUTODOGL_Bind (lightmap_textures + s->lightmaptexturenum);
 		i = s->lightmaptexturenum;
 		if (lightmap_modified[i])
 		{
@@ -322,6 +321,15 @@ void R_DrawSequentialPoly (msurface_t *s)
 			theRect->h = 0;
 			theRect->w = 0;
 		}
+		v = p->verts[0];
+		GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT0, p->numverts);
+		for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
+		{
+			GX_Position3f32(v[0], v[1], v[2]);
+			GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+			GX_TexCoord2f32(v[3], v[4]);
+		}
+		GX_End();
 /* ELUTODO
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
 		glBegin(GL_POLYGON);
