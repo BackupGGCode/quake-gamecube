@@ -75,9 +75,8 @@ static float vid_gamma = 1.0;
 /*-----------------------------------------------------------------------*/
 
 // ELUTODO
-Mtx view;
 Mtx44 perspective;
-Mtx model, modelview;
+Mtx modelview;
 
 cvar_t vid_tvborder = {"vid_tvborder", "0", (qboolean)true};
 
@@ -188,7 +187,6 @@ void GL_Init (void)
 	GX_SetCopyClear(background, GX_MAX_Z24);
 
 	// other gx setup
-	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
 	yscale = GX_GetYScaleFactor(rmode->efbHeight,rmode->xfbHeight);
 	xfbHeight = GX_SetDispCopyYScale(yscale);
 	GX_SetScissor(0,0,rmode->fbWidth,rmode->efbHeight);
@@ -202,7 +200,7 @@ void GL_Init (void)
 	else*/
 		GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
 
-	GX_SetCullMode(GX_CULL_NONE);
+	// ELUTODO GX_SetCullMode(GX_CULL_NONE);
 	GX_CopyDisp(xfb,GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0); // ELUTODO
 
@@ -227,6 +225,7 @@ void GL_Init (void)
 
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
+	// ELUTODO: glquake changed between MODULATE and REPLACE at various places
 	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
@@ -246,8 +245,6 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 	*x = *y = 0;
 	*width = scr_width;
 	*height = scr_height;
-
-	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
 
 	// ELUTODO: really necessary?
 	GX_InvVtxCache();

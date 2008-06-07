@@ -23,8 +23,6 @@ void GL_EndRendering (void);
 
 extern	float	gldepthmin, gldepthmax;
 
-/*void GL_Upload32 (GXTexObj *dest, unsigned *data, int width, int height,  qboolean mipmap, qboolean alpha);
-void GL_Upload8 (GXTexObj *dest, byte *data, int width, int height,  qboolean mipmap, qboolean alpha);*/
 int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
 int GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
 int GL_FindTexture (char *identifier);
@@ -187,6 +185,16 @@ void GL_Bind (int texnum);
 
 extern vrect_t scr_vrect;
 
-extern Mtx view;
 extern Mtx44 perspective;
-extern Mtx model, modelview;
+extern Mtx modelview;
+
+#define ZMIN3D			4.0f
+#define ZMAX3D			16384.0f
+#define ZMIN2D			-9999.0f
+#define ZMAX2D			9999.0f
+
+void QGX_ZMode(qboolean state);
+void QGX_Alpha(qboolean state);
+void QGX_Blend(qboolean state);
+void QGX_PushModelview(void);
+void QGX_PopModelview(void);
