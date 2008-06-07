@@ -338,7 +338,7 @@ void VID_Init(unsigned char *palette)
 
 	GL_Init();
 
-	//Check_Gamma(palette);
+	Check_Gamma(palette);
 
 	VID_SetPalette(palette);
 
