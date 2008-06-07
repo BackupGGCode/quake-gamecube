@@ -775,7 +775,7 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	destination->allocated_area = SYS_GetArena2Lo();
 	destination->data = Align_To_32_Bytes(destination->allocated_area);
 	if ((u32)destination->data + scaled_width * scaled_height * sizeof(unsigned) >= 0x933e0000)
-		Sys_Error("GL_Upload32: Out of memory.\nnumgltextures = %d\narena1lo = %.8x\narena1hi = %.8x",
+		Sys_Error("GL_Upload32: Out of memory.\nnumgltextures = %d\narena2lo = %.8x\narena2hi = %.8x",
 			numgltextures, (u32)SYS_GetArena2Lo(), (u32)SYS_GetArena2Hi());
 	SYS_SetArena2Lo(destination->data + scaled_width * scaled_height);
 
