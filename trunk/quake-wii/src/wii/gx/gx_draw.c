@@ -666,7 +666,6 @@ Setup as if the screen was 320*200
 */
 void GL_Set2D (void)
 {
-	// ELUTODO necessary here?
 	GX_SetViewport(glx,gly,glwidth,glheight, ZMIN2D, ZMAX2D);
 
 	guOrtho(perspective,0, vid.conheight,0,vid.conwidth,ZMIN2D,ZMAX2D);
