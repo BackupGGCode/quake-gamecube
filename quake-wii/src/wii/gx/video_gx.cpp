@@ -76,7 +76,7 @@ static float vid_gamma = 1.0;
 
 // ELUTODO
 Mtx44 perspective;
-Mtx modelview;
+Mtx view, model, modelview;
 
 cvar_t vid_tvborder = {"vid_tvborder", "0", (qboolean)true};
 

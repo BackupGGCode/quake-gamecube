@@ -99,27 +99,6 @@ cvar_t	gl_doubleeyes = {"gl_doubleeys", "1"};
 
 extern	cvar_t	gl_ztrick;
 
-qboolean	mv_pushed = false; // ELUTODO: omg...
-Mtx			mv_copy;
-void QGX_PushModelview(void)
-{
-	if (mv_pushed)
-		Sys_Error("Tried to push modelview 2 times.\n");
-
-	mv_pushed = true;
-	guMtxCopy(modelview, mv_copy);
-}
-
-void QGX_PopModelview(void)
-{
-	if (!mv_pushed)
-		Sys_Error("Tried to pop modelview already poped/non-pushed\n");
-
-	mv_pushed = false;
-	guMtxCopy(mv_copy, modelview);
-	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
-}
-
 /*
 =================
 R_CullBox
@@ -137,19 +116,17 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 	return false;
 }
 
-
 void R_RotateForEntity (entity_t *e)
 {
 	Vector axis2 = {0,0,1};
 	Vector axis1 = {0,1,0};
 	Vector axis0 = {1,0,0};
 
-	guMtxTrans(modelview, e->origin[0],  e->origin[1],  e->origin[2]);
-	guMtxRotAxisDeg(modelview, &axis2, e->angles[1]);
-	guMtxRotAxisDeg(modelview, &axis1, -e->angles[0]);
-	guMtxRotAxisDeg(modelview, &axis0, e->angles[2]);
+	guMtxTrans(model, e->origin[0],  e->origin[1],  e->origin[2]);
 
-	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
+	guMtxRotAxisDeg(model, &axis2, e->angles[2]);
+	guMtxRotAxisDeg(model, &axis1, -e->angles[1]);
+	guMtxRotAxisDeg(model, &axis0, e->angles[0]);
 }
 
 /*
@@ -244,6 +221,8 @@ void R_DrawSpriteModel (entity_t *e)
 	}
 
 	// ELUTODO GL_DisableMultitexture();
+
+	GX_LoadPosMtxImm(view, GX_PNMTX0);
 
     GL_Bind(frame->gl_texturenum);
 
@@ -560,18 +539,19 @@ void R_DrawAliasModel (entity_t *e)
 	// draw all the triangles
 	//
 
-    QGX_PushModelview ();
+	guMtxIdentity(model);
 	R_RotateForEntity (e);
 
 	if (!strcmp (clmodel->name, "progs/eyes.mdl") && gl_doubleeyes.value) {
-		guMtxTrans (modelview, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
+		guMtxTrans (model, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
 // double size of eyes, since they are really hard to see in gl
-		guMtxScale (modelview, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
+		guMtxScale (model, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
 	} else {
-		guMtxTrans (modelview, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-		guMtxScale (modelview, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+		guMtxTrans (model, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+		guMtxScale (model, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
 	}
 
+	guMtxConcat(view,model,modelview);
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	anim = (int)(cl.time*10) & 3;
@@ -599,8 +579,6 @@ void R_DrawAliasModel (entity_t *e)
 	glShadeModel (GL_FLAT);
 	if (gl_affinemodels.value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);*/
-
-	QGX_PopModelview ();
 
 	/* ELUTODO if (r_shadows.value)
 	{
@@ -891,9 +869,6 @@ void R_SetupGL (void)
 	int		i;
 	extern	int glwidth, glheight;
 	int		x, x2, y2, y, w, h;
-	Vector axis2 = {0,0,1};
-	Vector axis1 = {0,1,0};
-	Vector axis0 = {1,0,0};
 
 	//
 	// set up viewpoint
@@ -939,8 +914,7 @@ void R_SetupGL (void)
 
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
-	guMtxIdentity(modelview);
-
+	/*
 	guMtxRotAxisDeg(modelview, &axis0, -90.0f);	// put Z going up
     guMtxRotAxisDeg(modelview, &axis2, 90.0f);	// put Z going up
 
@@ -948,6 +922,13 @@ void R_SetupGL (void)
 	guMtxRotAxisDeg(modelview, &axis1, -r_refdef.viewangles[0]);
 	guMtxRotAxisDeg(modelview, &axis2, -r_refdef.viewangles[1]);
 	guMtxTrans(modelview, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
+	*/
+{
+	Vector cam = {r_refdef.vieworg[0], r_refdef.vieworg[1], r_refdef.vieworg[2]},
+	up = {-vup[0], -vup[1], -vup[2]},
+	look = {vpn[0], -vpn[1], vpn[2]};
+	guLookAt(view, &cam, &up, &look);
+}
 
 	// ELUTODOglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
 
@@ -960,8 +941,6 @@ void R_SetupGL (void)
 	QGX_Blend(false);
 	QGX_Alpha(false);
 	QGX_ZMode(true);
-
-	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 }
 
 /*
