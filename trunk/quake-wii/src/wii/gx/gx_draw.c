@@ -77,6 +77,14 @@ void GL_Bind (int texnum)
 	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP0);
 }
 
+void QGX_ZMode(qboolean state)
+{
+	if (state)
+		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+	else
+		GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
+}
+
 void QGX_Alpha(qboolean state)
 {
 	if (state)
@@ -614,7 +622,7 @@ void Draw_FadeScreen (void)
 	QGX_Blend(false);
 	QGX_Alpha(true);
 
-	// Sbar_Changed();
+	Sbar_Changed();
 }
 
 //=============================================================================
@@ -658,16 +666,17 @@ Setup as if the screen was 320*200
 */
 void GL_Set2D (void)
 {
-	// glViewport (glx, gly, glwidth, glheight);
+	// ELUTODO necessary here?
+	GX_SetViewport(glx,gly,glwidth,glheight, ZMIN2D, ZMAX2D);
 
-	guOrtho(perspective,0, vid.conheight,0,vid.conwidth,-99999,99999);
+	guOrtho(perspective,0, vid.conheight,0,vid.conwidth,ZMIN2D,ZMAX2D);
 	GX_LoadProjectionMtx(perspective, GX_ORTHOGRAPHIC);
 
 	guMtxIdentity(modelview);
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	// ELUODO: filtering is making some borders
-	GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
+	QGX_ZMode(false);
 	QGX_Blend(true);
 	GX_SetCullMode(GX_CULL_NONE);
 	QGX_Alpha(true);

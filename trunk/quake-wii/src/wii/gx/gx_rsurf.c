@@ -788,7 +788,7 @@ void R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-    // ELUTODO glPushMatrix ();
+    QGX_PushModelview ();
 e->angles[0] = -e->angles[0];	// stupid quake bug
 	R_RotateForEntity (e);
 e->angles[0] = -e->angles[0];	// stupid quake bug
@@ -811,7 +811,7 @@ e->angles[0] = -e->angles[0];	// stupid quake bug
 		}
 	}
 
-	// ELUTODO glPopMatrix ();
+	QGX_PopModelview ();
 }
 
 /*

@@ -655,18 +655,16 @@ void R_DrawParticles (void)
 	float			dvel;
 	float			frametime;
 	
-/* ELUTODO
 	vec3_t			up, right;
 	float			scale;
+	unsigned		color;
 
     GL_Bind(particletexture);
-	glEnable (GL_BLEND);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glBegin (GL_TRIANGLES);
+	QGX_Blend (true);
 
 	VectorScale (vup, 1.5, up);
 	VectorScale (vright, 1.5, right);
-*/
+
 	frametime = cl.time - cl.oldtime;
 	time3 = frametime * 15;
 	time2 = frametime * 10; // 15;
@@ -702,7 +700,8 @@ void R_DrawParticles (void)
 			break;
 		}
 
-/* ELUTODO
+		GX_Begin (GX_TRIANGLES, GX_VTXFMT0, 3);
+
 		// hack a scale up to keep particles from disapearing
 		scale = (p->org[0] - r_origin[0])*vpn[0] + (p->org[1] - r_origin[1])*vpn[1]
 			+ (p->org[2] - r_origin[2])*vpn[2];
@@ -710,14 +709,23 @@ void R_DrawParticles (void)
 			scale = 1;
 		else
 			scale = 1 + scale * 0.004;
-		glColor3ubv ((byte *)&d_8to24table[(int)p->color]);
-		glTexCoord2f (0,0);
-		glVertex3fv (p->org);
-		glTexCoord2f (1,0);
-		glVertex3f (p->org[0] + up[0]*scale, p->org[1] + up[1]*scale, p->org[2] + up[2]*scale);
-		glTexCoord2f (0,1);
-		glVertex3f (p->org[0] + right[0]*scale, p->org[1] + right[1]*scale, p->org[2] + right[2]*scale);
-*/
+
+		color = d_8to24table[(int)p->color];
+
+		GX_Position3f32(p->org[0], p->org[1], p->org[2]);
+		GX_Color4u8(color & 0xff, (color >> 8) & 0xff, (color >> 16) & 0xff, (color >> 24) & 0xff);
+		GX_TexCoord2f32(0, 0);
+
+		GX_Position3f32(p->org[0] + up[0]*scale, p->org[1] + up[1]*scale, p->org[2] + up[2]*scale);
+		GX_Color4u8(color & 0xff, (color >> 8) & 0xff, (color >> 16) & 0xff, (color >> 24) & 0xff);
+		GX_TexCoord2f32(1, 0);
+
+		GX_Position3f32(p->org[0] + right[0]*scale, p->org[1] + right[1]*scale, p->org[2] + right[2]*scale);
+		GX_Color4u8(color & 0xff, (color >> 8) & 0xff, (color >> 16) & 0xff, (color >> 24) & 0xff);
+		GX_TexCoord2f32(0, 1);
+
+		GX_End();
+
 		p->org[0] += p->vel[0]*frametime;
 		p->org[1] += p->vel[1]*frametime;
 		p->org[2] += p->vel[2]*frametime;
@@ -780,10 +788,6 @@ void R_DrawParticles (void)
 		}
 	}
 
-/* ELUTODO
-	glEnd ();
-	glDisable (GL_BLEND);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-*/
+	QGX_Blend(false);
 }
 

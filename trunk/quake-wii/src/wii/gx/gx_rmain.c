@@ -99,6 +99,27 @@ cvar_t	gl_doubleeyes = {"gl_doubleeys", "1"};
 
 extern	cvar_t	gl_ztrick;
 
+qboolean	mv_pushed = false; // ELUTODO: omg...
+Mtx			mv_copy;
+void QGX_PushModelview(void)
+{
+	if (mv_pushed)
+		Sys_Error("Tried to push modelview 2 times.\n");
+
+	mv_pushed = true;
+	guMtxCopy(modelview, mv_copy);
+}
+
+void QGX_PopModelview(void)
+{
+	if (!mv_pushed)
+		Sys_Error("Tried to pop modelview already poped/non-pushed\n");
+
+	mv_pushed = false;
+	guMtxCopy(mv_copy, modelview);
+	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
+}
+
 /*
 =================
 R_CullBox
@@ -119,13 +140,13 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 
 void R_RotateForEntity (entity_t *e)
 {
-/* ELUTODO
-    glTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
+	// ELUTODO: works? angles are really deg?
+	guMtxTrans(modelview, e->origin[0],  e->origin[1],  e->origin[2]);
+	guMtxRotRad(modelview, 2, DegToRad(e->angles[1]));
+	guMtxRotRad(modelview, 1, -DegToRad(e->angles[0]));
+	guMtxRotRad(modelview, 0, DegToRad(e->angles[2]));
 
-    glRotatef (e->angles[1],  0, 0, 1);
-    glRotatef (-e->angles[0],  0, 1, 0);
-    glRotatef (e->angles[2],  1, 0, 0);
-*/
+	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 }
 
 /*
@@ -218,40 +239,40 @@ void R_DrawSpriteModel (entity_t *e)
 		up = vup;
 		right = vright;
 	}
-/* ELUTODO
-	glColor3f (1,1,1);
 
-	GL_DisableMultitexture();
+	// ELUTODO GL_DisableMultitexture();
 
     GL_Bind(frame->gl_texturenum);
 
-	glEnable (GL_ALPHA_TEST);
-	glBegin (GL_QUADS);
+	QGX_Alpha(true);
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
-	glTexCoord2f (0, 1);
 	VectorMA (e->origin, frame->down, up, point);
 	VectorMA (point, frame->left, right, point);
-	glVertex3fv (point);
+	GX_Position3f32(point[0], point[1], point[2]);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(0, 1);
 
-	glTexCoord2f (0, 0);
 	VectorMA (e->origin, frame->up, up, point);
 	VectorMA (point, frame->left, right, point);
-	glVertex3fv (point);
+	GX_Position3f32(point[0], point[1], point[2]);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(0, 0);
 
-	glTexCoord2f (1, 0);
 	VectorMA (e->origin, frame->up, up, point);
 	VectorMA (point, frame->right, right, point);
-	glVertex3fv (point);
+	GX_Position3f32(point[0], point[1], point[2]);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(1, 0);
 
-	glTexCoord2f (1, 1);
 	VectorMA (e->origin, frame->down, up, point);
 	VectorMA (point, frame->right, right, point);
-	glVertex3fv (point);
-	
-	glEnd ();
+	GX_Position3f32(point[0], point[1], point[2]);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(1, 1);
 
-	glDisable (GL_ALPHA_TEST);
-*/
+	GX_End();
+	QGX_Alpha(false);
 }
 
 /*
@@ -306,7 +327,6 @@ lastposenum = posenum;
 	verts += posenum * paliashdr->poseverts;
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
 
-/* ELUTODO
 	while (1)
 	{
 		// get the vertex count and primitive type
@@ -316,27 +336,27 @@ lastposenum = posenum;
 		if (count < 0)
 		{
 			count = -count;
-			glBegin (GL_TRIANGLE_FAN);
+			GX_Begin (GX_TRIANGLEFAN, GX_VTXFMT0, count);
 		}
 		else
-			glBegin (GL_TRIANGLE_STRIP);
+			GX_Begin (GX_TRIANGLESTRIP, GX_VTXFMT0, count);
 
 		do
 		{
-			// texture coordinates come from the draw list
-			glTexCoord2f (((float *)order)[0], ((float *)order)[1]);
-			order += 2;
-
 			// normals and vertexes come from the frame list
+			GX_Position3f32(verts->v[0], verts->v[1], verts->v[2]);
 			l = shadedots[verts->lightnormalindex] * shadelight;
-			glColor3f (l, l, l);
-			glVertex3f (verts->v[0], verts->v[1], verts->v[2]);
+			GX_Color4u8(l*255, l*255, l*255, 0xff); // ELUTODO: format of l?
+
+			// texture coordinates come from the draw list
+			GX_TexCoord2f32(((float *)order)[0], ((float *)order)[1]);
+
+			order += 2;
 			verts++;
 		} while (--count);
 
-		glEnd ();
+		GX_End ();
 	}
-*/
 }
 
 
@@ -537,18 +557,19 @@ void R_DrawAliasModel (entity_t *e)
 	// draw all the triangles
 	//
 
-/* ELUTODO
-    glPushMatrix ();
+    QGX_PushModelview ();
 	R_RotateForEntity (e);
 
 	if (!strcmp (clmodel->name, "progs/eyes.mdl") && gl_doubleeyes.value) {
-		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
+		guMtxTrans (modelview, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
 // double size of eyes, since they are really hard to see in gl
-		glScalef (paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
+		guMtxScale (modelview, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
 	} else {
-		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-		glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+		guMtxTrans (modelview, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+		guMtxScale (modelview, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
 	}
+
+	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	anim = (int)(cl.time*10) & 3;
     GL_Bind(paliashdr->gl_texturenum[currententity->skinnum][anim]);
@@ -562,24 +583,23 @@ void R_DrawAliasModel (entity_t *e)
 		    GL_Bind(playertextures - 1 + i);
 	}
 
-	if (gl_smoothmodels.value)
-		glShadeModel (GL_SMOOTH);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	/* ELUTODO if (gl_smoothmodels.value)
+		glShadeModel (GL_SMOOTH);*/
 
+	/* ELUTODO
 	if (gl_affinemodels.value)
-		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);*/
 
 	R_SetupAliasFrame (currententity->frame, paliashdr);
 
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
+/* ELUTODO
 	glShadeModel (GL_FLAT);
 	if (gl_affinemodels.value)
-		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);*/
 
-	glPopMatrix ();
+	QGX_PopModelview ();
 
-	if (r_shadows.value)
+	/* ELUTODO if (r_shadows.value)
 	{
 		glPushMatrix ();
 		R_RotateForEntity (e);
@@ -707,11 +727,9 @@ void R_DrawViewModel (void)
 	diffuse[0] = diffuse[1] = diffuse[2] = diffuse[3] = (float)shadelight / 128;
 
 	// hack the depth range to prevent view model from poking into walls
-/* ELUTODO
-	glDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
+	// ELUTODO glDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 	R_DrawAliasModel (currententity);
-	glDepthRange (gldepthmin, gldepthmax);
-*/
+	// ELUTODO glDepthRange (gldepthmin, gldepthmax);
 }
 
 
@@ -845,11 +863,9 @@ void R_SetupFrame (void)
 
 }
 
-/* ELUTODO
-void MYgluPerspective( GLdouble fovy, GLdouble aspect,
-		     GLdouble zNear, GLdouble zFar )
+void MYgluPerspective( double fovy, double aspect, double zNear, double zFar )
 {
-   GLdouble xmin, xmax, ymin, ymax;
+   double xmin, xmax, ymin, ymax;
 
    ymax = zNear * tan( fovy * M_PI / 360.0 );
    ymin = -ymax;
@@ -857,9 +873,8 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
    xmin = ymin * aspect;
    xmax = ymax * aspect;
 
-   glFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
+   guFrustum( perspective, ymin, ymax, xmin, xmax, zNear, zFar );
 }
-*/
 
 /*
 =============
@@ -877,10 +892,8 @@ void R_SetupGL (void)
 	//
 	// set up viewpoint
 	//
-/* ELUTODO
-	glMatrixMode(GL_PROJECTION);
-    glLoadIdentity ();
-*/
+	guMtxIdentity (perspective);
+
 	x = r_refdef.vrect.x * glwidth/vid.width;
 	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * glwidth/vid.width;
 	y = (vid.height-r_refdef.vrect.y) * glheight/vid.height;
@@ -905,47 +918,46 @@ void R_SetupGL (void)
 		w = h = 256;
 	}
 
-// ELUTODO	glViewport (glx + x, gly + y2, w, h);
+	GX_SetViewport(glx + x, gly + y, w, h, ZMIN3D, ZMAX3D);
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
-//	yfov = 2*atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*180/M_PI;
-// ELUTODO    MYgluPerspective (r_refdef.fov_y,  screenaspect,  4,  4096);
+	MYgluPerspective (r_refdef.fov_y,  screenaspect, ZMIN3D, ZMAX3D);
 
-/* ELUTODO
 	if (mirror)
 	{
 		if (mirror_plane->normal[2])
-			glScalef (1, -1, 1);
+			guMtxScale (perspective, 1, -1, 1);
 		else
-			glScalef (-1, 1, 1);
-		glCullFace(GL_BACK);
+			guMtxScale (perspective, -1, 1, 1);
+		GX_SetCullMode(GX_CULL_BACK);
 	}
 	else
-		glCullFace(GL_FRONT);
+		GX_SetCullMode(GX_CULL_FRONT);
 
-	glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity ();
+	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
-    glRotatef (-90,  1, 0, 0);	    // put Z going up
-    glRotatef (90,  0, 0, 1);	    // put Z going up
-    glRotatef (-r_refdef.viewangles[2],  1, 0, 0);
-    glRotatef (-r_refdef.viewangles[0],  0, 1, 0);
-    glRotatef (-r_refdef.viewangles[1],  0, 0, 1);
-    glTranslatef (-r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
+	guMtxIdentity(modelview);
+	// ELUTODO: deg?
+	guMtxRotRad(modelview, 0, DegToRad(-90));	// put Z going up
+    guMtxRotRad(modelview, 2, DegToRad(90));	// put Z going up
 
-	glGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
+	guMtxRotRad(modelview, 0, DegToRad(-r_refdef.viewangles[2]));
+	guMtxRotRad(modelview, 1, DegToRad(-r_refdef.viewangles[0]));
+	guMtxRotRad(modelview, 2, DegToRad(-r_refdef.viewangles[1]));
+	guMtxTrans(modelview, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
+
+	// ELUTODOglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
 
 	//
 	// set drawing parms
 	//
-	if (gl_cull.value)
-		glEnable(GL_CULL_FACE);
-	else
-		glDisable(GL_CULL_FACE);
+	if (!gl_cull.value)
+		GX_SetCullMode(GX_CULL_NONE);
 
-	glDisable(GL_BLEND);
-	glDisable(GL_ALPHA_TEST);
-	glEnable(GL_DEPTH_TEST);
-*/
+	QGX_Blend(false);
+	QGX_Alpha(false);
+	QGX_ZMode(true);
+
+	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 }
 
 /*

@@ -70,34 +70,20 @@ byte	dottexture[8][8] =
 void R_InitParticleTexture (void)
 {
 	int		x,y;
-	byte	data[8][8][4];
+	byte	data[8][8];
 
 	//
 	// particle texture
 	//
-/* ELUTODO
-	particletexture = texture_extension_number++;
-    GL_Bind(particletexture);
-*/
-
 	for (x=0 ; x<8 ; x++)
 	{
 		for (y=0 ; y<8 ; y++)
 		{
-			data[y][x][0] = 255;
-			data[y][x][1] = 255;
-			data[y][x][2] = 255;
-			data[y][x][3] = dottexture[x][y]*255;
+			data[y][x] = dottexture[x][y] ? 15 : 255; // ELUTODO assumes 15 is white
 		}
 	}
-/* ELUTODO
-	glTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-*/
+	particletexture = GL_LoadTexture("", 8, 8, data, false, true);
 }
 
 /*
