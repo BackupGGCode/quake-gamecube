@@ -796,10 +796,13 @@ void R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-    QGX_PushModelview ();
+	guMtxIdentity(model);
 e->angles[0] = -e->angles[0];	// stupid quake bug
 	R_RotateForEntity (e);
 e->angles[0] = -e->angles[0];	// stupid quake bug
+
+	guMtxConcat(view,model,modelview);
+	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	//
 	// draw texture
@@ -818,8 +821,6 @@ e->angles[0] = -e->angles[0];	// stupid quake bug
 			R_DrawSequentialPoly (psurf);
 		}
 	}
-
-	QGX_PopModelview ();
 }
 
 /*

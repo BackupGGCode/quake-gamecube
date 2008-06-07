@@ -186,7 +186,7 @@ void GL_Bind (int texnum);
 extern vrect_t scr_vrect;
 
 extern Mtx44 perspective;
-extern Mtx modelview;
+extern Mtx view, model, modelview;
 
 #define ZMIN3D			4.0f
 #define ZMAX3D			16384.0f
@@ -196,5 +196,3 @@ extern Mtx modelview;
 void QGX_ZMode(qboolean state);
 void QGX_Alpha(qboolean state);
 void QGX_Blend(qboolean state);
-void QGX_PushModelview(void);
-void QGX_PopModelview(void);
