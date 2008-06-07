@@ -252,6 +252,8 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 	// ELUTODO: really necessary?
 	GX_InvVtxCache();
 	GX_InvalidateTexAll();
+
+	Sbar_Changed(); // force status bar redraw evry frame
 }
 
 
