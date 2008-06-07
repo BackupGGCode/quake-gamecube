@@ -771,17 +771,15 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 		memcpy(scaled, data, scaled_width * scaled_height * sizeof(unsigned));
 	}
 
-	// ELUTODO: is this right?
-	//destination->allocated_area = Hunk_AllocName (scaled_width * scaled_height * sizeof(unsigned) + 32, "gx_textures");
-	//destination->data = MEM_K0_TO_K1(Align_To_32_Bytes(destination->allocated_area));
-	destination->allocated_area = memalign(32, scaled_width * scaled_height * sizeof(unsigned));
-	if (destination->allocated_area)
-		destination->data = MEM_K0_TO_K1(destination->allocated_area);
-	else
-	{
+	// ELUTODO manage properly
+	destination->allocated_area = SYS_GetArena2Lo();
+	destination->data = Align_To_32_Bytes(destination->allocated_area);
+	if ((u32)destination->data + scaled_width * scaled_height * sizeof(unsigned) >= 0x933e0000)
 		Sys_Error("GL_Upload32: Out of memory.\nnumgltextures = %d\narena1lo = %.8x\narena1hi = %.8x",
-			numgltextures, (u32)SYS_GetArena1Lo(), (u32)SYS_GetArena1Hi());
-	}
+			numgltextures, (u32)SYS_GetArena2Lo(), (u32)SYS_GetArena2Hi());
+	SYS_SetArena2Lo(destination->data + scaled_width * scaled_height);
+
+	destination->data = MEM_K0_TO_K1(destination->data);
 
 	s = scaled_width * scaled_height;
 	if (s & 31)
