@@ -941,8 +941,8 @@ void R_SetupGL (void)
 
 	guMtxIdentity(modelview);
 
-	guMtxRotAxisDeg(modelview, &axis0, -90);	// put Z going up
-    guMtxRotAxisDeg(modelview, &axis2, 90);	// put Z going up
+	guMtxRotAxisDeg(modelview, &axis0, -90.0f);	// put Z going up
+    guMtxRotAxisDeg(modelview, &axis2, 90.0f);	// put Z going up
 
 	guMtxRotAxisDeg(modelview, &axis0, -r_refdef.viewangles[2]);
 	guMtxRotAxisDeg(modelview, &axis1, -r_refdef.viewangles[0]);
@@ -954,7 +954,7 @@ void R_SetupGL (void)
 	//
 	// set drawing parms
 	//
-	if (!gl_cull.value)
+	//if (!gl_cull.value) ELUTODO
 		GX_SetCullMode(GX_CULL_NONE);
 
 	QGX_Blend(false);
