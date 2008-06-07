@@ -116,17 +116,22 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 	return false;
 }
 
+Vector axis2 = {0,0,1};
+Vector axis1 = {0,1,0};
+Vector axis0 = {1,0,0};
+
 void R_RotateForEntity (entity_t *e)
 {
-	Vector axis2 = {0,0,1};
-	Vector axis1 = {0,1,0};
-	Vector axis0 = {1,0,0};
+	Mtx temp;
 
-	guMtxTrans(model, e->origin[0],  e->origin[1],  e->origin[2]);
+	guMtxTransApply(model, model, e->origin[0],  e->origin[1],  e->origin[2]);
 
-	guMtxRotAxisDeg(model, &axis2, e->angles[2]);
-	guMtxRotAxisDeg(model, &axis1, -e->angles[1]);
-	guMtxRotAxisDeg(model, &axis0, e->angles[0]);
+	guMtxRotAxisDeg(temp, &axis2, e->angles[1]);
+	guMtxConcat(model, temp, model);
+	guMtxRotAxisDeg(temp, &axis1, -e->angles[0]);
+	guMtxConcat(model, temp, model);
+	guMtxRotAxisDeg(temp, &axis0, e->angles[2]);
+	guMtxConcat(model, temp, model);
 }
 
 /*
@@ -543,12 +548,12 @@ void R_DrawAliasModel (entity_t *e)
 	R_RotateForEntity (e);
 
 	if (!strcmp (clmodel->name, "progs/eyes.mdl") && gl_doubleeyes.value) {
-		guMtxTrans (model, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
+		guMtxTransApply (model, model, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
 // double size of eyes, since they are really hard to see in gl
-		guMtxScale (model, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
+		guMtxScaleApply (model, model, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
 	} else {
-		guMtxTrans (model, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-		guMtxScale (model, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+		guMtxTransApply (model, model, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+		guMtxScaleApply (model, model, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
 	}
 
 	guMtxConcat(view,model,modelview);
@@ -869,6 +874,7 @@ void R_SetupGL (void)
 	int		i;
 	extern	int glwidth, glheight;
 	int		x, x2, y2, y, w, h;
+	Mtx		temp;
 
 	//
 	// set up viewpoint
@@ -904,9 +910,9 @@ void R_SetupGL (void)
 	if (mirror)
 	{
 		if (mirror_plane->normal[2])
-			guMtxScale (perspective, 1, -1, 1);
+			guMtxScaleApply (perspective, perspective, 1, -1, 1);
 		else
-			guMtxScale (perspective, -1, 1, 1);
+			guMtxScaleApply (perspective, perspective, -1, 1, 1);
 		GX_SetCullMode(GX_CULL_BACK);
 	}
 	else
@@ -914,21 +920,22 @@ void R_SetupGL (void)
 
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
-	/*
-	guMtxRotAxisDeg(modelview, &axis0, -90.0f);	// put Z going up
-    guMtxRotAxisDeg(modelview, &axis2, 90.0f);	// put Z going up
+	guMtxIdentity(view);
 
-	guMtxRotAxisDeg(modelview, &axis0, -r_refdef.viewangles[2]);
-	guMtxRotAxisDeg(modelview, &axis1, -r_refdef.viewangles[0]);
-	guMtxRotAxisDeg(modelview, &axis2, -r_refdef.viewangles[1]);
-	guMtxTrans(modelview, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
-	*/
-{
-	Vector cam = {r_refdef.vieworg[0], r_refdef.vieworg[1], r_refdef.vieworg[2]},
-	up = {-vup[0], -vup[1], -vup[2]},
-	look = {vpn[0], -vpn[1], vpn[2]};
-	guLookAt(view, &cam, &up, &look);
-}
+	guMtxRotAxisDeg(temp, &axis0, -90.0f);	// put Z going up
+	guMtxConcat(view, temp, view);
+    guMtxRotAxisDeg(temp, &axis2, 90.0f);	// put Z going up
+	guMtxConcat(view, temp, view);
+
+	guMtxRotAxisDeg(temp, &axis0, -r_refdef.viewangles[2]);
+	guMtxConcat(view, temp, view);
+	guMtxRotAxisDeg(temp, &axis1, -r_refdef.viewangles[0]);
+	guMtxConcat(view, temp, view);
+	guMtxRotAxisDeg(temp, &axis2, -r_refdef.viewangles[1]);
+	guMtxConcat(view, temp, view);
+	guMtxTransApply(view, view, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
+
+	Con_Printf("x: %f y: %f z: %f\nax:%f ay:%f az:%f\n", r_refdef.vieworg[0], r_refdef.vieworg[1], r_refdef.vieworg[2], r_refdef.viewangles[0], r_refdef.viewangles[1], r_refdef.viewangles[2]);
 
 	// ELUTODOglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
 
