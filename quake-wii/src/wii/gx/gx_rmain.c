@@ -313,6 +313,15 @@ lastposenum = posenum;
 	verts += posenum * paliashdr->poseverts;
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
 
+	if (!strcmp (currententity->model->name, "progs/v_shot.mdl") || !strcmp (currententity->model->name, "progs/v_axe.mdl"))
+	{
+		Vector asdf = {verts->v[0], verts->v[1], verts->v[2]};
+
+		guVecMultiply(modelview, &asdf, &asdf);
+		Con_Printf("vtx0: x: %4.2f y: %4.2f z: %4.2f\n", asdf.x, asdf.y, asdf.x);
+		Con_Printf("peye: x: %4.2f y: %4.2f z: %4.2f\n", r_refdef.vieworg[0], r_refdef.vieworg[1], r_refdef.vieworg[2]);
+	}
+
 	while (1)
 	{
 		// get the vertex count and primitive type
@@ -920,8 +929,6 @@ void R_SetupGL (void)
 		GX_SetCullMode(GX_CULL_FRONT);
 
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
-
-	guMtxIdentity(view);
 
 	{
 	Vector campos = {r_refdef.vieworg[0],  r_refdef.vieworg[1],  r_refdef.vieworg[2]};
