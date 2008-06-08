@@ -124,7 +124,7 @@ void R_RotateForEntity (entity_t *e)
 {
 	Mtx temp;
 
-	guMtxTrans(model, e->origin[0],  e->origin[1],  e->origin[2]);
+	guMtxTrans(temp, e->origin[0],  e->origin[1],  e->origin[2]);
 	guMtxConcat(model, temp, model);
 
 	guMtxRotAxisDeg(temp, &axis2, e->angles[1]);
@@ -1074,10 +1074,10 @@ void R_Mirror (void)
 	gldepthmax = 1;
 	glDepthRange (gldepthmin, gldepthmax);
 	glDepthFunc (GL_LEQUAL);
-*/
+
 	R_RenderScene ();
 	R_DrawWaterSurfaces ();
-/* ELUTODO
+
 	gldepthmin = 0;
 	gldepthmax = 0.5;
 	glDepthRange (gldepthmin, gldepthmax);
