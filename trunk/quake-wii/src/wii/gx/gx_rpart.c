@@ -712,17 +712,17 @@ void R_DrawParticles (void)
 
 		color = d_8to24table[(int)p->color];
 
-		GX_Position3f32(p->org[0], p->org[1], p->org[2]);
+		GX_Position3f32(p->org[0] + right[0]*scale, p->org[1] + right[1]*scale, p->org[2] + right[2]*scale);
 		GX_Color4u8(color & 0xff, (color >> 8) & 0xff, (color >> 16) & 0xff, (color >> 24) & 0xff);
-		GX_TexCoord2f32(0, 0);
+		GX_TexCoord2f32(0, 1);
 
 		GX_Position3f32(p->org[0] + up[0]*scale, p->org[1] + up[1]*scale, p->org[2] + up[2]*scale);
 		GX_Color4u8(color & 0xff, (color >> 8) & 0xff, (color >> 16) & 0xff, (color >> 24) & 0xff);
 		GX_TexCoord2f32(1, 0);
 
-		GX_Position3f32(p->org[0] + right[0]*scale, p->org[1] + right[1]*scale, p->org[2] + right[2]*scale);
+		GX_Position3f32(p->org[0], p->org[1], p->org[2]);
 		GX_Color4u8(color & 0xff, (color >> 8) & 0xff, (color >> 16) & 0xff, (color >> 24) & 0xff);
-		GX_TexCoord2f32(0, 1);
+		GX_TexCoord2f32(0, 0);
 
 		GX_End();
 
