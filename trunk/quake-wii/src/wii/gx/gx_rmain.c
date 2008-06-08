@@ -228,8 +228,6 @@ void R_DrawSpriteModel (entity_t *e)
 
 	// ELUTODO GL_DisableMultitexture();
 
-	GX_LoadPosMtxImm(view, GX_PNMTX0);
-
     GL_Bind(frame->gl_texturenum);
 
 	QGX_Alpha(true);
@@ -636,6 +634,7 @@ void R_DrawEntitiesOnList (void)
 		}
 	}
 
+	GX_LoadPosMtxImm(view, GX_PNMTX0);
 	for (i=0 ; i<cl_numvisedicts ; i++)
 	{
 		currententity = cl_visedicts[i];
@@ -924,28 +923,19 @@ void R_SetupGL (void)
 
 	guMtxIdentity(view);
 
-	guMtxRotAxisDeg(temp, &axis0, -90.0f);	// put Z going up
-	guMtxConcat(view, temp, view);
-    guMtxRotAxisDeg(temp, &axis2, 90.0f);	// put Z going up
-	guMtxConcat(view, temp, view);
-
-	guMtxRotAxisDeg(temp, &axis0, -r_refdef.viewangles[2]);
-	guMtxConcat(view, temp, view);
-	guMtxRotAxisDeg(temp, &axis1, -r_refdef.viewangles[0]);
-	guMtxConcat(view, temp, view);
-	guMtxRotAxisDeg(temp, &axis2, -r_refdef.viewangles[1]);
-	guMtxConcat(view, temp, view);
-	guMtxTrans(temp, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
-	guMtxConcat(view, temp, view);
-
-	Con_Printf("x: %f y: %f z: %f\nax:%f ay:%f az:%f\n", r_refdef.vieworg[0], r_refdef.vieworg[1], r_refdef.vieworg[2], r_refdef.viewangles[0], r_refdef.viewangles[1], r_refdef.viewangles[2]);
+	{
+	Vector campos = {r_refdef.vieworg[0],  r_refdef.vieworg[1],  r_refdef.vieworg[2]};
+	Vector camup = {vup[0], vup[1], vup[2]};
+	Vector camforward = {vpn[0] + r_refdef.vieworg[0], vpn[1] + r_refdef.vieworg[1], vpn[2] + r_refdef.vieworg[2]};
+	guLookAt(view, &campos, &camup, &camforward);
+	}
 
 	// ELUTODOglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
 
 	//
 	// set drawing parms
 	//
-	//if (!gl_cull.value) ELUTODO
+	if (!gl_cull.value)
 		GX_SetCullMode(GX_CULL_NONE);
 
 	QGX_Blend(false);
@@ -970,14 +960,17 @@ void R_RenderScene (void)
 
 	R_MarkLeaves ();	// done here so we know if we're in water
 
+	GX_LoadPosMtxImm(view, GX_PNMTX0);
 	R_DrawWorld ();		// adds static entities to the list
 
 	S_ExtraUpdate ();	// don't let sound get messed up if going slow
 
+	// for the entities, we load the matrices separately
 	R_DrawEntitiesOnList ();
 
 	// ELUTODO GL_DisableMultitexture();
 
+	GX_LoadPosMtxImm(view, GX_PNMTX0);
 	R_DrawParticles ();
 
 }

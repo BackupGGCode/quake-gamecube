@@ -662,8 +662,6 @@ void R_DrawParticles (void)
     GL_Bind(particletexture);
 	QGX_Blend (true);
 
-	GX_LoadPosMtxImm(view, GX_PNMTX0);
-
 	VectorScale (vup, 1.5, up);
 	VectorScale (vright, 1.5, right);
 
