@@ -935,8 +935,8 @@ void R_RecursiveWorldNode (mnode_t *node)
 					surf->texturechain = waterchain;
 					waterchain = surf;
 				} else
+					GX_LoadPosMtxImm(view, GX_PNMTX0);
 					R_DrawSequentialPoly (surf);
-
 			}
 		}
 

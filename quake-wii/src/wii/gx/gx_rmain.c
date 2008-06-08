@@ -124,7 +124,8 @@ void R_RotateForEntity (entity_t *e)
 {
 	Mtx temp;
 
-	guMtxTransApply(model, model, e->origin[0],  e->origin[1],  e->origin[2]);
+	guMtxTrans(model, e->origin[0],  e->origin[1],  e->origin[2]);
+	guMtxConcat(model, temp, model);
 
 	guMtxRotAxisDeg(temp, &axis2, e->angles[1]);
 	guMtxConcat(model, temp, model);
@@ -905,7 +906,8 @@ void R_SetupGL (void)
 
 	GX_SetViewport(glx + x, gly + y2, w, h, ZMIN3D, ZMAX3D);
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
-	MYgluPerspective (r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
+	//MYgluPerspective (r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
+	guPerspective (perspective, r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 
 	if (mirror)
 	{
@@ -933,7 +935,8 @@ void R_SetupGL (void)
 	guMtxConcat(view, temp, view);
 	guMtxRotAxisDeg(temp, &axis2, -r_refdef.viewangles[1]);
 	guMtxConcat(view, temp, view);
-	guMtxTransApply(view, view, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
+	guMtxTrans(temp, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
+	guMtxConcat(view, temp, view);
 
 	Con_Printf("x: %f y: %f z: %f\nax:%f ay:%f az:%f\n", r_refdef.vieworg[0], r_refdef.vieworg[1], r_refdef.vieworg[2], r_refdef.viewangles[0], r_refdef.viewangles[1], r_refdef.viewangles[2]);
 
