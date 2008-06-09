@@ -792,6 +792,7 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 			numgltextures, (u32)SYS_GetArena2Lo(), (u32)SYS_GetArena2Hi());
 	SYS_SetArena2Lo(destination->data + scaled_width * scaled_height);
 
+	// ELUTODO use cache
 	destination->data = MEM_K0_TO_K1(destination->data);
 
 	s = scaled_width * scaled_height;
