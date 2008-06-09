@@ -127,12 +127,12 @@ void R_RotateForEntity (entity_t *e)
 	guMtxTrans(temp, e->origin[0],  e->origin[1],  e->origin[2]);
 	guMtxConcat(model, temp, model);
 
-	guMtxRotAxisDeg(temp, &axis2, e->angles[1]);
+	/*ELUTODO guMtxRotAxisDeg(temp, &axis2, e->angles[1]);
 	guMtxConcat(model, temp, model);
 	guMtxRotAxisDeg(temp, &axis1, -e->angles[0]);
 	guMtxConcat(model, temp, model);
 	guMtxRotAxisDeg(temp, &axis0, e->angles[2]);
-	guMtxConcat(model, temp, model);
+	guMtxConcat(model, temp, model);*/
 }
 
 /*
@@ -234,16 +234,10 @@ void R_DrawSpriteModel (entity_t *e)
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	VectorMA (e->origin, frame->down, up, point);
-	VectorMA (point, frame->left, right, point);
+	VectorMA (point, frame->right, right, point);
 	GX_Position3f32(point[0], point[1], point[2]);
 	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
-	GX_TexCoord2f32(0, 1);
-
-	VectorMA (e->origin, frame->up, up, point);
-	VectorMA (point, frame->left, right, point);
-	GX_Position3f32(point[0], point[1], point[2]);
-	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
-	GX_TexCoord2f32(0, 0);
+	GX_TexCoord2f32(1, 1);
 
 	VectorMA (e->origin, frame->up, up, point);
 	VectorMA (point, frame->right, right, point);
@@ -251,11 +245,17 @@ void R_DrawSpriteModel (entity_t *e)
 	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(1, 0);
 
-	VectorMA (e->origin, frame->down, up, point);
-	VectorMA (point, frame->right, right, point);
+	VectorMA (e->origin, frame->up, up, point);
+	VectorMA (point, frame->left, right, point);
 	GX_Position3f32(point[0], point[1], point[2]);
 	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
-	GX_TexCoord2f32(1, 1);
+	GX_TexCoord2f32(0, 0);
+
+	VectorMA (e->origin, frame->down, up, point);
+	VectorMA (point, frame->left, right, point);
+	GX_Position3f32(point[0], point[1], point[2]);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(0, 1);
 
 	GX_End();
 	QGX_Alpha(false);
@@ -858,19 +858,6 @@ void R_SetupFrame (void)
 
 }
 
-void MYgluPerspective( double fovy, double aspect, double zNear, double zFar )
-{
-   double xmin, xmax, ymin, ymax;
-
-   ymax = zNear * tan( fovy * M_PI / 360.0 );
-   ymin = -ymax;
-
-   xmin = ymin * aspect;
-   xmax = ymax * aspect;
-
-   guFrustum( perspective, ymin, ymax, xmin, xmax, zNear, zFar );
-}
-
 /*
 =============
 R_SetupGL
@@ -914,7 +901,6 @@ void R_SetupGL (void)
 
 	GX_SetViewport(glx + x, gly + y2, w, h, ZMIN3D, ZMAX3D);
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
-	//MYgluPerspective (r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 	guPerspective (perspective, r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 
 	if (mirror)
@@ -931,10 +917,10 @@ void R_SetupGL (void)
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
 	{
-	Vector campos = {r_refdef.vieworg[0],  r_refdef.vieworg[1],  r_refdef.vieworg[2]};
-	Vector camup = {vup[0], vup[1], vup[2]};
-	Vector camforward = {vpn[0] + r_refdef.vieworg[0], vpn[1] + r_refdef.vieworg[1], vpn[2] + r_refdef.vieworg[2]};
-	guLookAt(view, &campos, &camup, &camforward);
+		Vector campos = {r_refdef.vieworg[0],  r_refdef.vieworg[1],  r_refdef.vieworg[2]};
+		Vector camup = {vup[0], vup[1], vup[2]};
+		Vector camforward = {vpn[0] + r_refdef.vieworg[0], vpn[1] + r_refdef.vieworg[1], vpn[2] + r_refdef.vieworg[2]};
+		guLookAt(view, &campos, &camup, &camforward);
 	}
 
 	// ELUTODOglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
