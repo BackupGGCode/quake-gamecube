@@ -26,8 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "../../generic/quakedef.h"
 
-extern unsigned char d_15to8table[65536];
-
 cvar_t		gl_max_size = {"gl_max_size", "1024"};
 
 byte		*draw_chars;				// 8*8 graphic characters
@@ -62,7 +60,7 @@ typedef struct
 	unsigned	*data;
 	void		*allocated_area;
 
-	// So that we can reload quickly if gamma changes, etc...
+	// So that we can reload quickly if gamma changes, etc... What about cached pictures?
 	byte		*paletted_data;
 } gltexture_t;
 
