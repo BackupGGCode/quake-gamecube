@@ -110,6 +110,7 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 {
 	int		i;
 
+	// ELUTODO: check for failure cases (rendering to an aspect different of that of the quake-calculated frustum, etc
 	for (i=0 ; i<4 ; i++)
 		if (BoxOnPlaneSide (mins, maxs, &frustum[i]) == 2)
 			return true;
@@ -542,6 +543,8 @@ void R_DrawAliasModel (entity_t *e)
 	//
 	// draw all the triangles
 	//
+
+	// ELUTODO GL_DisableMultitexture();
 
 	guMtxIdentity(model);
 	R_RotateForEntity (e);
