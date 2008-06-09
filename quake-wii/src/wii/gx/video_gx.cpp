@@ -201,7 +201,7 @@ void GL_Init (void)
 		GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
 
 	GX_CopyDisp(xfb,GX_TRUE);
-	GX_SetDispCopyGamma(GX_GM_1_0); // ELUTODO
+	GX_SetDispCopyGamma(GX_GM_1_0);
 
 	GX_SetZCompLoc(false); // ELUTODO
 
@@ -262,20 +262,17 @@ void GL_EndRendering (void)
 
 		GX_DrawDone();
 
-		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+		QGX_ZMode((qboolean)true);
 		GX_SetColorUpdate(GX_TRUE);
 		GX_SetAlphaUpdate(GX_TRUE);
-		//GX_SetDstAlpha(GX_DISABLE, 0xFF); // ELUTODO
+		// GX_SetDstAlpha(GX_DISABLE, 0xFF); // ELUTODO
         // Start copying the frame buffer every vsync.
         GX_CopyDisp(xfb, GX_TRUE);
 
 		// ELUTODO?
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
-/* ELUTODO
-	glFlush();
-	glXSwapBuffers(dpy, win);
-*/
+		GX_WaitDrawDone();
 }
 
 static void Check_Gamma (unsigned char *pal)
