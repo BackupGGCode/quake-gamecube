@@ -682,6 +682,8 @@ void GL_Set2D (void)
 	QGX_Blend(true);
 	GX_SetCullMode(GX_CULL_NONE);
 	QGX_Alpha(true);
+
+	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 }
 
 //====================================================================
