@@ -662,6 +662,8 @@ void R_DrawParticles (void)
     GL_Bind(particletexture);
 	QGX_Blend (true);
 
+	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+
 	VectorScale (vup, 1.5, up);
 	VectorScale (vright, 1.5, right);
 
@@ -789,5 +791,6 @@ void R_DrawParticles (void)
 	}
 
 	QGX_Blend(false);
+	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 }
 

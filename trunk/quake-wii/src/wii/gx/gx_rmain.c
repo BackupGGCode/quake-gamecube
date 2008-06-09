@@ -332,7 +332,8 @@ lastposenum = posenum;
 			// normals and vertexes come from the frame list
 			GX_Position3f32(verts->v[0], verts->v[1], verts->v[2]);
 			l = shadedots[verts->lightnormalindex] * shadelight;
-			GX_Color4u8(l*255, l*255, l*255, 0xff); // ELUTODO: format of l?
+			l *= 255; if (l > 255.0f) l = 255.0f; // ELUTODO: format of l correct?
+			GX_Color4u8(l, l, l, 0xff);
 
 			// texture coordinates come from the draw list
 			GX_TexCoord2f32(((float *)order)[0], ((float *)order)[1]);
@@ -580,11 +581,15 @@ void R_DrawAliasModel (entity_t *e)
 	/* ELUTODO if (gl_smoothmodels.value)
 		glShadeModel (GL_SMOOTH);*/
 
+	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+
 	/* ELUTODO
 	if (gl_affinemodels.value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);*/
 
 	R_SetupAliasFrame (currententity->frame, paliashdr);
+
+	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 
 /* ELUTODO
 	glShadeModel (GL_FLAT);
@@ -947,6 +952,8 @@ r_refdef must be set before the first call
 */
 void R_RenderScene (void)
 {
+	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+
 	R_SetupFrame ();
 
 	R_SetFrustum ();
@@ -967,7 +974,6 @@ void R_RenderScene (void)
 
 	GX_LoadPosMtxImm(view, GX_PNMTX0);
 	R_DrawParticles ();
-
 }
 
 

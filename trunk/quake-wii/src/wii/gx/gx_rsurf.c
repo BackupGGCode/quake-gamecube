@@ -305,6 +305,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 		// Binds world to texture env 0
 		// ELUTODO GL_SelectTexture(TEXTURE0_SGIS);
 		GL_Bind (t->gl_texturenum);
+		GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 		// Binds lightmap to texenv 1
 		// ELUTODO GL_EnableMultitexture(); // Same as SelectTexture (TEXTURE1)
 		// ELUTODOGL_Bind (lightmap_textures + s->lightmaptexturenum);

@@ -226,8 +226,7 @@ void GL_Init (void)
 
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
-	// ELUTODO: glquake changed between MODULATE and REPLACE at various places
-	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
 	GX_InvalidateTexAll();
