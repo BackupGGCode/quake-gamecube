@@ -61,6 +61,9 @@ typedef struct
 	qboolean	mipmap;
 	unsigned	*data;
 	void		*allocated_area;
+
+	// So that we can reload quickly if gamma changes, etc...
+	byte		*paletted_data;
 } gltexture_t;
 
 #define	MAX_GLTEXTURES	1024
@@ -889,6 +892,7 @@ void GL_Upload8 (gltexture_t *destination, byte *data, int width, int height,  q
 		}
 	}
 
+	destination->paletted_data = data;
 	GL_Upload32 (destination, trans, width, height, mipmap, alpha);
 }
 
@@ -1070,6 +1074,7 @@ void GL_Update8 (gltexture_t *destination, byte *data, int width, int height,  q
 		}
 	}
 
+	destination->paletted_data = data;
 	GL_Update32 (destination, trans, width, height, mipmap, alpha);
 }
 
@@ -1100,5 +1105,6 @@ GL_LoadPicTexture
 */
 int GL_LoadPicTexture (qpic_t *pic)
 {
+	// ELUTODO: loading too much with "" fills the memory with repeated data? Hope not... Check later
 	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true);
 }
