@@ -796,8 +796,6 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	if ((int)destination->data & 31)
 		Sys_Error ("GL_Upload32: destination->data&31");
 
-	// ELUTODO: some data corruption seems to be taking place, maybe we are crossing some barriers here
-
 	pos = (u8 *)destination->data;
 	for (y = 0; y < scaled_height; y += 4)
 	{
@@ -980,8 +978,6 @@ void GL_Update32 (gltexture_t *destination, unsigned *data, int width, int heigh
 
 	if ((int)destination->data & 31)
 		Sys_Error ("GL_Upload32: destination->data&31");
-
-	// ELUTODO: some data corruption seems to be taking place, maybe we are crossing some barriers here
 
 	pos = (u8 *)destination->data;
 	for (y = 0; y < scaled_height; y += 4)
