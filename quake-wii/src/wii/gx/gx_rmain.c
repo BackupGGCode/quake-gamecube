@@ -116,23 +116,22 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 	return false;
 }
 
-Vector axis2 = {0,0,1};
-Vector axis1 = {0,1,0};
-Vector axis0 = {1,0,0};
-
 void R_RotateForEntity (entity_t *e)
 {
+	Vector axis2 = {0,0,1};
+	Vector axis1 = {0,1,0};
+	Vector axis0 = {1,0,0};
 	Mtx temp;
 
 	guMtxTrans(temp, e->origin[0],  e->origin[1],  e->origin[2]);
 	guMtxConcat(model, temp, model);
 
-	/*ELUTODO guMtxRotAxisDeg(temp, &axis2, e->angles[1]);
+	guMtxRotAxisDeg(temp, &axis2, e->angles[1]);
 	guMtxConcat(model, temp, model);
 	guMtxRotAxisDeg(temp, &axis1, -e->angles[0]);
 	guMtxConcat(model, temp, model);
 	guMtxRotAxisDeg(temp, &axis0, e->angles[2]);
-	guMtxConcat(model, temp, model);*/
+	guMtxConcat(model, temp, model);
 }
 
 /*
@@ -234,16 +233,10 @@ void R_DrawSpriteModel (entity_t *e)
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	VectorMA (e->origin, frame->down, up, point);
-	VectorMA (point, frame->right, right, point);
+	VectorMA (point, frame->left, right, point);
 	GX_Position3f32(point[0], point[1], point[2]);
 	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
-	GX_TexCoord2f32(1, 1);
-
-	VectorMA (e->origin, frame->up, up, point);
-	VectorMA (point, frame->right, right, point);
-	GX_Position3f32(point[0], point[1], point[2]);
-	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
-	GX_TexCoord2f32(1, 0);
+	GX_TexCoord2f32(0, 1);
 
 	VectorMA (e->origin, frame->up, up, point);
 	VectorMA (point, frame->left, right, point);
@@ -251,11 +244,17 @@ void R_DrawSpriteModel (entity_t *e)
 	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 	GX_TexCoord2f32(0, 0);
 
-	VectorMA (e->origin, frame->down, up, point);
-	VectorMA (point, frame->left, right, point);
+	VectorMA (e->origin, frame->up, up, point);
+	VectorMA (point, frame->right, right, point);
 	GX_Position3f32(point[0], point[1], point[2]);
 	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
-	GX_TexCoord2f32(0, 1);
+	GX_TexCoord2f32(1, 0);
+
+	VectorMA (e->origin, frame->down, up, point);
+	VectorMA (point, frame->right, right, point);
+	GX_Position3f32(point[0], point[1], point[2]);
+	GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+	GX_TexCoord2f32(1, 1);
 
 	GX_End();
 	QGX_Alpha(false);
@@ -312,15 +311,6 @@ lastposenum = posenum;
 	verts = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
 	verts += posenum * paliashdr->poseverts;
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
-
-	if (!strcmp (currententity->model->name, "progs/v_shot.mdl") || !strcmp (currententity->model->name, "progs/v_axe.mdl"))
-	{
-		Vector asdf = {verts->v[0], verts->v[1], verts->v[2]};
-
-		guVecMultiply(modelview, &asdf, &asdf);
-		Con_Printf("vtx0: x: %4.2f y: %4.2f z: %4.2f\n", asdf.x, asdf.y, asdf.x);
-		Con_Printf("peye: x: %4.2f y: %4.2f z: %4.2f\n", r_refdef.vieworg[0], r_refdef.vieworg[1], r_refdef.vieworg[2]);
-	}
 
 	while (1)
 	{
@@ -475,6 +465,7 @@ void R_DrawAliasModel (entity_t *e)
 	int			index;
 	float		s, t, an;
 	int			anim;
+	Mtx			temp;
 
 	clmodel = currententity->model;
 
@@ -556,12 +547,16 @@ void R_DrawAliasModel (entity_t *e)
 	R_RotateForEntity (e);
 
 	if (!strcmp (clmodel->name, "progs/eyes.mdl") && gl_doubleeyes.value) {
-		guMtxTransApply (model, model, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
+		guMtxTrans (temp, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
+		guMtxConcat(model, temp, model);
 // double size of eyes, since they are really hard to see in gl
-		guMtxScaleApply (model, model, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
+		guMtxScale (temp, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
+		guMtxConcat(model, temp, model);
 	} else {
-		guMtxTransApply (model, model, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-		guMtxScaleApply (model, model, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+		guMtxTrans (temp, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+		guMtxConcat(model, temp, model);
+		guMtxScale (temp, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+		guMtxConcat(model, temp, model);
 	}
 
 	guMtxConcat(view,model,modelview);
@@ -906,13 +901,17 @@ void R_SetupGL (void)
 	if (mirror)
 	{
 		if (mirror_plane->normal[2])
-			guMtxScaleApply (perspective, perspective, 1, -1, 1);
+		{
+			guMtxScale (temp, 1, -1, 1);
+			guMtxConcat(perspective, temp, perspective);
+		}
 		else
-			guMtxScaleApply (perspective, perspective, -1, 1, 1);
-		GX_SetCullMode(GX_CULL_BACK);
+			guMtxScale (temp, -1, 1, 1);
+			guMtxConcat(perspective, temp, perspective);
+		GX_SetCullMode(GX_CULL_FRONT);
 	}
 	else
-		GX_SetCullMode(GX_CULL_FRONT);
+		GX_SetCullMode(GX_CULL_BACK);
 
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 

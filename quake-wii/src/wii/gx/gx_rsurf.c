@@ -321,9 +321,9 @@ void R_DrawSequentialPoly (msurface_t *s)
 			theRect->h = 0;
 			theRect->w = 0;
 		}
-		v = p->verts[p->numverts - 1];
+		v = p->verts[0];
 		GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT0, p->numverts);
-		for (i=0 ; i<p->numverts ; i++, v-= VERTEXSIZE)
+		for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
 		{
 			GX_Position3f32(v[0], v[1], v[2]);
 			GX_Color4u8(0xff, 0xff, 0xff, 0xff);
