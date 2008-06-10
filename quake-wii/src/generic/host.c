@@ -480,6 +480,11 @@ not reinitialize anything.
 void Host_ClearMemory (void)
 {
 	Con_DPrintf ("Clearing memory\n");
+
+#if HW_RVL && GXQUAKE
+	GL_ClearTextureCache();
+#endif
+
 	D_FlushCaches ();
 	Mod_ClearAll ();
 	if (host_hunklevel)

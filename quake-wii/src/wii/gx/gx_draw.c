@@ -56,10 +56,15 @@ typedef struct
 	qboolean	mipmap;
 	unsigned	*data;
 	void		*allocated_area;
+	int			scaled_width, scaled_height;
 
-	// So that we can reload quickly if gamma changes, etc... What about cached pictures?
-	byte		*paletted_data;
+	// ELUTODO: make sure textures loaded without an identifier are loaded only one time, if "keep" is on
+	// What about mid-game gamma changes?
 	qboolean	type; // 0 = normal, 1 = lightmap
+	qboolean	keep;
+
+	int			*texnumpointer;
+	int			texnumpointer_cnt; // ELUTODO: bad hack
 } gltexture_t;
 
 #define	MAX_GLTEXTURES	2048
@@ -127,7 +132,7 @@ byte		menuplyr_pixels[4096];
 int		pic_texels;
 int		pic_count;
 
-int GL_LoadPicTexture (qpic_t *pic);
+void GL_LoadPicTexture (qpic_t *pic, int *dest);
 
 qpic_t *Draw_PicFromWad (char *name)
 {
@@ -137,7 +142,7 @@ qpic_t *Draw_PicFromWad (char *name)
 	p = W_GetLumpName (name);
 	gl = (glpic_t *)p->data;
 
-	gl->texnum = GL_LoadPicTexture (p);
+	GL_LoadPicTexture (p, &gl->texnum);
 	gl->sl = 0;
 	gl->sh = 1;
 	gl->tl = 0;
@@ -186,7 +191,7 @@ qpic_t	*Draw_CachePic (char *path)
 	pic->pic.height = dat->height;
 
 	gl = (glpic_t *)pic->pic.data;
-	gl->texnum = GL_LoadPicTexture (dat);
+	GL_LoadPicTexture (dat, &gl->texnum);
 	gl->sl = 0;
 	gl->sh = 1;
 	gl->tl = 0;
@@ -261,7 +266,7 @@ void Draw_Init (void)
 			draw_chars[i] = 255;	// proper transparent color
 
 	// now turn them into textures
-	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
+	GL_LoadTexture ("charset", 128, 128, draw_chars, false, true, true, &char_texture, 1);
 
 	start = Hunk_LowMark();
 
@@ -283,7 +288,7 @@ void Draw_Init (void)
 	ncdata = cb->data;
 
 	gl = (glpic_t *)conback->data;
-	gl->texnum = GL_LoadTexture ("conback", conback->width, conback->height, ncdata, false, false);
+	GL_LoadTexture ("conback", conback->width, conback->height, ncdata, false, false, true, &gl->texnum, 1);
 	gl->sl = 0;
 	gl->sh = 1;
 	gl->tl = 0;
@@ -296,8 +301,8 @@ void Draw_Init (void)
 
 	player_pic = Draw_CachePic("gfx/menuplyr.lmp");
 	// save a texture slot for translated picture
-	translate_texture = GL_LoadTexture("player_translate", player_pic->width, player_pic->height, player_pic->data,
-		false, false);
+	GL_LoadTexture("player_translate", player_pic->width, player_pic->height, player_pic->data,
+		false, false, true, &translate_texture, 1);
 
 	//
 	// get the other pics we need
@@ -305,7 +310,7 @@ void Draw_Init (void)
 	draw_disc = Draw_PicFromWad ("disc");
 	draw_backtile = Draw_PicFromWad ("backtile");
 
-	white_texturenum = GL_LoadTexture("white_texturenum", 8, 8, white_texture, false, false);
+	GL_LoadTexture("white_texturenum", 8, 8, white_texture, false, false, true, &white_texturenum, 1);
 }
 
 
@@ -812,6 +817,9 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	// ELUTODO use cache
 	destination->data = MEM_K0_TO_K1(destination->data);
 
+	destination->scaled_width = scaled_width;
+	destination->scaled_height = scaled_height;
+
 	s = scaled_width * scaled_height;
 	if (s & 31)
 		Sys_Error ("GL_Upload32: s&31");
@@ -912,7 +920,6 @@ void GL_Upload8 (gltexture_t *destination, byte *data, int width, int height,  q
 		}
 	}
 
-	destination->paletted_data = data;
 	GL_Upload32 (destination, trans, width, height, mipmap, alpha);
 }
 
@@ -921,7 +928,7 @@ void GL_Upload8 (gltexture_t *destination, byte *data, int width, int height,  q
 GL_LoadTexture
 ================
 */
-int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha)
+void GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha, qboolean keep, int *dest, int dest_count)
 {
 	int			i;
 	gltexture_t	*glt;
@@ -936,7 +943,8 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 			{
 				if (width != glt->width || height != glt->height)
 					Sys_Error ("GL_LoadTexture: cache mismatch");
-				return gltextures[i].texnum;
+				*dest = gltextures[i].texnum;
+				return;
 			}
 		}
 	}
@@ -951,12 +959,19 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 	glt->height = height;
 	glt->mipmap = mipmap;
 	glt->type = 0;
+	glt->keep = keep;
 
 	GL_Upload8 (glt, data, width, height, mipmap, alpha);
 
 	numgltextures++;
 
-	return glt->texnum;
+	glt->texnumpointer_cnt = dest_count;
+	glt->texnumpointer = dest;
+	if (dest)
+	{
+		for (i = 0; i < dest_count; i++)
+			dest[i] = glt->texnum;
+	}
 }
 
 /*
@@ -981,7 +996,6 @@ void GL_UploadLightmap8 (gltexture_t *destination, byte *data, int width, int he
 		trans[i] = (p << 16) + (p << 8) + p;
 	}
 
-	destination->paletted_data = data;
 	// ELUTODO: really mipmap?
 	GL_Upload32 (destination, trans, width, height, true, true);
 }
@@ -1006,6 +1020,8 @@ int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data)
 	glt->height = height;
 	glt->mipmap = true; // ELUTODO
 	glt->type = 1;
+	glt->keep = false;
+	glt->texnumpointer = NULL;
 
 	GL_UploadLightmap8 (glt, data, width, height);
 
@@ -1154,7 +1170,6 @@ void GL_Update8 (gltexture_t *destination, byte *data, int width, int height,  q
 		}
 	}
 
-	destination->paletted_data = data;
 	GL_Update32 (destination, trans, width, height, mipmap, alpha);
 }
 
@@ -1200,7 +1215,6 @@ void GL_UpdateLightmap8 (gltexture_t *destination, byte *data, int width, int he
 		trans[i] = (p << 16) + (p << 8) + p;
 	}
 
-	destination->paletted_data = data;
 	// ELUTODO: really mipmap?
 	GL_Update32 (destination, trans, width, height, true, true);
 }
@@ -1230,13 +1244,13 @@ int GL_UpdateLightmapTexture (int pic_id, char *identifier, int width, int heigh
 GL_LoadPicTexture
 ================
 */
-int GL_LoadPicTexture (qpic_t *pic)
+void GL_LoadPicTexture (qpic_t *pic, int *dest)
 {
 	// ELUTODO: loading too much with "" fills the memory with repeated data? Hope not... Check later
-	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true);
+	GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true, true, dest, 1);
 }
 
-// ELUTODO: clean the disable/enable multitexture calls
+// ELUTODO: clean the disable/enable multitexture calls around the engine
 
 void GL_DisableMultitexture(void)
 {
@@ -1267,4 +1281,57 @@ void GL_EnableMultitexture(void)
 
 	GX_SetNumTexGens(2);
 	GX_SetNumTevStages(2);
+}
+
+void GL_ClearTextureCache(void)
+{
+	int i, j;
+	int oldnumgltextures = numgltextures;
+
+	numgltextures = 0;
+	SYS_SetArena2Lo((void *)ARENA2_HI);
+
+	for (i = 0; i < oldnumgltextures; i++)
+	{
+		if (gltextures[i].keep)
+		{
+			// We use memmove in the case the data is at the same area
+			gltextures[numgltextures].texnum = numgltextures;
+			memmove(gltextures[numgltextures].identifier, gltextures[i].identifier, 64);
+			gltextures[numgltextures].width = gltextures[i].width;
+			gltextures[numgltextures].height = gltextures[i].height;
+			gltextures[numgltextures].mipmap = gltextures[i].mipmap;
+			gltextures[numgltextures].type = gltextures[i].type;
+			gltextures[numgltextures].keep = gltextures[i].keep;
+			gltextures[numgltextures].scaled_width = gltextures[i].scaled_width;
+			gltextures[numgltextures].scaled_height = gltextures[i].scaled_height;
+
+			// ELUTODO manage properly
+			gltextures[numgltextures].allocated_area = SYS_GetArena2Lo();
+			gltextures[numgltextures].data = Align_To_32_Bytes(gltextures[numgltextures].allocated_area);
+			if ((u32)gltextures[numgltextures].data + gltextures[numgltextures].scaled_width * gltextures[numgltextures].scaled_height * sizeof(unsigned) >= 0x933e0000)
+				Sys_Error("GL_Upload32: Out of memory.\nnumgltextures = %d\narena2lo = %.8x\narena2hi = %.8x",
+					numgltextures, (u32)SYS_GetArena2Lo(), (u32)SYS_GetArena2Hi());
+			SYS_SetArena2Lo(gltextures[numgltextures].data + gltextures[numgltextures].scaled_width * gltextures[numgltextures].scaled_height);
+
+			// ELUTODO use cache
+			gltextures[numgltextures].data = MEM_K0_TO_K1(gltextures[numgltextures].data);
+
+			memmove(gltextures[numgltextures].data, gltextures[i].data, gltextures[numgltextures].scaled_width * gltextures[numgltextures].scaled_height * 4);
+
+			GX_InitTexObj(&gltextures[numgltextures].gx_tex, gltextures[numgltextures].data, gltextures[numgltextures].scaled_width, gltextures[numgltextures].scaled_height, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, /*mipmap ? GX_TRUE :*/ GX_FALSE);
+
+			gltextures[numgltextures].texnumpointer = gltextures[i].texnumpointer;
+			gltextures[numgltextures].texnumpointer_cnt = gltextures[i].texnumpointer_cnt;
+			if (gltextures[i].texnumpointer)
+			{
+				for (j = 0; j < gltextures[numgltextures].texnumpointer_cnt; j++)
+					gltextures[numgltextures].texnumpointer[j] = numgltextures;
+			}
+
+			numgltextures++;
+		}
+	}
+
+	GX_InvalidateTexAll();
 }

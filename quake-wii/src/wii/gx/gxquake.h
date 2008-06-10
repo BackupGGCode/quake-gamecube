@@ -23,7 +23,7 @@ void GL_EndRendering (void);
 
 extern	float	gldepthmin, gldepthmax;
 
-int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
+void GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha, qboolean keep, int *dest, int dest_count);
 int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data);
 int GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
 int GL_UpdateLightmapTexture (int pic_id, char *identifier, int width, int height, byte *data);
@@ -202,3 +202,5 @@ void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
 
 extern int numgltextures;
+
+void GL_ClearTextureCache(void);

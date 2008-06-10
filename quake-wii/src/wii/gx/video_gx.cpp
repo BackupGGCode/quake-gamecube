@@ -18,6 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // ELUTODO: horizontal tv border
+// ELUTODO: double buffer
 #include <malloc.h>
 #include <ogc/cache.h>
 #include <ogc/gx.h>

@@ -1010,10 +1010,7 @@ void R_InitSky (texture_t *mt)
 		for (j=0 ; j<128 ; j++)
 			trans[(i*128) + j] = src[i*256 + j + 128];
 
-	if (!solidskytexture)
-		solidskytexture = GL_LoadTexture("render_solidskytexture", 128, 128, trans, true, true);
-	else
-		solidskytexture = GL_UpdateTexture(solidskytexture, "render_solidskytexture", 128, 128, trans, true, true);
+	GL_LoadTexture("render_solidskytexture", 128, 128, trans, true, true, false, &solidskytexture, 1);
 
 	for (i=0 ; i<128 ; i++)
 		for (j=0 ; j<128 ; j++)
@@ -1025,9 +1022,6 @@ void R_InitSky (texture_t *mt)
 				trans[(i*128) + j] = p;
 		}
 
-	if (!alphaskytexture)
-		alphaskytexture = GL_LoadTexture("render_alphaskytexture", 128, 128, trans, true, true);
-	else
-		alphaskytexture = GL_UpdateTexture(alphaskytexture, "render_alphaskytexture", 128, 128, trans, true, true);
+	GL_LoadTexture("render_alphaskytexture", 128, 128, trans, true, true, false, &alphaskytexture, 1);
 }
 

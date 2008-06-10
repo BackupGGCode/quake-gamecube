@@ -58,13 +58,11 @@ namespace quake
 		pixel_pair	(*xfb)[][640]	= 0;
 		GXRModeObj*	rmode			= 0;
 
-		#define ARENA_LO	0x90080000
-		#define ARENA_HI	0x91000000
 		// Set up the heap.
 		//static const size_t	heap_size	= 12 * 1024 * 1024;
-		static const size_t	heap_size	= (ARENA_HI - ARENA_LO);
+		static const size_t	heap_size	= (ARENA2_HI - ARENA2_LO);
 		//static char			heap[heap_size] __attribute__((aligned(8)));
-		static char		*heap = (char *)ARENA_LO;
+		static char		*heap = (char *)ARENA2_LO;
 
 		static void init()
 		{
@@ -225,7 +223,7 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
-	SYS_SetArena2Lo((void *)ARENA_HI);
+	SYS_SetArena2Lo((void *)ARENA2_HI);
 	__STM_Init();
 	SYS_SetResetCallback(reset_system);
 
