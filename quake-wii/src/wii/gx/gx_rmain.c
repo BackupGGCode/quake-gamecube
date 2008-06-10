@@ -109,7 +109,7 @@ Returns true if the box is completely outside the frustom
 qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 {
 	int		i;
-return false; // ELUTODO
+
 	// ELUTODO: check for failure cases (rendering to an aspect different of that of the quake-calculated frustum, etc
 	for (i=0 ; i<4 ; i++)
 		if (BoxOnPlaneSide (mins, maxs, &frustum[i]) == 2)
@@ -881,21 +881,21 @@ void R_SetupGL (void)
 	//
 	x = r_refdef.vrect.x * glwidth/vid.width;
 	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * glwidth/vid.width;
-	y = (vid.height-r_refdef.vrect.y) * glheight/vid.height;
-	y2 = (vid.height - (r_refdef.vrect.y + r_refdef.vrect.height)) * glheight/vid.height;
+	y = r_refdef.vrect.y * glheight/vid.height;
+	y2 = (r_refdef.vrect.y + r_refdef.vrect.height) * glheight/vid.height;
 
 	// fudge around because of frac screen scale
 	if (x > 0)
 		x--;
 	if (x2 < glwidth)
 		x2++;
-	if (y2 < 0)
-		y2--;
-	if (y < glheight)
-		y++;
+	if (y > 0)
+		y--;
+	if (y2 < glheight)
+		y2++;
 
 	w = x2 - x;
-	h = y - y2;
+	h = y2 - y;
 
 	if (envmap)
 	{
@@ -903,7 +903,7 @@ void R_SetupGL (void)
 		w = h = 256;
 	}
 
-	GX_SetViewport(glx + x, gly + y2, w, h, 0.0f, 1.0f);
+	GX_SetViewport(glx + x, gly + y, w, h, 0.0f, 1.0f);
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
 	guPerspective (perspective, r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 
