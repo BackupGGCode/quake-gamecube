@@ -196,3 +196,5 @@ extern Mtx view, model, modelview;
 void QGX_ZMode(qboolean state);
 void QGX_Alpha(qboolean state);
 void QGX_Blend(qboolean state);
+
+extern int white_texturenum;
