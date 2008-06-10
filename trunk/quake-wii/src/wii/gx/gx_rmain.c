@@ -109,7 +109,7 @@ Returns true if the box is completely outside the frustom
 qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 {
 	int		i;
-
+return false; // ELUTODO
 	// ELUTODO: check for failure cases (rendering to an aspect different of that of the quake-calculated frustum, etc
 	for (i=0 ; i<4 ; i++)
 		if (BoxOnPlaneSide (mins, maxs, &frustum[i]) == 2)
@@ -124,15 +124,16 @@ void R_RotateForEntity (entity_t *e)
 	Vector axis0 = {1,0,0};
 	Mtx temp;
 
-	guMtxTrans(temp, e->origin[0],  e->origin[1],  e->origin[2]);
-	guMtxConcat(model, temp, model);
+	// ELUTODO: change back to asm when ALL functions have been corrected
+	c_guMtxTrans(temp, e->origin[0],  e->origin[1],  e->origin[2]);
+	c_guMtxConcat(model, temp, model);
 
-	guMtxRotAxisDeg(temp, &axis2, e->angles[1]);
-	guMtxConcat(model, temp, model);
-	guMtxRotAxisDeg(temp, &axis1, -e->angles[0]);
-	guMtxConcat(model, temp, model);
-	guMtxRotAxisDeg(temp, &axis0, e->angles[2]);
-	guMtxConcat(model, temp, model);
+	c_guMtxRotAxisRad(temp, &axis2, DegToRad(e->angles[1]));
+	c_guMtxConcat(model, temp, model);
+	c_guMtxRotAxisRad(temp, &axis1, DegToRad(-e->angles[0]));
+	c_guMtxConcat(model, temp, model);
+	c_guMtxRotAxisRad(temp, &axis0, DegToRad(e->angles[2]));
+	c_guMtxConcat(model, temp, model);
 }
 
 /*
@@ -547,23 +548,23 @@ void R_DrawAliasModel (entity_t *e)
 
 	// ELUTODO GL_DisableMultitexture();
 
-	guMtxIdentity(model);
+	c_guMtxIdentity(model);
 	R_RotateForEntity (e);
 
 	if (!strcmp (clmodel->name, "progs/eyes.mdl") && gl_doubleeyes.value) {
-		guMtxTrans (temp, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
-		guMtxConcat(model, temp, model);
+		c_guMtxTrans (temp, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
+		c_guMtxConcat(model, temp, model);
 // double size of eyes, since they are really hard to see in gl
-		guMtxScale (temp, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
-		guMtxConcat(model, temp, model);
+		c_guMtxScale (temp, paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
+		c_guMtxConcat(model, temp, model);
 	} else {
-		guMtxTrans (temp, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-		guMtxConcat(model, temp, model);
-		guMtxScale (temp, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
-		guMtxConcat(model, temp, model);
+		c_guMtxTrans (temp, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+		c_guMtxConcat(model, temp, model);
+		c_guMtxScale (temp, paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+		c_guMtxConcat(model, temp, model);
 	}
 
-	guMtxConcat(view,model,modelview);
+	c_guMtxConcat(view,model,modelview);
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	anim = (int)(cl.time*10) & 3;
@@ -910,12 +911,12 @@ void R_SetupGL (void)
 	{
 		if (mirror_plane->normal[2])
 		{
-			guMtxScale (temp, 1, -1, 1);
-			guMtxConcat(perspective, temp, perspective);
+			c_guMtxScale (temp, 1, -1, 1);
+			c_guMtxConcat(perspective, temp, perspective);
 		}
 		else
-			guMtxScale (temp, -1, 1, 1);
-			guMtxConcat(perspective, temp, perspective);
+			c_guMtxScale (temp, -1, 1, 1);
+			c_guMtxConcat(perspective, temp, perspective);
 		GX_SetCullMode(GX_CULL_FRONT);
 	}
 	else

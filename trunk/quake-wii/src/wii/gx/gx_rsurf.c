@@ -637,12 +637,12 @@ void R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	guMtxIdentity(model);
+	c_guMtxIdentity(model);
 e->angles[0] = -e->angles[0];	// stupid quake bug
 	R_RotateForEntity (e);
 e->angles[0] = -e->angles[0];	// stupid quake bug
 
-	guMtxConcat(view,model,modelview);
+	c_guMtxConcat(view,model,modelview);
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	//
