@@ -118,11 +118,12 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 	return false;
 }
 
+Vector axis2 = {0,0,1};
+Vector axis1 = {0,1,0};
+Vector axis0 = {1,0,0};
+
 void R_RotateForEntity (entity_t *e)
 {
-	Vector axis2 = {0,0,1};
-	Vector axis1 = {0,1,0};
-	Vector axis0 = {1,0,0};
 	Mtx temp;
 
 	// ELUTODO: change back to asm when ALL functions have been corrected
@@ -740,36 +741,50 @@ R_PolyBlend
 */
 void R_PolyBlend (void)
 {
+	Mtx temp;
+
 	if (!gl_polyblend.value)
 		return;
 	if (!v_blend[3])
 		return;
 
-/* ELUTODO
-	glDisable (GL_ALPHA_TEST);
-	glEnable (GL_BLEND);
-	glDisable (GL_DEPTH_TEST);
-	glDisable (GL_TEXTURE_2D);
+	QGX_Alpha(false);
+	QGX_Blend(true);
+	QGX_ZMode(false);
+	GL_Bind(white_texturenum); // ELUTODO: do not use a texture
+	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 
-    glLoadIdentity ();
+	c_guMtxIdentity(view);
+    c_guMtxRotAxisRad(temp, &axis0, DegToRad(-90.0f));		// put Z going up
+	c_guMtxConcat(view, temp, view);
+    c_guMtxRotAxisRad(temp, &axis2, DegToRad(90.0f));		// put Z going up
+	c_guMtxConcat(view, temp, view);
+	GX_LoadPosMtxImm(view, GX_PNMTX0);
 
-    glRotatef (-90,  1, 0, 0);	    // put Z going up
-    glRotatef (90,  0, 0, 1);	    // put Z going up
+	// ELUTODO: check if v_blend gets bigger than 1.0f
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
-	glColor4fv (v_blend);
+	GX_Position3f32(10.0f, 100.0f, 100.0f);
+	GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
+	GX_TexCoord2f32(1.0f, 1.0f);
 
-	glBegin (GL_QUADS);
+	GX_Position3f32(10.0f, -100.0f, 100.0f);
+	GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
+	GX_TexCoord2f32(0.0f, 1.0f);
 
-	glVertex3f (10, 100, 100);
-	glVertex3f (10, -100, 100);
-	glVertex3f (10, -100, -100);
-	glVertex3f (10, 100, -100);
-	glEnd ();
+	GX_Position3f32(10.0f, -100.0f, -100.0f);
+	GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
+	GX_TexCoord2f32(0.0f, 0.0f);
 
-	glDisable (GL_BLEND);
-	glEnable (GL_TEXTURE_2D);
-	glEnable (GL_ALPHA_TEST);
-*/
+	GX_Position3f32(10.0f, 100.0f, -100.0f);
+	GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
+	GX_TexCoord2f32(1.0f, 0.0f);
+
+	GX_End();
+
+	QGX_Blend(false);
+	QGX_Alpha(true);
+	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 }
 
 
