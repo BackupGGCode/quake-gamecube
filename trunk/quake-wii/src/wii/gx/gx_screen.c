@@ -873,8 +873,6 @@ void SCR_UpdateScreen (void)
 	
 	V_RenderView ();
 
-	// ELUTODO: flushing here has any effect? didn't help with the zbuffer issue
-
 	GL_Set2D ();
 
 	//
