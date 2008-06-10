@@ -35,6 +35,8 @@ qpic_t		*draw_backtile;
 int			translate_texture;
 int			char_texture;
 
+int			white_texturenum;
+
 typedef struct
 {
 	int			texnum;
@@ -231,6 +233,16 @@ void Draw_Init (void)
 	glpic_t	*gl;
 	int		start;
 	byte	*ncdata;
+	byte	white_texture[64] = { // ELUTODO assumes 0xfe is white
+									0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe,
+									0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe,
+									0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe,
+									0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe,
+									0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe,
+									0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe,
+									0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe,
+									0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe
+								}; // ELUTODO no necessity to be this big?
 
 	numgltextures = 0;
 
@@ -289,6 +301,8 @@ void Draw_Init (void)
 	//
 	draw_disc = Draw_PicFromWad ("disc");
 	draw_backtile = Draw_PicFromWad ("backtile");
+
+	white_texturenum = GL_LoadTexture("white_texturenum", 8, 8, white_texture, false, false);
 }
 
 
@@ -600,7 +614,7 @@ void Draw_FadeScreen (void)
 	QGX_Alpha(false);
 	QGX_Blend(true);
 
-	GL_Bind (*(int *)draw_backtile->data);
+	GL_Bind (white_texturenum);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(0, 0, 0.0f);
@@ -912,6 +926,7 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 	{
 		for (i=0, glt=gltextures ; i<numgltextures ; i++, glt++)
 		{
+			// ELUTODO: causes problems if we compare to a texture with NO name?
 			if (!strcmp (identifier, glt->identifier))
 			{
 				if (width != glt->width || height != glt->height)
