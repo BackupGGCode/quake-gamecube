@@ -950,8 +950,12 @@ R_RenderScene
 r_refdef must be set before the first call
 ================
 */
+#define _SHIFTL(v, s, w)  \
+	((u32) (((u32)(v) & ((0x01 << (w)) - 1)) << (s)))
 void R_RenderScene (void)
 {
+	u32 z, regval;;
+
 	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 
 	R_SetupFrame ();
@@ -974,6 +978,13 @@ void R_RenderScene (void)
 
 	GX_LoadPosMtxImm(view, GX_PNMTX0);
 	R_DrawParticles ();
+
+	regval = 0xc8000000|(_SHIFTL(320,2,10));
+	regval = (regval&~0x3FF000)|(_SHIFTL(240,12,10));
+	regval = (regval&~0xC00000)|0x400000;
+	z = *(u32*)regval;
+
+	Con_Printf("Z320,240: %d\n", z);
 }
 
 

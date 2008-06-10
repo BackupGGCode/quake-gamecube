@@ -232,7 +232,6 @@ void GL_EndRendering (void)
 
 		GX_DrawDone();
 
-		QGX_ZMode((qboolean)true);
 		GX_SetColorUpdate(GX_TRUE);
 		GX_SetAlphaUpdate(GX_TRUE);
 		// GX_SetDstAlpha(GX_DISABLE, 0xFF); // ELUTODO
