@@ -686,7 +686,7 @@ void GL_Set2D (void)
 	guOrtho(perspective,0, vid.conheight,0,vid.conwidth,ZMIN2D,ZMAX2D);
 	GX_LoadProjectionMtx(perspective, GX_ORTHOGRAPHIC);
 
-	guMtxIdentity(modelview);
+	c_guMtxIdentity(modelview);
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	// ELUODO: filtering is making some borders
