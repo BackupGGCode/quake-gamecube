@@ -81,7 +81,7 @@ cvar_t	r_fullbright = {"r_fullbright","0"};
 cvar_t	r_lightmap = {"r_lightmap","0"};
 cvar_t	r_shadows = {"r_shadows","0"};
 cvar_t	r_mirroralpha = {"r_mirroralpha","1"};
-cvar_t	r_wateralpha = {"r_wateralpha","1"};
+cvar_t	r_wateralpha = {"r_wateralpha","0.5"};
 cvar_t	r_dynamic = {"r_dynamic","1"};
 cvar_t	r_novis = {"r_novis","0"};
 
@@ -1123,6 +1123,7 @@ void R_RenderView (void)
 
 	R_RenderScene ();
 	R_DrawViewModel ();
+	GX_LoadPosMtxImm(view, GX_PNMTX0);
 	R_DrawWaterSurfaces ();
 
 //  More fog right here :)

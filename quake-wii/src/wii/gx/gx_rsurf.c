@@ -310,6 +310,8 @@ void R_DrawSequentialPoly (msurface_t *s)
 		{
 			lightmap_modified[i] = false;
 			theRect = &lightmap_rectchange[i];
+			// PRIORITY ELUTODO: FAST substitute for this. we shouldn't reupload everything, you know...
+			/*GL_UpdateLightmapTexture (lightmap_textures + i, "", BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);*/
 			/* ELUTODO glTexSubImage2D(GL_TEXTURE_2D, 0, 0, theRect->t, 
 				BLOCK_WIDTH, theRect->h, gl_lightmap_format, GL_UNSIGNED_BYTE,
 				lightmaps+(i* BLOCK_HEIGHT + theRect->t) *BLOCK_WIDTH*lightmap_bytes);*/
@@ -352,16 +354,17 @@ void R_DrawSequentialPoly (msurface_t *s)
 
 	t = R_TextureAnimation (s->texinfo->texture);
 	GL_Bind0 (t->gl_texturenum);
-/* ELUTODO
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 	GL_EnableMultitexture();
-*/
+
 	GL_Bind1 (lightmap_textures + s->lightmaptexturenum);
 	i = s->lightmaptexturenum;
 	if (lightmap_modified[i])
 	{
 		lightmap_modified[i] = false;
 		theRect = &lightmap_rectchange[i];
+		// PRIORITY ELUTODO: FAST substitute for this. we shouldn't reupload everything, you know...
 		/* ELUTODO glTexSubImage2D(GL_TEXTURE_2D, 0, 0, theRect->t, 
 			BLOCK_WIDTH, theRect->h, gl_lightmap_format, GL_UNSIGNED_BYTE,
 			lightmaps+(i* BLOCK_HEIGHT + theRect->t) *BLOCK_WIDTH*lightmap_bytes);*/
@@ -370,23 +373,21 @@ void R_DrawSequentialPoly (msurface_t *s)
 		theRect->h = 0;
 		theRect->w = 0;
 	}
-/* ELUTODO
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-	glBegin (GL_TRIANGLE_FAN);
+
 	v = p->verts[0];
+	GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT1, p->numverts);
 	for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
 	{
-		qglMTexCoord2fSGIS (TEXTURE0_SGIS, v[3], v[4]);
-		qglMTexCoord2fSGIS (TEXTURE1_SGIS, v[5], v[6]);
-
 		nv[0] = v[0] + 8*sin(v[1]*0.05+realtime)*sin(v[2]*0.05+realtime);
 		nv[1] = v[1] + 8*sin(v[0]*0.05+realtime)*sin(v[2]*0.05+realtime);
 		nv[2] = v[2];
 
-		glVertex3fv (nv);
+		GX_Position3f32(nv[0], nv[1], nv[2]);
+		GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+		GX_TexCoord2f32(v[3], v[4]);
+		GX_TexCoord2f32(v[5], v[6]);
 	}
-	glEnd ();
-*/
+	GX_End();
 }
 
 /*
@@ -473,22 +474,20 @@ void R_DrawWaterSurfaces (void)
 	msurface_t	*s;
 	texture_t	*t;
 
+	if (!waterchain)
+		return;
+
 	//
 	// go back to the world matrix
 	//
 
-/* ELUTODO
-    glLoadMatrixf (r_world_matrix);
+/* ELUTODO - check when implementing mirrors
+    glLoadMatrixf (r_world_matrix);*/
 
 	if (r_wateralpha.value < 1.0) {
-		glEnable (GL_BLEND);
-		glColor4f (1,1,1,r_wateralpha.value);
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		QGX_Blend (true);
+		GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 	}
-*/
-
-	if (!waterchain)
-		return;
 
 	for ( s = waterchain ; s ; s=s->texturechain) {
 		GL_Bind0 (s->texinfo->texture->gl_texturenum);
@@ -497,14 +496,10 @@ void R_DrawWaterSurfaces (void)
 		
 	waterchain = NULL;
 
-/* ELUTODO
 	if (r_wateralpha.value < 1.0) {
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-		glColor4f (1,1,1,1);
-		glDisable (GL_BLEND);
+		GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+		QGX_Blend (false);
 	}
-*/
 }
 
 /*
