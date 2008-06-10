@@ -198,10 +198,9 @@ void EmitWaterPolys (msurface_t *fa)
 	int			i;
 	float		s, t, os, ot;
 
-/* ELUTODO
 	for (p=fa->polys ; p ; p=p->next)
 	{
-		glBegin (GL_POLYGON);
+		GX_Begin (GX_TRIANGLEFAN, GX_VTXFMT0, p->numverts);
 		for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
 		{
 			os = v[3];
@@ -213,12 +212,12 @@ void EmitWaterPolys (msurface_t *fa)
 			t = ot + turbsin[(int)((os*0.125+realtime) * TURBSCALE) & 255];
 			t *= (1.0/64);
 
-			glTexCoord2f (s, t);
-			glVertex3fv (v);
+			GX_Position3f32(v[0], v[1], v[2]);
+			GX_Color4u8(0xff, 0xff, 0xff, r_wateralpha.value * 0xff); // ELUTODO issues with draw order AND shoudn't be enabled if the map doesn't have watervis info
+			GX_TexCoord2f32(s, t);
 		}
-		glEnd ();
+		GX_End ();
 	}
-*/
 }
 
 
