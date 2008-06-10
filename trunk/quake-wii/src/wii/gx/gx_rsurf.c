@@ -300,12 +300,11 @@ void R_DrawSequentialPoly (msurface_t *s)
 
 		t = R_TextureAnimation (s->texinfo->texture);
 		// Binds world to texture env 0
-		// ELUTODO GL_SelectTexture(TEXTURE0_SGIS);
-		GL_Bind (t->gl_texturenum);
+		GL_Bind0 (t->gl_texturenum);
 		GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 		// Binds lightmap to texenv 1
-		// ELUTODO GL_EnableMultitexture(); // Same as SelectTexture (TEXTURE1)
-		// ELUTODOGL_Bind (lightmap_textures + s->lightmaptexturenum);
+		GL_EnableMultitexture();
+		GL_Bind1 (lightmap_textures + s->lightmaptexturenum);
 		i = s->lightmaptexturenum;
 		if (lightmap_modified[i])
 		{
@@ -320,26 +319,15 @@ void R_DrawSequentialPoly (msurface_t *s)
 			theRect->w = 0;
 		}
 		v = p->verts[0];
-		GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT0, p->numverts);
+		GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT1, p->numverts);
 		for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
 		{
 			GX_Position3f32(v[0], v[1], v[2]);
 			GX_Color4u8(0xff, 0xff, 0xff, 0xff);
 			GX_TexCoord2f32(v[3], v[4]);
+			GX_TexCoord2f32(v[5], v[6]);
 		}
 		GX_End();
-/* ELUTODO
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-		glBegin(GL_POLYGON);
-		v = p->verts[0];
-		for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
-		{
-			qglMTexCoord2fSGIS (TEXTURE0_SGIS, v[3], v[4]);
-			qglMTexCoord2fSGIS (TEXTURE1_SGIS, v[5], v[6]);
-			glVertex3fv (v);
-		}
-		glEnd ();
-*/
 		return;
 	}
 
@@ -349,8 +337,8 @@ void R_DrawSequentialPoly (msurface_t *s)
 
 	if (s->flags & SURF_DRAWTURB)
 	{
-		// ELUTODO GL_DisableMultitexture();
-		GL_Bind (s->texinfo->texture->gl_texturenum);
+		GL_DisableMultitexture();
+		GL_Bind0 (s->texinfo->texture->gl_texturenum);
 		EmitWaterPolys (s);
 		return;
 	}
@@ -363,13 +351,12 @@ void R_DrawSequentialPoly (msurface_t *s)
 	p = s->polys;
 
 	t = R_TextureAnimation (s->texinfo->texture);
-	// ELUTODO GL_SelectTexture(TEXTURE0_SGIS);
-	GL_Bind (t->gl_texturenum);
+	GL_Bind0 (t->gl_texturenum);
 /* ELUTODO
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	GL_EnableMultitexture();
 */
-	GL_Bind (lightmap_textures + s->lightmaptexturenum);
+	GL_Bind1 (lightmap_textures + s->lightmaptexturenum);
 	i = s->lightmaptexturenum;
 	if (lightmap_modified[i])
 	{
@@ -504,7 +491,7 @@ void R_DrawWaterSurfaces (void)
 		return;
 
 	for ( s = waterchain ; s ; s=s->texturechain) {
-		GL_Bind (s->texinfo->texture->gl_texturenum);
+		GL_Bind0 (s->texinfo->texture->gl_texturenum);
 		EmitWaterPolys (s);
 	}
 		
@@ -531,7 +518,7 @@ void DrawTextureChains (void)
 	msurface_t	*s;
 	texture_t	*t;
 
-	// ELUTODO GL_DisableMultitexture();
+	GL_DisableMultitexture();
 
 	if (skychain) {
 		R_DrawSkyChain(skychain);
@@ -582,7 +569,6 @@ void R_DrawBrushModel (entity_t *e)
 	if (R_CullBox (mins, maxs))
 		return;
 
-	// ELUTODO glColor3f (1,1,1);
 	memset (lightmap_polys, 0, sizeof(lightmap_polys));
 
 	VectorSubtract (r_refdef.vieworg, e->origin, modelorg);
@@ -1056,6 +1042,7 @@ with all the surfaces from all brush models
 */
 void GL_BuildLightmaps (void)
 {
+	qboolean first;
 	int		i, j;
 	model_t	*m;
 
@@ -1063,42 +1050,15 @@ void GL_BuildLightmaps (void)
 
 	r_framecount = 1;		// no dlightcache
 
-/* ELUTODO
 	if (!lightmap_textures)
 	{
-		lightmap_textures = texture_extension_number;
-		texture_extension_number += MAX_LIGHTMAPS;
+		lightmap_textures = numgltextures;
+		first = true;
 	}
+	else
+		first = false;
 
-	gl_lightmap_format = GL_LUMINANCE;
-
-	if (COM_CheckParm ("-lm_1"))
-		gl_lightmap_format = GL_LUMINANCE;
-	if (COM_CheckParm ("-lm_a"))
-		gl_lightmap_format = GL_ALPHA;
-	if (COM_CheckParm ("-lm_i"))
-		gl_lightmap_format = GL_INTENSITY;
-	if (COM_CheckParm ("-lm_2"))
-		gl_lightmap_format = GL_RGBA4;
-	if (COM_CheckParm ("-lm_4"))
-		gl_lightmap_format = GL_RGBA;
-
-	switch (gl_lightmap_format)
-	{
-	case GL_RGBA:
-		lightmap_bytes = 4;
-		break;
-	case GL_RGBA4:
-		lightmap_bytes = 2;
-		break;
-	case GL_LUMINANCE:
-	case GL_INTENSITY:
-	case GL_ALPHA:
-		lightmap_bytes = 1;
-		break;
-	}
-*/
-lightmap_bytes = 1; // ELUTODO
+	lightmap_bytes = 1; // ELUTODO
 
 	for (j=1 ; j<MAX_MODELS ; j++)
 	{
@@ -1122,8 +1082,6 @@ lightmap_bytes = 1; // ELUTODO
 		}
 	}
 
-	// ELUTODO GL_SelectTexture(TEXTURE1_SGIS);
-
 	//
 	// upload all lightmaps that were filled
 	//
@@ -1136,17 +1094,10 @@ lightmap_bytes = 1; // ELUTODO
 		lightmap_rectchange[i].t = BLOCK_HEIGHT;
 		lightmap_rectchange[i].w = 0;
 		lightmap_rectchange[i].h = 0;
-		GL_Bind(lightmap_textures + i);
-/* ELUTODO
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D (GL_TEXTURE_2D, 0, lightmap_bytes
-		, BLOCK_WIDTH, BLOCK_HEIGHT, 0, 
-		gl_lightmap_format, GL_UNSIGNED_BYTE, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
-*/
+		if (first)
+			GL_LoadLightmapTexture ("", BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
+		else
+			GL_UpdateLightmapTexture (lightmap_textures + i, "", BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
 	}
-
-	// ELUTODO GL_SelectTexture(TEXTURE0_SGIS);
-
 }
 

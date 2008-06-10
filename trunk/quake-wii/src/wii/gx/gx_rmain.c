@@ -229,9 +229,9 @@ void R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
-	// ELUTODO GL_DisableMultitexture();
+	GL_DisableMultitexture();
 
-    GL_Bind(frame->gl_texturenum);
+    GL_Bind0(frame->gl_texturenum);
 
 	QGX_Alpha(true);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
@@ -548,7 +548,7 @@ void R_DrawAliasModel (entity_t *e)
 	// draw all the triangles
 	//
 
-	// ELUTODO GL_DisableMultitexture();
+	GL_DisableMultitexture();
 
 	c_guMtxIdentity(model);
 	R_RotateForEntity (e);
@@ -570,7 +570,7 @@ void R_DrawAliasModel (entity_t *e)
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	anim = (int)(cl.time*10) & 3;
-    GL_Bind(paliashdr->gl_texturenum[currententity->skinnum][anim]);
+    GL_Bind0(paliashdr->gl_texturenum[currententity->skinnum][anim]);
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
@@ -578,7 +578,7 @@ void R_DrawAliasModel (entity_t *e)
 	{
 		i = currententity - cl_entities;
 		if (i >= 1 && i<=cl.maxclients)
-		    GL_Bind(playertextures - 1 + i);
+		    GL_Bind0(playertextures - 1 + i);
 	}
 
 	/* ELUTODO if (gl_smoothmodels.value)
@@ -751,7 +751,7 @@ void R_PolyBlend (void)
 	QGX_Alpha(false);
 	QGX_Blend(true);
 	QGX_ZMode(false);
-	GL_Bind(white_texturenum); // ELUTODO: do not use a texture
+	GL_Bind0(white_texturenum); // ELUTODO: do not use a texture
 	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 
 	c_guMtxIdentity(view);
@@ -991,7 +991,7 @@ void R_RenderScene (void)
 	// for the entities, we load the matrices separately
 	R_DrawEntitiesOnList ();
 
-	// ELUTODO GL_DisableMultitexture();
+	GL_DisableMultitexture();
 
 	GX_LoadPosMtxImm(view, GX_PNMTX0);
 	R_DrawParticles ();

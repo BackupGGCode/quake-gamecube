@@ -274,9 +274,9 @@ void R_DrawSkyChain (msurface_t *s)
 {
 	msurface_t	*fa;
 
-	// ELUTODO GL_DisableMultitexture();
+	GL_DisableMultitexture();
 
-	GL_Bind(solidskytexture);
+	GL_Bind0(solidskytexture);
 	speedscale = realtime*8;
 	speedscale -= (int)speedscale & ~127 ;
 
@@ -284,7 +284,7 @@ void R_DrawSkyChain (msurface_t *s)
 		EmitSkyPolys (fa);
 
 	QGX_Blend(true);
-	GL_Bind (alphaskytexture);
+	GL_Bind0 (alphaskytexture);
 	speedscale = realtime*16;
 	speedscale -= (int)speedscale & ~127 ;
 
@@ -615,7 +615,7 @@ void R_LoadSkys (void)
 
 	for (i=0 ; i<6 ; i++)
 	{
-		GL_Bind (SKY_TEX + i);
+		GL_Bind0 (SKY_TEX + i);
 		sprintf (name, "gfx/env/bkgtst%s.tga", suf[i]);
 		COM_FOpenFile (name, &f);
 		if (!f)
@@ -869,7 +869,7 @@ void R_DrawSkyChain (msurface_t *s)
 	glpoly_t	*p;
 
 	c_sky = 0;
-	GL_Bind(solidskytexture);
+	GL_Bind0(solidskytexture);
 
 	// calculate vertex values for sky box
 
@@ -965,7 +965,7 @@ glDisable (GL_DEPTH_TEST);
 		|| skymins[1][i] >= skymaxs[1][i])
 			continue;
 
-		GL_Bind (SKY_TEX+skytexorder[i]);
+		GL_Bind0 (SKY_TEX+skytexorder[i]);
 #if 0
 skymins[0][i] = -1;
 skymins[1][i] = -1;
