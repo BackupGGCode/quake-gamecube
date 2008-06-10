@@ -83,7 +83,7 @@ void R_InitParticleTexture (void)
 		}
 	}
 
-	particletexture = GL_LoadTexture("", 8, 8, data, false, true);
+	particletexture = GL_LoadTexture("", 8, 8, (byte *)data, false, true);
 }
 
 /*
@@ -232,7 +232,7 @@ void R_TranslatePlayerSkin (int playernum)
 	unsigned	frac, fracstep;
 	extern	byte		**player_8bit_texels_tbl;
 
-	// ELUTODO GL_DisableMultitexture();
+	GL_DisableMultitexture();
 
 	top = cl.scores[playernum].colors & 0xf0;
 	bottom = (cl.scores[playernum].colors &15)<<4;
@@ -278,7 +278,7 @@ void R_TranslatePlayerSkin (int playernum)
 
 	// because this happens during gameplay, do it fast
 	// instead of sending it through gl_upload 8
-    GL_Bind(playertextures + playernum);
+    GL_Bind0(playertextures + playernum);
 
 	scaled_width = gl_max_size.value < 512 ? gl_max_size.value : 512;
 	scaled_height = gl_max_size.value < 256 ? gl_max_size.value : 256;

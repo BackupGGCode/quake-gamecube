@@ -24,7 +24,9 @@ void GL_EndRendering (void);
 extern	float	gldepthmin, gldepthmax;
 
 int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
+int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data);
 int GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
+int GL_UpdateLightmapTexture (int pic_id, char *identifier, int width, int height, byte *data);
 int GL_FindTexture (char *identifier);
 
 typedef struct
@@ -168,10 +170,6 @@ extern	cvar_t	gl_reporttjunctions;
 extern	cvar_t	gl_nocolors;
 extern	cvar_t	gl_doubleeyes;
 
-extern	int		gl_lightmap_format;
-extern	int		gl_solid_format;
-extern	int		gl_alpha_format;
-
 extern	cvar_t	gl_max_size;
 extern	cvar_t	gl_playermip;
 
@@ -181,7 +179,8 @@ extern	mplane_t	*mirror_plane;
 
 extern	float	r_world_matrix[16];
 
-void GL_Bind (int texnum);
+void GL_Bind0 (int texnum);
+void GL_Bind1 (int texnum);
 
 extern vrect_t scr_vrect;
 
@@ -198,3 +197,8 @@ void QGX_Alpha(qboolean state);
 void QGX_Blend(qboolean state);
 
 extern int white_texturenum;
+
+void GL_DisableMultitexture(void);
+void GL_EnableMultitexture(void);
+
+extern int numgltextures;

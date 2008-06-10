@@ -45,10 +45,6 @@ typedef struct
 byte		conback_buffer[sizeof(qpic_t) + sizeof(glpic_t)];
 qpic_t		*conback = (qpic_t *)&conback_buffer;
 
-int		gl_lightmap_format = 4;
-int		gl_solid_format = 3;
-int		gl_alpha_format = 4;
-
 int		texels;
 
 typedef struct
@@ -63,20 +59,28 @@ typedef struct
 
 	// So that we can reload quickly if gamma changes, etc... What about cached pictures?
 	byte		*paletted_data;
+	qboolean	type; // 0 = normal, 1 = lightmap
 } gltexture_t;
 
-#define	MAX_GLTEXTURES	1024
+#define	MAX_GLTEXTURES	2048
 gltexture_t	gltextures[MAX_GLTEXTURES];
 int			numgltextures;
 
-
-void GL_Bind (int texnum)
+// ELUTODO: clean this currenttexture
+void GL_Bind0 (int texnum)
 {
 	if (currenttexture == texnum)
 		return;
 	currenttexture = texnum;
-	// ELUTODO multitexture, should load to GX_TEXMAP1?
 	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP0);
+}
+
+void GL_Bind1 (int texnum)
+{
+	if (currenttexture == texnum)
+		return;
+	currenttexture = texnum;
+	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP1);
 }
 
 void QGX_ZMode(qboolean state)
@@ -335,7 +339,7 @@ void Draw_Character (int x, int y, int num)
 	fcol = col*0.0625;
 	size = 0.0625;
 
-	GL_Bind (char_texture);
+	GL_Bind0 (char_texture);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(x, y, 0.0f);
@@ -398,7 +402,7 @@ void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	QGX_Alpha(false);
 	QGX_Blend(true);
 
-	GL_Bind (gl->texnum);
+	GL_Bind0 (gl->texnum);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(x, y, 0.0f);
@@ -434,7 +438,7 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 
 	gl = (glpic_t *)pic->data;
 
-	GL_Bind (gl->texnum);
+	GL_Bind0 (gl->texnum);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(x, y, 0.0f);
@@ -500,7 +504,7 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 	GL_UpdateTexture (translate_texture, gltextures[translate_texture].identifier, gltextures[translate_texture].width,
 		gltextures[translate_texture].height, trans, gltextures[translate_texture].mipmap, false);
 
-	GL_Bind (translate_texture);
+	GL_Bind0 (translate_texture);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(x, y, 0.0f);
@@ -549,7 +553,7 @@ refresh window.
 */
 void Draw_TileClear (int x, int y, int w, int h)
 {
-	GL_Bind (*(int *)draw_backtile->data);
+	GL_Bind0 (*(int *)draw_backtile->data);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(x, y, 0.0f);
@@ -613,7 +617,7 @@ void Draw_FadeScreen (void)
 	QGX_Alpha(false);
 	QGX_Blend(true);
 
-	GL_Bind (white_texturenum);
+	GL_Bind0 (white_texturenum);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	GX_Position3f32(0, 0, 0.0f);
@@ -695,6 +699,8 @@ void GL_Set2D (void)
 	QGX_Alpha(true);
 
 	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+
+	GL_DisableMultitexture();
 }
 
 //====================================================================
@@ -935,14 +941,73 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 		}
 	}
 
+	if (numgltextures == MAX_GLTEXTURES)
+		Sys_Error ("GL_LoadTexture: numgltextures == MAX_GLTEXTURES\n");
+
 	glt = &gltextures[numgltextures];
 	strcpy (glt->identifier, identifier);
 	glt->texnum = numgltextures;
 	glt->width = width;
 	glt->height = height;
 	glt->mipmap = mipmap;
+	glt->type = 0;
 
 	GL_Upload8 (glt, data, width, height, mipmap, alpha);
+
+	numgltextures++;
+
+	return glt->texnum;
+}
+
+/*
+==================
+GL_UploadLightmap8
+==================
+*/
+void GL_UploadLightmap8 (gltexture_t *destination, byte *data, int width, int height)
+{
+	static	unsigned	trans[640*480];		// FIXME, temporary
+	u32 p;
+	int			i, s;
+
+	s = width*height;
+
+	if (s&3)
+		Sys_Error ("GL_Upload8: s&3");
+
+	for (i=0 ; i<s ; i++)
+	{
+		p = 0xff - data[i];
+		trans[i] = (p << 16) + (p << 8) + p;
+	}
+
+	destination->paletted_data = data;
+	// ELUTODO: really mipmap?
+	GL_Upload32 (destination, trans, width, height, true, true);
+}
+
+/*
+======================
+GL_LoadLightmapTexture
+======================
+*/
+// ELUTODO: only acceps 1 lightmap byte
+int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data)
+{
+	gltexture_t	*glt;
+
+	if (numgltextures == MAX_GLTEXTURES)
+		Sys_Error ("GL_LoadTexture: numgltextures == MAX_GLTEXTURES\n");
+
+	glt = &gltextures[numgltextures];
+	strcpy (glt->identifier, identifier);
+	glt->texnum = numgltextures;
+	glt->width = width;
+	glt->height = height;
+	glt->mipmap = true; // ELUTODO
+	glt->type = 1;
+
+	GL_UploadLightmap8 (glt, data, width, height);
 
 	numgltextures++;
 
@@ -1105,10 +1170,57 @@ int GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte 
 	// see if the texture is allready present
 	glt = &gltextures[pic_id];
 
-	if (strcmp (identifier, glt->identifier) || width != glt->width || height != glt->height || mipmap != glt->mipmap)
+	if (strcmp (identifier, glt->identifier) || width != glt->width || height != glt->height || mipmap != glt->mipmap || glt->type != 0)
 			Sys_Error ("GL_UpdateTexture: cache mismatch");
 
 	GL_Update8 (glt, data, width, height, mipmap, alpha);
+
+	return glt->texnum;
+}
+
+/*
+===============
+GL_Update8
+===============
+*/
+void GL_UpdateLightmap8 (gltexture_t *destination, byte *data, int width, int height)
+{
+	static	unsigned	trans[640*480];		// FIXME, temporary
+	u32 p;
+	int			i, s;
+
+	s = width*height;
+
+	if (s&3)
+		Sys_Error ("GL_Upload8: s&3");
+
+	for (i=0 ; i<s ; i++)
+	{
+		p = 0xff - data[i];
+		trans[i] = (p << 16) + (p << 8) + p;
+	}
+
+	destination->paletted_data = data;
+	// ELUTODO: really mipmap?
+	GL_Update32 (destination, trans, width, height, true, true);
+}
+
+/*
+========================
+GL_UpdateLightmapTexture
+========================
+*/
+int GL_UpdateLightmapTexture (int pic_id, char *identifier, int width, int height, byte *data)
+{
+	gltexture_t	*glt;
+
+	// see if the texture is allready present
+	glt = &gltextures[pic_id];
+
+	if (strcmp (identifier, glt->identifier) || width != glt->width || height != glt->height || glt->mipmap != true /* ELUODO: really mipmap? */ || glt->type != 1)
+			Sys_Error ("GL_UpdateTexture: cache mismatch");
+
+	GL_UpdateLightmap8 (glt, data, width, height);
 
 	return glt->texnum;
 }
@@ -1122,4 +1234,37 @@ int GL_LoadPicTexture (qpic_t *pic)
 {
 	// ELUTODO: loading too much with "" fills the memory with repeated data? Hope not... Check later
 	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true);
+}
+
+// ELUTODO: clean the disable/enable multitexture calls
+
+void GL_DisableMultitexture(void)
+{
+	// ELUTODO: we shouldn't need the color atributes for the vertices...
+
+	// setup the vertex descriptor
+	// tells the flipper to expect direct data
+	GX_ClearVtxDesc();
+	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+
+	GX_SetNumTexGens(1);
+	GX_SetNumTevStages(1);
+}
+
+void GL_EnableMultitexture(void)
+{
+	// ELUTODO: we shouldn't need the color atributes for the vertices...
+
+	// setup the vertex descriptor
+	// tells the flipper to expect direct data
+	GX_ClearVtxDesc();
+	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_TEX1, GX_DIRECT);
+
+	GX_SetNumTexGens(2);
+	GX_SetNumTevStages(2);
 }
