@@ -83,7 +83,7 @@ void R_InitParticleTexture (void)
 		}
 	}
 
-	particletexture = GL_LoadTexture("", 8, 8, (byte *)data, false, true);
+	GL_LoadTexture("", 8, 8, (byte *)data, false, true, true, &particletexture, 1);
 }
 
 /*
@@ -326,7 +326,7 @@ R_NewMap
 void R_NewMap (void)
 {
 	int		i;
-	
+
 	for (i=0 ; i<256 ; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
 

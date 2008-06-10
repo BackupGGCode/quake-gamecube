@@ -1037,7 +1037,6 @@ with all the surfaces from all brush models
 */
 void GL_BuildLightmaps (void)
 {
-	qboolean first;
 	int		i, j;
 	model_t	*m;
 
@@ -1045,13 +1044,7 @@ void GL_BuildLightmaps (void)
 
 	r_framecount = 1;		// no dlightcache
 
-	if (!lightmap_textures)
-	{
-		lightmap_textures = numgltextures;
-		first = true;
-	}
-	else
-		first = false;
+	lightmap_textures = numgltextures;
 
 	lightmap_bytes = 1; // ELUTODO
 
@@ -1089,10 +1082,7 @@ void GL_BuildLightmaps (void)
 		lightmap_rectchange[i].t = BLOCK_HEIGHT;
 		lightmap_rectchange[i].w = 0;
 		lightmap_rectchange[i].h = 0;
-		if (first)
-			GL_LoadLightmapTexture ("", BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
-		else
-			GL_UpdateLightmapTexture (lightmap_textures + i, "", BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
+		GL_LoadLightmapTexture ("", BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
 	}
 }
 

@@ -387,7 +387,7 @@ void Mod_LoadTextures (lump_t *l)
 			R_InitSky (tx);
 		else
 		{
-			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false);
+			GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false, false, &tx->gl_texturenum, 1);
 		}
 	}
 
@@ -1437,12 +1437,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 				memcpy (texels, (byte *)(pskintype + 1), s);
 	//		}
 			sprintf (name, "%s_%i", loadmodel->name, i);
-			pheader->gl_texturenum[i][0] =
-			pheader->gl_texturenum[i][1] =
-			pheader->gl_texturenum[i][2] =
-			pheader->gl_texturenum[i][3] =
-				GL_LoadTexture (name, pheader->skinwidth, 
-				pheader->skinheight, (byte *)(pskintype + 1), true, false);
+			GL_LoadTexture (name, pheader->skinwidth, pheader->skinheight, (byte *)(pskintype + 1), true, false, true, 			&pheader->gl_texturenum[i][0], 4);
 			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
 		} else {
 			// animating skin group.  yuck.
@@ -1462,9 +1457,8 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 						memcpy (texels, (byte *)(pskintype), s);
 					}
 					sprintf (name, "%s_%i_%i", loadmodel->name, i,j);
-					pheader->gl_texturenum[i][j&3] = 
-						GL_LoadTexture (name, pheader->skinwidth, 
-						pheader->skinheight, (byte *)(pskintype), true, false);
+					GL_LoadTexture (name, pheader->skinwidth, 
+						pheader->skinheight, (byte *)(pskintype), true, false, true, &pheader->gl_texturenum[i][j&3], 1);
 					pskintype = (daliasskintype_t *)((byte *)(pskintype) + s);
 			}
 			k = j;
@@ -1682,7 +1676,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->right = width + origin[0];
 
 	sprintf (name, "%s_%i", loadmodel->name, framenum);
-	pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, true);
+	GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, true, true, &pspriteframe->gl_texturenum, 1);
 
 	return (void *)((byte *)pinframe + sizeof (dspriteframe_t) + size);
 }
