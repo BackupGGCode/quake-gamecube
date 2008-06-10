@@ -83,7 +83,7 @@ void QGX_ZMode(qboolean state)
 	if (state)
 		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 	else
-		GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
+		GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_TRUE);
 }
 
 void QGX_Alpha(qboolean state)
@@ -99,7 +99,7 @@ void QGX_Blend(qboolean state)
 	if (state)
 		GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
 	else
-		GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_CLEAR);
+		GX_SetBlendMode(GX_BM_NONE,GX_BL_ONE,GX_BL_ZERO,GX_LO_COPY);
 }
 
 
