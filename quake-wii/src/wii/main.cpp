@@ -97,7 +97,7 @@ namespace quake
 			// Initialise the controller library.
 			PAD_Init();
 
-#ifdef DISABLE_WIIMOTE
+#ifndef DISABLE_WIIMOTE
 			WPAD_Shutdown();
 			WPAD_Init();
 
