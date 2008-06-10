@@ -72,7 +72,6 @@ static float vid_gamma = 1.0;
 
 /*-----------------------------------------------------------------------*/
 
-// ELUTODO
 Mtx44 perspective;
 Mtx view, model, modelview;
 
@@ -222,7 +221,7 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 	GX_InvVtxCache();
 	GX_InvalidateTexAll();
 
-	Sbar_Changed(); // force status bar redraw evry frame
+	Sbar_Changed(); // force status bar redraw every frame
 }
 
 

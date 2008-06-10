@@ -335,7 +335,7 @@ lastposenum = posenum;
 			// normals and vertexes come from the frame list
 			GX_Position3f32(verts->v[0], verts->v[1], verts->v[2]);
 			l = shadedots[verts->lightnormalindex] * shadelight;
-			l *= 255; if (l > 255.0f) l = 255.0f; // ELUTODO: format of l correct?
+			l *= 255; if (l > 255.0f) l = 255.0f;
 			GX_Color4u8(l, l, l, 0xff);
 
 			// texture coordinates come from the draw list
