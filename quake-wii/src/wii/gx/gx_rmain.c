@@ -902,7 +902,7 @@ void R_SetupGL (void)
 		w = h = 256;
 	}
 
-	GX_SetViewport(glx + x, gly + y2, w, h, ZMIN3D, ZMAX3D);
+	GX_SetViewport(glx + x, gly + y2, w, h, 0.0f, 1.0f);
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
 	guPerspective (perspective, r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 

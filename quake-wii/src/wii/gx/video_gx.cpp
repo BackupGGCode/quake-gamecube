@@ -229,8 +229,8 @@ void GL_EndRendering (void)
 {
         // Finish up any graphics operations.
         GX_Flush();
-
 		GX_DrawDone();
+		GX_WaitDrawDone();
 
 		GX_SetColorUpdate(GX_TRUE);
 		GX_SetAlphaUpdate(GX_TRUE);
@@ -241,7 +241,6 @@ void GL_EndRendering (void)
 		// ELUTODO?
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
-		GX_WaitDrawDone();
 }
 
 static void Check_Gamma (unsigned char *pal)
