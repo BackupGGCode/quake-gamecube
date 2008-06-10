@@ -238,10 +238,9 @@ void EmitSkyPolys (msurface_t *fa)
 	vec3_t	dir;
 	float	length;
 
-/* ELUTODO
 	for (p=fa->polys ; p ; p=p->next)
 	{
-		glBegin (GL_POLYGON);
+		GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT0, p->numverts);
 		for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
 		{
 			VectorSubtract (v, r_origin, dir);
@@ -257,45 +256,12 @@ void EmitSkyPolys (msurface_t *fa)
 			s = (speedscale + dir[0]) * (1.0/128);
 			t = (speedscale + dir[1]) * (1.0/128);
 
-			glTexCoord2f (s, t);
-			glVertex3fv (v);
+			GX_Position3f32(v[0], v[1], v[2]);
+			GX_Color4u8(0xff, 0xff, 0xff, 0xff);
+			GX_TexCoord2f32(s, t);
 		}
-		glEnd ();
+		GX_End ();
 	}
-*/
-}
-
-/*
-===============
-EmitBothSkyLayers
-
-Does a sky warp on the pre-fragmented glpoly_t chain
-This will be called for brushmodels, the world
-will have them chained together.
-===============
-*/
-void EmitBothSkyLayers (msurface_t *fa)
-{
-	int			i;
-	int			lindex;
-	float		*vec;
-
-	// ELUTODO GL_DisableMultitexture();
-
-	GL_Bind (solidskytexture);
-	speedscale = realtime*8;
-	speedscale -= (int)speedscale & ~127 ;
-
-	EmitSkyPolys (fa);
-
-	// ELUTODO glEnable (GL_BLEND);
-	GL_Bind (alphaskytexture);
-	speedscale = realtime*16;
-	speedscale -= (int)speedscale & ~127 ;
-
-	EmitSkyPolys (fa);
-
-	// ELUTODO glDisable (GL_BLEND);
 }
 
 #ifndef QUAKE2
@@ -310,7 +276,6 @@ void R_DrawSkyChain (msurface_t *s)
 
 	// ELUTODO GL_DisableMultitexture();
 
-	// used when gl_texsort is on
 	GL_Bind(solidskytexture);
 	speedscale = realtime*8;
 	speedscale -= (int)speedscale & ~127 ;
@@ -318,7 +283,7 @@ void R_DrawSkyChain (msurface_t *s)
 	for (fa=s ; fa ; fa=fa->texturechain)
 		EmitSkyPolys (fa);
 
-	// ELUTODO glEnable (GL_BLEND);
+	QGX_Blend(true);
 	GL_Bind (alphaskytexture);
 	speedscale = realtime*16;
 	speedscale -= (int)speedscale & ~127 ;
@@ -326,7 +291,7 @@ void R_DrawSkyChain (msurface_t *s)
 	for (fa=s ; fa ; fa=fa->texturechain)
 		EmitSkyPolys (fa);
 
-	// ELUTODO glDisable (GL_BLEND);
+	QGX_Blend(false);
 }
 
 #endif
@@ -1038,63 +1003,32 @@ void R_InitSky (texture_t *mt)
 {
 	int			i, j, p;
 	byte		*src;
-	unsigned	trans[128*128];
-	unsigned	transpix;
-	int			r, g, b;
-	unsigned	*rgba;
-	extern	int			skytexturenum;
+	byte		trans[128*128];
 
 	src = (byte *)mt + mt->offsets[0];
 
-	// make an average value for the back to avoid
-	// a fringe on the top level
-
-	r = g = b = 0;
 	for (i=0 ; i<128 ; i++)
 		for (j=0 ; j<128 ; j++)
-		{
-			p = src[i*256 + j + 128];
-			rgba = &d_8to24table[p];
-			trans[(i*128) + j] = *rgba;
-			r += ((byte *)rgba)[0];
-			g += ((byte *)rgba)[1];
-			b += ((byte *)rgba)[2];
-		}
+			trans[(i*128) + j] = src[i*256 + j + 128];
 
-	((byte *)&transpix)[0] = r/(128*128);
-	((byte *)&transpix)[1] = g/(128*128);
-	((byte *)&transpix)[2] = b/(128*128);
-	((byte *)&transpix)[3] = 0;
-
-
-/* ELUTODO
 	if (!solidskytexture)
-		solidskytexture = texture_extension_number++;
-	GL_Bind (solidskytexture );
-
-	glTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, 128, 128, 0, GL_RGBA, GL_UNSIGNED_BYTE, trans);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-*/
+		solidskytexture = GL_LoadTexture("render_solidskytexture", 128, 128, trans, true, true);
+	else
+		solidskytexture = GL_UpdateTexture(solidskytexture, "render_solidskytexture", 128, 128, trans, true, true);
 
 	for (i=0 ; i<128 ; i++)
 		for (j=0 ; j<128 ; j++)
 		{
 			p = src[i*256 + j];
 			if (p == 0)
-				trans[(i*128) + j] = transpix;
+				trans[(i*128) + j] = 255;
 			else
-				trans[(i*128) + j] = d_8to24table[p];
+				trans[(i*128) + j] = p;
 		}
 
-/* ELUTODO
 	if (!alphaskytexture)
-		alphaskytexture = texture_extension_number++;
-	GL_Bind(alphaskytexture);
-
-	glTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 128, 128, 0, GL_RGBA, GL_UNSIGNED_BYTE, trans);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-*/
+		alphaskytexture = GL_LoadTexture("render_alphaskytexture", 128, 128, trans, true, true);
+	else
+		alphaskytexture = GL_UpdateTexture(alphaskytexture, "render_alphaskytexture", 128, 128, trans, true, true);
 }
 

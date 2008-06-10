@@ -98,6 +98,7 @@ cvar_t	gl_reporttjunctions = {"gl_reporttjunctions","0"};
 cvar_t	gl_doubleeyes = {"gl_doubleeys", "1"};
 
 extern	cvar_t	gl_ztrick;
+float viewport_size[4];
 
 /*
 =================
@@ -726,9 +727,9 @@ void R_DrawViewModel (void)
 	diffuse[0] = diffuse[1] = diffuse[2] = diffuse[3] = (float)shadelight / 128;
 
 	// hack the depth range to prevent view model from poking into walls
-	// ELUTODO glDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
+	GX_SetViewport(viewport_size[0], viewport_size[1], viewport_size[2], viewport_size[3], 0.0f, 0.3f);
 	R_DrawAliasModel (currententity);
-	// ELUTODO glDepthRange (gldepthmin, gldepthmax);
+	GX_SetViewport(viewport_size[0], viewport_size[1], viewport_size[2], viewport_size[3], 0.0f, 1.0f);
 }
 
 
@@ -903,7 +904,11 @@ void R_SetupGL (void)
 		w = h = 256;
 	}
 
-	GX_SetViewport(glx + x, gly + y, w, h, 0.0f, 1.0f);
+	viewport_size[0] = glx + x;
+	viewport_size[1] = gly + y;
+	viewport_size[2] = w;
+	viewport_size[3] = h;
+	GX_SetViewport(viewport_size[0], viewport_size[1], viewport_size[2], viewport_size[3], 0.0f, 1.0f);
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
 	guPerspective (perspective, r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 
@@ -985,51 +990,7 @@ R_Clear
 */
 void R_Clear (void)
 {
-/* ELUTODO
-	if (r_mirroralpha.value != 1.0)
-	{
-		if (gl_clear.value)
-			glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		else
-			glClear (GL_DEPTH_BUFFER_BIT);
-		gldepthmin = 0;
-		gldepthmax = 0.5;
-		glDepthFunc (GL_LEQUAL);
-	}
-	else if (gl_ztrick.value)
-	{
-		static int trickframe;
-
-		if (gl_clear.value)
-			glClear (GL_COLOR_BUFFER_BIT);
-
-		trickframe++;
-		if (trickframe & 1)
-		{
-			gldepthmin = 0;
-			gldepthmax = 0.49999;
-			glDepthFunc (GL_LEQUAL);
-		}
-		else
-		{
-			gldepthmin = 1;
-			gldepthmax = 0.5;
-			glDepthFunc (GL_GEQUAL);
-		}
-	}
-	else
-	{
-		if (gl_clear.value)
-			glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		else
-			glClear (GL_DEPTH_BUFFER_BIT);
-		gldepthmin = 0;
-		gldepthmax = 1;
-		glDepthFunc (GL_LEQUAL);
-	}
-
-	glDepthRange (gldepthmin, gldepthmax);
-*/
+	// Not needed, GX clears the efb while copying to the xfb
 }
 
 /*
