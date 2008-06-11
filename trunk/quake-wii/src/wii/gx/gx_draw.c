@@ -19,6 +19,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 // ELUTODO: separate texture management
+// ELUTODO: GL_Upload32 and GL_Update32 could use some optimizations
+// ELUTODO: mipmap and texture filters
 
 // draw.c -- this is the only file outside the refresh that touches the
 // vid buffer
@@ -793,7 +795,7 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	// ELUTODO: mipmaps
 
 	if (scaled_width * scaled_height > sizeof(scaled)/4)
-		Sys_Error ("GL_LoadTexture: too big");
+		Sys_Error ("GL_Upload32: too big");
 
 	// ELUTODO samples = alpha ? GX_TF_RGBA8 : GX_TF_RGBA8;
 
@@ -980,43 +982,16 @@ void GL_LoadTexture (char *identifier, int width, int height, byte *data, qboole
 }
 
 /*
-==================
-GL_UploadLightmap8
-==================
-*/
-void GL_UploadLightmap8 (gltexture_t *destination, byte *data, int width, int height)
-{
-	static	unsigned	trans[640*480];		// FIXME, temporary
-	u32 p;
-	int			i, s;
-
-	s = width*height;
-
-	if (s&3)
-		Sys_Error ("GL_Upload8: s&3");
-
-	for (i=0 ; i<s ; i++)
-	{
-		p = 0xff - data[i];
-		trans[i] = (p << 16) + (p << 8) + p;
-	}
-
-	// ELUTODO: really mipmap?
-	GL_Upload32 (destination, trans, width, height, true, true);
-}
-
-/*
 ======================
 GL_LoadLightmapTexture
 ======================
 */
-// ELUTODO: only acceps 1 lightmap byte
 int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data)
 {
 	gltexture_t	*glt;
 
 	if (numgltextures == MAX_GLTEXTURES)
-		Sys_Error ("GL_LoadTexture: numgltextures == MAX_GLTEXTURES\n");
+		Sys_Error ("GL_LoadLightmapTexture: numgltextures == MAX_GLTEXTURES\n");
 
 	glt = &gltextures[numgltextures];
 	strcpy (glt->identifier, identifier);
@@ -1028,7 +1003,10 @@ int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data)
 	glt->keep = false;
 	glt->texnumpointer = NULL;
 
-	GL_UploadLightmap8 (glt, data, width, height);
+	GL_Upload32 (glt, (unsigned *)data, width, height, true, true);
+
+	if (width != glt->scaled_width || height != glt->scaled_height)
+		Sys_Error("GL_LoadLightmapTexture: Tried to scale lightmap\n");
 
 	numgltextures++;
 
@@ -1062,7 +1040,7 @@ void GL_Update32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	// ELUTODO: mipmaps
 
 	if (scaled_width * scaled_height > sizeof(scaled)/4)
-		Sys_Error ("GL_LoadTexture: too big");
+		Sys_Error ("GL_Update32: too big");
 
 	// ELUTODO samples = alpha ? GX_TF_RGBA8 : GX_TF_RGBA8;
 
@@ -1077,10 +1055,10 @@ void GL_Update32 (gltexture_t *destination, unsigned *data, int width, int heigh
 
 	s = scaled_width * scaled_height;
 	if (s & 31)
-		Sys_Error ("GL_Upload32: s&31");
+		Sys_Error ("GL_Update32: s&31");
 
 	if ((int)destination->data & 31)
-		Sys_Error ("GL_Upload32: destination->data&31");
+		Sys_Error ("GL_Update32: destination->data&31");
 
 	pos = (u8 *)destination->data;
 	for (y = 0; y < scaled_height; y += 4)
@@ -1164,7 +1142,7 @@ void GL_Update8 (gltexture_t *destination, byte *data, int width, int height,  q
 	else
 	{
 		if (s&3)
-			Sys_Error ("GL_Upload8: s&3");
+			Sys_Error ("GL_Update8: s&3");
 		for (i=0 ; i<s ; i+=4)
 		{
 			trans[i] = d_8to24table[data[i]];
@@ -1197,50 +1175,61 @@ int GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte 
 	return glt->texnum;
 }
 
-/*
-===============
-GL_Update8
-===============
-*/
-void GL_UpdateLightmap8 (gltexture_t *destination, byte *data, int width, int height)
+const int lightblock_datamap[128*128*4] =
 {
-	static	unsigned	trans[640*480];		// FIXME, temporary
-	u32 p;
-	int			i, s;
+#include "128_128_datamap.h"
+};
 
-	s = width*height;
+/*
+================================
+GL_UpdateLightmapTextureRegion32
+================================
+*/
+void GL_UpdateLightmapTextureRegion32 (gltexture_t *destination, unsigned *data, int width, int height, int xoffset, int yoffset, qboolean mipmap, qboolean alpha)
+{
+	int			x, y, pos;
+	int			samples;
+	int			realwidth = width + xoffset;
+	int			realheight = height + yoffset;
+	u8			*dest = (u8 *)destination->data, *src = (u8 *)data;
 
-	if (s&3)
-		Sys_Error ("GL_Upload8: s&3");
+	// ELUTODO: mipmaps
+	// ELUTODO samples = alpha ? GX_TF_RGBA8 : GX_TF_RGBA8;
 
-	for (i=0 ; i<s ; i++)
+	if ((int)destination->data & 31)
+		Sys_Error ("GL_Update32: destination->data&31");
+
+	for (y = yoffset; y < realheight; y++)
 	{
-		p = 0xff - data[i];
-		trans[i] = (p << 16) + (p << 8) + p;
+		for (x = xoffset; x < realwidth; x++)
+		{
+			pos = (x + y * realwidth) * 4;
+			dest[lightblock_datamap[pos]] = src[pos];
+			dest[lightblock_datamap[pos + 1]] = src[pos + 1];
+			dest[lightblock_datamap[pos + 2]] = src[pos + 2];
+			dest[lightblock_datamap[pos + 3]] = src[pos + 3];
+		}
 	}
 
-	// ELUTODO: really mipmap?
-	GL_Update32 (destination, trans, width, height, true, true);
+	// Flushing this way works because of how this functions is always called
+	DCFlushRange(destination->data + xoffset + yoffset * realwidth, width * height * sizeof(unsigned));
+	GX_InvalidateTexAll();
 }
 
 /*
-========================
-GL_UpdateLightmapTexture
-========================
+==============================
+GL_UpdateLightmapTextureRegion
+==============================
 */
-int GL_UpdateLightmapTexture (int pic_id, char *identifier, int width, int height, byte *data)
+// ELUTODO: doesn't work if the texture doesn't follow the default quake format. Needs improvements.
+void GL_UpdateLightmapTextureRegion (int pic_id, int width, int height, int xoffset, int yoffset, byte *data)
 {
-	gltexture_t	*glt;
+	gltexture_t	*destination;
 
 	// see if the texture is allready present
-	glt = &gltextures[pic_id];
+	destination = &gltextures[pic_id];
 
-	if (strcmp (identifier, glt->identifier) || width != glt->width || height != glt->height || glt->mipmap != true /* ELUODO: really mipmap? */ || glt->type != 1)
-			Sys_Error ("GL_UpdateTexture: cache mismatch");
-
-	GL_UpdateLightmap8 (glt, data, width, height);
-
-	return glt->texnum;
+	GL_UpdateLightmapTextureRegion32 (destination, (unsigned *)data, width, height, xoffset, yoffset, true, true);
 }
 
 /*
@@ -1314,7 +1303,7 @@ void GL_ClearTextureCache(void)
 			gltextures[numgltextures].allocated_area = SYS_GetArena2Lo();
 			gltextures[numgltextures].data = Align_To_32_Bytes(gltextures[numgltextures].allocated_area);
 			if ((u32)gltextures[numgltextures].data + gltextures[numgltextures].scaled_width * gltextures[numgltextures].scaled_height * sizeof(unsigned) >= 0x933e0000)
-				Sys_Error("GL_Upload32: Out of memory.\nnumgltextures = %d\narena2lo = %.8x\narena2hi = %.8x",
+				Sys_Error("GL_ClearTextureCache: Out of memory.\nnumgltextures = %d\narena2lo = %.8x\narena2hi = %.8x",
 					numgltextures, (u32)SYS_GetArena2Lo(), (u32)SYS_GetArena2Hi());
 			SYS_SetArena2Lo(gltextures[numgltextures].data + gltextures[numgltextures].scaled_width * gltextures[numgltextures].scaled_height);
 

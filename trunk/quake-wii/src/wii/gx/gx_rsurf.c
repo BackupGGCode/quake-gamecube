@@ -179,43 +179,23 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 
 // bound, invert, and shift
 store:
-/* ELUTODO	switch (gl_lightmap_format)
+	stride -= (smax<<2);
+	bl = blocklights;
+	for (i=0 ; i<tmax ; i++, dest += stride)
 	{
-	case GL_RGBA:
-		stride -= (smax<<2);
-		bl = blocklights;
-		for (i=0 ; i<tmax ; i++, dest += stride)
+		for (j=0 ; j<smax ; j++)
 		{
-			for (j=0 ; j<smax ; j++)
-			{
-				t = *bl++;
-				t >>= 7;
-				if (t > 255)
-					t = 255;
-				dest[3] = 255-t;
-				dest += 4;
-			}
+			t = *bl++;
+			t >>= 7;
+			if (t > 255)
+				t = 255;
+			dest[3] = t;
+			dest[2] = t;
+			dest[1] = t;
+			dest[0] = 0;
+			dest += 4;
 		}
-		break;
-	case GL_ALPHA:
-	case GL_LUMINANCE:
-	case GL_INTENSITY:*/
-		bl = blocklights;
-		for (i=0 ; i<tmax ; i++, dest += stride)
-		{
-			for (j=0 ; j<smax ; j++)
-			{
-				t = *bl++;
-				t >>= 7;
-				if (t > 255)
-					t = 255;
-				dest[j] = 255-t;
-			}
-		}
-/* ELUTODO		break;
-	default:
-		Sys_Error ("Bad lightmap format");
-	}*/
+	}
 }
 
 
@@ -310,11 +290,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 		{
 			lightmap_modified[i] = false;
 			theRect = &lightmap_rectchange[i];
-			// PRIORITY ELUTODO: FAST substitute for this. we shouldn't reupload everything, you know...
-			/*GL_UpdateLightmapTexture (lightmap_textures + i, "", BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);*/
-			/* ELUTODO glTexSubImage2D(GL_TEXTURE_2D, 0, 0, theRect->t, 
-				BLOCK_WIDTH, theRect->h, gl_lightmap_format, GL_UNSIGNED_BYTE,
-				lightmaps+(i* BLOCK_HEIGHT + theRect->t) *BLOCK_WIDTH*lightmap_bytes);*/
+			GL_UpdateLightmapTextureRegion (lightmap_textures + s->lightmaptexturenum, BLOCK_WIDTH, theRect->h, 0, theRect->t, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
 			theRect->l = BLOCK_WIDTH;
 			theRect->t = BLOCK_HEIGHT;
 			theRect->h = 0;
@@ -364,10 +340,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 	{
 		lightmap_modified[i] = false;
 		theRect = &lightmap_rectchange[i];
-		// PRIORITY ELUTODO: FAST substitute for this. we shouldn't reupload everything, you know...
-		/* ELUTODO glTexSubImage2D(GL_TEXTURE_2D, 0, 0, theRect->t, 
-			BLOCK_WIDTH, theRect->h, gl_lightmap_format, GL_UNSIGNED_BYTE,
-			lightmaps+(i* BLOCK_HEIGHT + theRect->t) *BLOCK_WIDTH*lightmap_bytes);*/
+		GL_UpdateLightmapTextureRegion (lightmap_textures + s->lightmaptexturenum, BLOCK_WIDTH, theRect->h, 0, theRect->t, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
 		theRect->l = BLOCK_WIDTH;
 		theRect->t = BLOCK_HEIGHT;
 		theRect->h = 0;
@@ -767,7 +740,6 @@ void R_DrawWorld (void)
 	currenttexture0 = -1;
 	currenttexture1 = -1;
 
-	// ELUTODO glColor3f (1,1,1);
 	memset (lightmap_polys, 0, sizeof(lightmap_polys));
 #ifdef QUAKE2
 	R_ClearSkyBox ();
@@ -1048,7 +1020,7 @@ void GL_BuildLightmaps (void)
 
 	lightmap_textures = numgltextures;
 
-	lightmap_bytes = 1; // ELUTODO
+	lightmap_bytes = 4;
 
 	for (j=1 ; j<MAX_MODELS ; j++)
 	{

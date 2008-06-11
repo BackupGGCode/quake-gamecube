@@ -26,7 +26,7 @@ extern	float	gldepthmin, gldepthmax;
 void GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha, qboolean keep, int *dest, int dest_count);
 int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data);
 int GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
-int GL_UpdateLightmapTexture (int pic_id, char *identifier, int width, int height, byte *data);
+void GL_UpdateLightmapTextureRegion (int pic_id, int width, int height, int xoffset, int yoffset, byte *data);
 int GL_FindTexture (char *identifier);
 
 typedef struct
