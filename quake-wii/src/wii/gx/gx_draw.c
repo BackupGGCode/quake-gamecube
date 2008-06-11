@@ -18,10 +18,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+// ELUTODO: separate texture management
+
 // draw.c -- this is the only file outside the refresh that touches the
 // vid buffer
 
 #include <ogc/system.h>
+#include <ogc/cache.h>
 
 #include "../../generic/quakedef.h"
 
@@ -71,20 +74,19 @@ typedef struct
 gltexture_t	gltextures[MAX_GLTEXTURES];
 int			numgltextures;
 
-// ELUTODO: clean this currenttexture
 void GL_Bind0 (int texnum)
 {
-	if (currenttexture == texnum)
+	if (currenttexture0 == texnum)
 		return;
-	currenttexture = texnum;
+	currenttexture0 = texnum;
 	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP0);
 }
 
 void GL_Bind1 (int texnum)
 {
-	if (currenttexture == texnum)
+	if (currenttexture1 == texnum)
 		return;
-	currenttexture = texnum;
+	currenttexture1 = texnum;
 	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP1);
 }
 
@@ -814,9 +816,6 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 			numgltextures, (u32)SYS_GetArena2Lo(), (u32)SYS_GetArena2Hi());
 	SYS_SetArena2Lo(destination->data + scaled_width * scaled_height);
 
-	// ELUTODO use cache
-	destination->data = MEM_K0_TO_K1(destination->data);
-
 	destination->scaled_width = scaled_width;
 	destination->scaled_height = scaled_height;
 
@@ -874,6 +873,8 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	}
 
 	GX_InitTexObj(&destination->gx_tex, destination->data, scaled_width, scaled_height, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, /*mipmap ? GX_TRUE :*/ GX_FALSE);
+
+	DCFlushRange(destination->data, scaled_width * scaled_height * sizeof(unsigned));
 
 	/* ELUTODO powercallback SYS_SetPowerCallback(powercallback cb);*/
 }
@@ -943,7 +944,11 @@ void GL_LoadTexture (char *identifier, int width, int height, byte *data, qboole
 			{
 				if (width != glt->width || height != glt->height)
 					Sys_Error ("GL_LoadTexture: cache mismatch");
-				*dest = gltextures[i].texnum;
+				if (dest)
+				{
+					for (i = 0; i < dest_count; i++)
+						dest[i] = glt->texnum;
+				}
 				return;
 			}
 		}
@@ -1061,8 +1066,6 @@ void GL_Update32 (gltexture_t *destination, unsigned *data, int width, int heigh
 
 	// ELUTODO samples = alpha ? GX_TF_RGBA8 : GX_TF_RGBA8;
 
-	texels += scaled_width * scaled_height;
-
 	if (scaled_width != width || scaled_height != height)
 	{
 		GL_ResampleTexture (data, width, height, scaled, scaled_width, scaled_height);
@@ -1125,7 +1128,8 @@ void GL_Update32 (gltexture_t *destination, unsigned *data, int width, int heigh
 		}
 	}
 
-	GX_InvalidateTexAll(); // ELUTODO: invalidate region
+	DCFlushRange(destination->data, scaled_width * scaled_height * sizeof(unsigned));
+	GX_InvalidateTexAll();
 }
 
 /*
@@ -1314,12 +1318,11 @@ void GL_ClearTextureCache(void)
 					numgltextures, (u32)SYS_GetArena2Lo(), (u32)SYS_GetArena2Hi());
 			SYS_SetArena2Lo(gltextures[numgltextures].data + gltextures[numgltextures].scaled_width * gltextures[numgltextures].scaled_height);
 
-			// ELUTODO use cache
-			gltextures[numgltextures].data = MEM_K0_TO_K1(gltextures[numgltextures].data);
-
 			memmove(gltextures[numgltextures].data, gltextures[i].data, gltextures[numgltextures].scaled_width * gltextures[numgltextures].scaled_height * 4);
 
 			GX_InitTexObj(&gltextures[numgltextures].gx_tex, gltextures[numgltextures].data, gltextures[numgltextures].scaled_width, gltextures[numgltextures].scaled_height, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, /*mipmap ? GX_TRUE :*/ GX_FALSE);
+
+			DCFlushRange(gltextures[numgltextures].data, gltextures[numgltextures].scaled_width * gltextures[numgltextures].scaled_height * sizeof(unsigned));
 
 			gltextures[numgltextures].texnumpointer = gltextures[i].texnumpointer;
 			gltextures[numgltextures].texnumpointer_cnt = gltextures[i].texnumpointer_cnt;

@@ -541,7 +541,8 @@ void R_DrawBrushModel (entity_t *e)
 	qboolean	rotated;
 
 	currententity = e;
-	currenttexture = -1;
+	currenttexture0 = -1;
+	currenttexture1 = -1;
 
 	clmodel = e->model;
 
@@ -763,7 +764,8 @@ void R_DrawWorld (void)
 	VectorCopy (r_refdef.vieworg, modelorg);
 
 	currententity = &ent;
-	currenttexture = -1;
+	currenttexture0 = -1;
+	currenttexture1 = -1;
 
 	// ELUTODO glColor3f (1,1,1);
 	memset (lightmap_polys, 0, sizeof(lightmap_polys));

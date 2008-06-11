@@ -37,7 +37,8 @@ int			c_brush_polys, c_alias_polys;
 
 qboolean	envmap;				// true during envmap command capture 
 
-int			currenttexture = -1;		// to avoid unnecessary texture sets
+int			currenttexture0 = -1;		// to avoid unnecessary texture sets
+int			currenttexture1 = -1;		// to avoid unnecessary texture sets
 
 int			cnttextures[2] = {-1, -1};     // cached
 
