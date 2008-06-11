@@ -18,7 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // ELUTODO: horizontal tv border
-// ELUTODO: double buffer
 #include <malloc.h>
 #include <ogc/cache.h>
 #include <ogc/gx.h>
@@ -40,15 +39,15 @@ namespace quake
 {
 	namespace main
 	{
-		typedef u32 pixel_pair;
-		extern pixel_pair       (*xfb)[][640];
-
-		extern GXRModeObj*     rmode;
+		extern void				*framebuffer[2];
+		extern u32				fb;
+		extern GXRModeObj		*rmode;
 	}
 
 	namespace video
 	{
-		using main::xfb;
+		using main::framebuffer;
+		using main::fb;
 		using main::rmode;
 
 		static void								*gp_fifo;
@@ -171,7 +170,7 @@ void GL_Init (void)
 	else
 		GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
 
-	GX_CopyDisp(xfb,GX_TRUE);
+	GX_CopyDisp(framebuffer[fb],GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 
 	GX_SetZCompLoc(true); // ELUTODO
@@ -228,17 +227,20 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 
 void GL_EndRendering (void)
 {
-        // Finish up any graphics operations.
-        GX_Flush();
+		// Finish up any graphics operations.
+		GX_Flush();
 		GX_DrawDone();
 		GX_WaitDrawDone();
+
+		fb ^= 1;
 
 		GX_SetColorUpdate(GX_TRUE);
 		GX_SetAlphaUpdate(GX_TRUE);
 		// GX_SetDstAlpha(GX_DISABLE, 0xFF); // ELUTODO
-        // Start copying the frame buffer every vsync.
-        GX_CopyDisp(xfb, GX_TRUE);
+		// Start copying the frame buffer every vsync.
+		GX_CopyDisp(framebuffer[fb], GX_TRUE);
 
+		VIDEO_SetNextFramebuffer(framebuffer[fb]);
 		// ELUTODO?
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
