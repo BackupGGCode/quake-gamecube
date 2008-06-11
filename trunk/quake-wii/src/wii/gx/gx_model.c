@@ -60,14 +60,9 @@ Caches the data if needed
 */
 void *Mod_Extradata (model_t *mod)
 {
-	void	*r;
-	
-	r = Cache_Check (&mod->cache);
-	if (r)
-		return r;
+	if (mod->needload)
+		Mod_LoadModel (mod, true);
 
-	Mod_LoadModel (mod, true);
-	
 	if (!mod->cache.data)
 		Sys_Error ("Mod_Extradata: caching failed");
 	return mod->cache.data;
@@ -171,8 +166,7 @@ void Mod_ClearAll (void)
 	model_t	*mod;
 	
 	for (i=0 , mod=mod_known ; i<mod_numknown ; i++, mod++)
-		if (mod->type != mod_alias)
-			mod->needload = true;
+		mod->needload = true;
 }
 
 /*
@@ -219,12 +213,6 @@ void Mod_TouchModel (char *name)
 	model_t	*mod;
 	
 	mod = Mod_FindName (name);
-	
-	if (!mod->needload)
-	{
-		if (mod->type == mod_alias)
-			Cache_Check (&mod->cache);
-	}
 }
 
 /*
@@ -241,16 +229,7 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	byte	stackbuf[1024];		// avoid dirtying the cache heap
 
 	if (!mod->needload)
-	{
-		if (mod->type == mod_alias)
-		{
-			d = Cache_Check (&mod->cache);
-			if (d)
-				return mod;
-		}
-		else
 			return mod;		// not cached at all
-	}
 
 //
 // because the world is so huge, load it one piece at a time
@@ -1490,8 +1469,6 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	daliasskintype_t	*pskintype;
 	int					start, end, total;
 	
-	start = Hunk_LowMark ();
-
 	pinmodel = (mdl_t *)buffer;
 
 	version = LittleLong (pinmodel->version);
@@ -1623,18 +1600,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	//
 	GL_MakeAliasModelDisplayLists (mod, pheader);
 
-//
-// move the complete, relocatable alias model to the cache
-//	
-	end = Hunk_LowMark ();
-	total = end - start;
-	
-	Cache_Alloc (&mod->cache, total, loadname);
-	if (!mod->cache.data)
-		return;
-	memcpy (mod->cache.data, pheader, total);
-
-	Hunk_FreeToLowMark (start);
+	mod->cache.data = pheader;
 }
 
 //=============================================================================

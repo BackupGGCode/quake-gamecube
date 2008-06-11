@@ -278,14 +278,10 @@ void R_TranslatePlayerSkin (int playernum)
 
 	// because this happens during gameplay, do it fast
 	// instead of sending it through gl_upload 8
-    GL_Bind0(playertextures + playernum);
+    // ELUTODO GL_Bind0(playertextures + playernum);
 
 	scaled_width = gl_max_size.value < 512 ? gl_max_size.value : 512;
 	scaled_height = gl_max_size.value < 256 ? gl_max_size.value : 256;
-
-	// allow users to crunch sizes down even more if they want
-	scaled_width >>= (int)gl_playermip.value;
-	scaled_height >>= (int)gl_playermip.value;
 
 	for (i=0 ; i<256 ; i++)
 		translate32[i] = d_8to24table[translate[i]];
