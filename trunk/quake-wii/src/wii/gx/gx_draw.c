@@ -1211,8 +1211,8 @@ void GL_UpdateLightmapTextureRegion32 (gltexture_t *destination, unsigned *data,
 		}
 	}
 
-	// Flushing this way works because of how this functions is always called
-	DCFlushRange(destination->data + xoffset + yoffset * realwidth, width * height * sizeof(unsigned));
+	// ELUTODO: flush region only
+	DCFlushRange(destination->data, destination->scaled_width * destination->scaled_height * sizeof(unsigned));
 	GX_InvalidateTexAll();
 }
 

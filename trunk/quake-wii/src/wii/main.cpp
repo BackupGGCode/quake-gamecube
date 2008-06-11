@@ -51,12 +51,10 @@ namespace quake
 {
 	namespace main
 	{
-		// Types.
-		typedef u32 pixel_pair;
-
 		// Video globals.
-		pixel_pair	(*xfb)[][640]	= 0;
-		GXRModeObj*	rmode			= 0;
+		void		*framebuffer[2]		= {NULL, NULL};
+		u32		fb			= 0;
+		GXRModeObj	*rmode			= 0;
 
 		// Set up the heap.
 		//static const size_t	heap_size	= 12 * 1024 * 1024;
@@ -66,19 +64,22 @@ namespace quake
 
 		static void init()
 		{
+			fb = 0;
+
 			// Initialise the video system.
 			VIDEO_Init();
 
 			rmode = VIDEO_GetPreferredMode(NULL);
 
 			// Allocate the frame buffer.
-			xfb = static_cast<pixel_pair (*)[][640]>(MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode)));
+			framebuffer[0] = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+			framebuffer[1] = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
 
 			// Set up the video system with the chosen mode.
 			VIDEO_Configure(rmode);
 
 			// Set the frame buffer.
-			VIDEO_SetNextFramebuffer(xfb);
+			VIDEO_SetNextFramebuffer(framebuffer[fb]);
 
 			// Show the screen.
 			VIDEO_SetBlack(FALSE);
@@ -90,7 +91,8 @@ namespace quake
 			}
 
 			// Initialise the debug console.
-			console_init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * 2);
+			// ELUTODO: only one framebuffer with it?
+			console_init(framebuffer[0], 20, 20, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * 2);
 
 			// Initialise the controller library.
 			PAD_Init();
