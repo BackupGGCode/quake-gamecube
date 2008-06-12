@@ -39,19 +39,13 @@ heap_cntrl texture_heap;
 void *texture_heap_ptr;
 u32 texture_heap_size;
 
-// ELUTODO: same as in main
-inline void *Align_To_32_Bytes (void *p)
-{
-	return (void*)(((int)(p + 31)) & 0xffffffe0);
-}
-
 void R_InitTextureHeap (void)
 {
 	u32 level, size;
 
 	_CPU_ISR_Disable(level);
-	texture_heap_ptr = Align_To_32_Bytes(SYS_GetArena2Lo());
-	texture_heap_size = 32 * 1024 * 1024 - ((u32)texture_heap_ptr - (u32)SYS_GetArena2Lo());
+	texture_heap_ptr = SYS_GetArena2Lo();
+	texture_heap_size = 32 * 1024 * 1024;
 	if ((u32)texture_heap_ptr + texture_heap_size > (u32)SYS_GetArena2Hi())
 	{
 		_CPU_ISR_Restore(level);
