@@ -21,7 +21,7 @@ SED = sed "s/:\([0-9]*\):/\(\1\) :/"
 COMMON_FLAGS	:= -mcpu=750 -g -meabi -mhard-float -Wall -pipe -mrvl
 OPT_FLAGS		:= -Os -fno-merge-constants -fno-strict-aliasing -fsingle-precision-constant
 DEFINES			:= -DGEKKO -DGXQUAKE #-DDISABLE_WIIMOTE
-CFLAGS			:= $(COMMON_FLAGS) $(OPT_FLAGS) $(DEFINES) -I$(DEVKITPRO)/libogc/include -I$(DEVKITPRO)/libogc/include/ogc
+CFLAGS			:= $(COMMON_FLAGS) $(OPT_FLAGS) $(DEFINES) -I$(DEVKITPRO)/libogc/include -I$(DEVKITPRO)/libogc/include/ogc -I$(DEVKITPRO)/libogc/include/ogc/machine
 CXXFLAGS		:= $(CFLAGS) -Weffc++ -fno-exceptions -fno-rtti
 LDFLAGS			:= $(COMMON_FLAGS) -L$(DEVKITPRO)/libogc/lib/wii
 
@@ -51,6 +51,7 @@ OBJS := \
 	$(OBJ_DIR)/wii/gx/gx_screen.o \
 	$(OBJ_DIR)/wii/gx/gx_warp.o \
 	$(OBJ_DIR)/wii/gx/gx_rpart.o \
+	$(OBJ_DIR)/wii/gx/gx_textures.o \
 	$(OBJ_DIR)/generic/cd_null.o \
 	$(OBJ_DIR)/generic/chase.o \
 	$(OBJ_DIR)/generic/cl_demo.o \

@@ -183,8 +183,6 @@ namespace quake
 				_CPU_ISR_Restore(level);
 			}
 
-ARENA2_HI = (u32)heap + real_heap_size;
-
 			// Initialise the Host module.
 			quakeparms_t parms;
 			memset(&parms, 0, sizeof(parms));

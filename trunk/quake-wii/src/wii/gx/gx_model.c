@@ -60,9 +60,14 @@ Caches the data if needed
 */
 void *Mod_Extradata (model_t *mod)
 {
-	if (mod->needload)
-		Mod_LoadModel (mod, true);
+	void	*r;
+	
+	r = Cache_Check (&mod->cache);
+	if (r)
+		return r;
 
+	Mod_LoadModel (mod, true);
+	
 	if (!mod->cache.data)
 		Sys_Error ("Mod_Extradata: caching failed");
 	return mod->cache.data;
@@ -166,7 +171,8 @@ void Mod_ClearAll (void)
 	model_t	*mod;
 	
 	for (i=0 , mod=mod_known ; i<mod_numknown ; i++, mod++)
-		mod->needload = true;
+		if (mod->type != mod_alias)
+			mod->needload = true;
 }
 
 /*
@@ -213,6 +219,12 @@ void Mod_TouchModel (char *name)
 	model_t	*mod;
 	
 	mod = Mod_FindName (name);
+	
+	if (!mod->needload)
+	{
+		if (mod->type == mod_alias)
+			Cache_Check (&mod->cache);
+	}
 }
 
 /*
@@ -229,7 +241,16 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	byte	stackbuf[1024];		// avoid dirtying the cache heap
 
 	if (!mod->needload)
+	{
+		if (mod->type == mod_alias)
+		{
+			d = Cache_Check (&mod->cache);
+			if (d)
+				return mod;
+		}
+		else
 			return mod;		// not cached at all
+	}
 
 //
 // because the world is so huge, load it one piece at a time
@@ -366,7 +387,7 @@ void Mod_LoadTextures (lump_t *l)
 			R_InitSky (tx);
 		else
 		{
-			GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false, false, &tx->gl_texturenum, 1);
+			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false, false);
 		}
 	}
 
@@ -1416,7 +1437,11 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 				memcpy (texels, (byte *)(pskintype + 1), s);
 	//		}
 			sprintf (name, "%s_%i", loadmodel->name, i);
-			GL_LoadTexture (name, pheader->skinwidth, pheader->skinheight, (byte *)(pskintype + 1), true, false, true, 			&pheader->gl_texturenum[i][0], 4);
+			pheader->gl_texturenum[i][0] =
+			pheader->gl_texturenum[i][1] =
+			pheader->gl_texturenum[i][2] =
+			pheader->gl_texturenum[i][3] =
+			GL_LoadTexture (name, pheader->skinwidth, pheader->skinheight, (byte *)(pskintype + 1), true, false, true);
 			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
 		} else {
 			// animating skin group.  yuck.
@@ -1436,8 +1461,8 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 						memcpy (texels, (byte *)(pskintype), s);
 					}
 					sprintf (name, "%s_%i_%i", loadmodel->name, i,j);
-					GL_LoadTexture (name, pheader->skinwidth, 
-						pheader->skinheight, (byte *)(pskintype), true, false, true, &pheader->gl_texturenum[i][j&3], 1);
+					pheader->gl_texturenum[i][j&3] = GL_LoadTexture (name, pheader->skinwidth, 
+						pheader->skinheight, (byte *)(pskintype), true, false, true);
 					pskintype = (daliasskintype_t *)((byte *)(pskintype) + s);
 			}
 			k = j;
@@ -1469,6 +1494,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	daliasskintype_t	*pskintype;
 	int					start, end, total;
 	
+	start = Hunk_LowMark ();
+
 	pinmodel = (mdl_t *)buffer;
 
 	version = LittleLong (pinmodel->version);
@@ -1600,7 +1627,18 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	//
 	GL_MakeAliasModelDisplayLists (mod, pheader);
 
-	mod->cache.data = pheader;
+//
+// move the complete, relocatable alias model to the cache
+//	
+	end = Hunk_LowMark ();
+	total = end - start;
+	
+	Cache_Alloc (&mod->cache, total, loadname);
+	if (!mod->cache.data)
+		return;
+	memcpy (mod->cache.data, pheader, total);
+
+	Hunk_FreeToLowMark (start);
 }
 
 //=============================================================================
@@ -1642,7 +1680,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->right = width + origin[0];
 
 	sprintf (name, "%s_%i", loadmodel->name, framenum);
-	GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, true, true, &pspriteframe->gl_texturenum, 1);
+	pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, true, true);
 
 	return (void *)((byte *)pinframe + sizeof (dspriteframe_t) + size);
 }

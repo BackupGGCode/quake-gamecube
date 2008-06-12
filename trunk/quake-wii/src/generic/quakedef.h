@@ -28,10 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define WIIGX_VERSION			0.01
 #endif
 
-#if HW_RVL
-extern int ARENA2_HI;
-#endif
-
 //define	PARANOID			// speed sapping error checking
 
 #ifdef QUAKE2
