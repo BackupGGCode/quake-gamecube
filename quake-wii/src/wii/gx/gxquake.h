@@ -199,7 +199,6 @@ typedef struct
 	int			width, height;
 	qboolean	mipmap;
 	unsigned	*data;
-	unsigned	*allocated_area;
 	int			scaled_width, scaled_height;
 
 	// ELUTODO: make sure textures loaded without an identifier are loaded only one time, if "keep" is on
