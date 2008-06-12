@@ -104,11 +104,6 @@ namespace quake
 #ifndef DISABLE_WIIMOTE
 			if (WPAD_Init() != WPAD_ERR_NONE)
 				Sys_Error("WPAD_Init() failed.\n");
-
-			//WPAD_Disconnect(WPAD_CHAN_0);
-			WPAD_Disconnect(WPAD_CHAN_1);
-			WPAD_Disconnect(WPAD_CHAN_2);
-			WPAD_Disconnect(WPAD_CHAN_3);
 #endif
 
 			wiimote_ir_res_x = rmode->fbWidth;
