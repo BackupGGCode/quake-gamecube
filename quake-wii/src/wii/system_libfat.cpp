@@ -35,7 +35,8 @@ namespace quake
 			static bool initialised = false;
 			if (!initialised)
 			{
-				fatInitDefault();
+				if (!fatInitDefault())
+					Sys_Error("Filesystem initialization failed\n");
 
 				for (size_t i = 0; i < file_count; i++)
 					files[i].handle = NULL;
