@@ -43,18 +43,17 @@ namespace quake
 {
 	namespace main
 	{
-		// Types.
-		typedef u32 pixel_pair;
-
 		// Globals.
-		extern pixel_pair	(*xfb)[][640];
-		extern GXRModeObj*	rmode;
+		extern void		*framebuffer[2];
+		extern int		fb;
+		extern GXRModeObj	*rmode;
 	}
 
 	namespace video
 	{
+		using main::framebuffer;
+		using main::fb;
 		using main::rmode;
-		using main::xfb;
 
 		// Quake constants.
 		static const size_t		max_screen_width	= 640;
@@ -304,8 +303,10 @@ void VID_Update(vrect_t* rects)
 	// Mark the end of drawing.
 	GX_DrawDone();
 
+	fb ^= 1;
 	// Start copying the frame buffer every vsync.
-	GX_CopyDisp(xfb, GX_TRUE);
+	GX_CopyDisp(framebuffer[fb], GX_TRUE);
+	VIDEO_SetNextFramebuffer(framebuffer[fb]);
 }
 
 void D_BeginDirectRect(int x, int y, byte* pbitmap, int width, int height)

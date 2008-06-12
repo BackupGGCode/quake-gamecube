@@ -240,7 +240,8 @@ void GL_EndRendering (void)
 		GX_CopyDisp(framebuffer[fb], GX_TRUE);
 
 		VIDEO_SetNextFramebuffer(framebuffer[fb]);
-		// ELUTODO?
+
+		// Keep framerate
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
 }

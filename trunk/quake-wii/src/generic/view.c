@@ -854,7 +854,7 @@ void V_RenderView (void)
 		R_RenderView ();
 	}
 
-#if !HW_RVL && !GXQUAKE
+#if ((!HW_RVL && !GXQUAKE) || (HW_RVL && !GXQUAKE))
 	if (crosshair.value)
 		Draw_Character (scr_vrect.x + scr_vrect.width/2 + cl_crossx.value, 
 			scr_vrect.y + scr_vrect.height/2 + cl_crossy.value, '+');

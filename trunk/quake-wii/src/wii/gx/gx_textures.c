@@ -115,7 +115,7 @@ void GL_Bind0 (int texnum)
 		return;
 
 	if (!gltextures[texnum].used)
-		Sys_Error("Tried to bind and inactive texture0.");
+		Sys_Error("Tried to bind a inactive texture0.");
 
 	currenttexture0 = texnum;
 	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP0);
@@ -127,7 +127,7 @@ void GL_Bind1 (int texnum)
 		return;
 
 	if (!gltextures[texnum].used)
-		Sys_Error("Tried to bind and inactive texture1.");
+		Sys_Error("Tried to bind a inactive texture1.");
 
 	currenttexture1 = texnum;
 	GX_LoadTexObj(&(gltextures[texnum].gx_tex), GX_TEXMAP1);
