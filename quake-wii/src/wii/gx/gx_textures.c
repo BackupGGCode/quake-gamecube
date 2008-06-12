@@ -715,27 +715,33 @@ void GL_ClearTextureCache(void)
 
 	for (i = 0; i < oldnumgltextures; i++)
 	{
-		if (gltextures[i].keep)
+		if (gltextures[i].used)
 		{
-			numgltextures = i + 1;
+			if (gltextures[i].keep)
+			{
+				numgltextures = i + 1;
 
-			newdata = __lwp_heap_allocate(&texture_heap, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
-			if (!newdata)
-				Sys_Error("GL_ClearTextureCache: Out of memory.");
+				newdata = __lwp_heap_allocate(&texture_heap, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
+				if (!newdata)
+					Sys_Error("GL_ClearTextureCache: Out of memory.");
 
-			// ELUTODO Pseudo-defragmentation that helps a bit :)
-			memcpy(newdata, gltextures[i].data, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
-			__lwp_heap_free(&texture_heap, gltextures[i].data);
-			gltextures[i].data = newdata;
-			GX_InitTexObj(&gltextures[i].gx_tex, gltextures[i].data, gltextures[i].scaled_width, gltextures[i].scaled_height, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, /*mipmap ? GX_TRUE :*/ GX_FALSE);
+				// ELUTODO Pseudo-defragmentation that helps a bit :)
+				memcpy(newdata, gltextures[i].data, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
 
-			DCFlushRange(gltextures[i].data, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
-		}
-		else
-		{
-			gltextures[i].used = false;
-			if (!__lwp_heap_free(&texture_heap, gltextures[i].data))
-				Sys_Error("GL_ClearTextureCache: Error freeing data.");
+				if (!__lwp_heap_free(&texture_heap, gltextures[i].data))
+					Sys_Error("GL_ClearTextureCache: Error freeing data.");
+
+				gltextures[i].data = newdata;
+				GX_InitTexObj(&gltextures[i].gx_tex, gltextures[i].data, gltextures[i].scaled_width, gltextures[i].scaled_height, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, /*mipmap ? GX_TRUE :*/ GX_FALSE);
+
+				DCFlushRange(gltextures[i].data, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
+			}
+			else
+			{
+				gltextures[i].used = false;
+				if (!__lwp_heap_free(&texture_heap, gltextures[i].data))
+					Sys_Error("GL_ClearTextureCache: Error freeing data.");
+			}
 		}
 	}
 
