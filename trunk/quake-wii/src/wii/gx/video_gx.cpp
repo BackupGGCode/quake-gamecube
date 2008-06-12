@@ -230,7 +230,6 @@ void GL_EndRendering (void)
 		// Finish up any graphics operations.
 		GX_Flush();
 		GX_DrawDone();
-		GX_WaitDrawDone();
 
 		fb ^= 1;
 

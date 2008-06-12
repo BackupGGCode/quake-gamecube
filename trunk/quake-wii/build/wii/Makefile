@@ -21,7 +21,7 @@ SED = sed "s/:\([0-9]*\):/\(\1\) :/"
 COMMON_FLAGS	:= -mcpu=750 -meabi -mhard-float -g -Wall -pipe -mrvl
 OPT_FLAGS		:= -Os -fno-merge-constants -fno-strict-aliasing -fsingle-precision-constant
 DEFINES			:= -DGEKKO
-CFLAGS			:= $(COMMON_FLAGS) $(OPT_FLAGS) $(DEFINES) -I$(DEVKITPRO)/libogc/include
+CFLAGS			:= $(COMMON_FLAGS) $(OPT_FLAGS) $(DEFINES) -I$(DEVKITPRO)/libogc/include -I$(DEVKITPRO)/libogc/include/ogc
 CXXFLAGS		:= $(CFLAGS) -Weffc++ -fno-exceptions -fno-rtti
 LDFLAGS			:= $(COMMON_FLAGS) -L$(DEVKITPRO)/libogc/lib/wii
 

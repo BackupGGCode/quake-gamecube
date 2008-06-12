@@ -91,6 +91,8 @@ cvar_t		scr_printspeed = {"scr_printspeed","8"};
 cvar_t		gl_triplebuffer = {"gl_triplebuffer", "1", true };
 
 extern	cvar_t	crosshair;
+extern	cvar_t	cl_crossx;
+extern	cvar_t	cl_crossy;
 
 qboolean	scr_initialized;		// ready to draw
 
@@ -903,8 +905,9 @@ void SCR_UpdateScreen (void)
 	}
 	else
 	{
-		if (crosshair.value)
-			Draw_Character (scr_vrect.x + scr_vrect.width/2, scr_vrect.y + scr_vrect.height/2, '+');
+        if (crosshair.value)
+                Draw_Character (scr_vrect.x + scr_vrect.width/2 + cl_crossx.value,
+                        scr_vrect.y + scr_vrect.height/2 + cl_crossy.value, '+');
 		
 		SCR_DrawRam ();
 		SCR_DrawNet ();
