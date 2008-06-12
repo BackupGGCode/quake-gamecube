@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ogc/cache.h>
 
 #include "../../generic/quakedef.h"
-
+int ARENA2_HI;
 cvar_t		gl_max_size = {"gl_max_size", "1024"};
 
 byte		*draw_chars;				// 8*8 graphic characters

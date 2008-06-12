@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // OGC includes.
 #include <ogc/lwp.h>
+#include <ogc/lwp_mutex.h>
 #include <ogc/lwp_watchdog.h>
 #include <ogcsys.h>
 #include <wiiuse/wpad.h>
@@ -57,10 +58,13 @@ namespace quake
 		GXRModeObj	*rmode			= 0;
 
 		// Set up the heap.
-		//static const size_t	heap_size	= 12 * 1024 * 1024;
-		static const size_t	heap_size	= (ARENA2_HI - ARENA2_LO);
-		//static char			heap[heap_size] __attribute__((aligned(8)));
-		static char		*heap = (char *)ARENA2_LO;
+		static const size_t	heap_size	= 16 * 1024 * 1024;
+		static char		*heap;
+
+		inline void *align32 (void *p)
+		{
+			return (void*)((((int)p + 31)) & 0xffffffe0);
+		}
 
 		static void init()
 		{
@@ -117,13 +121,10 @@ namespace quake
 				(u32)SYS_GetArena1Hi() - (u32)SYS_GetArena1Lo(),
 				(u32)SYS_GetArena2Hi() - (u32)SYS_GetArena2Lo());
 
-			/*printf("Arena1Lo: %u\n", (unsigned)SYS_GetArena1Lo());
-			printf("Arena1Hi: %u\n", (unsigned)SYS_GetArena1Hi());
-			printf("Arena2Lo: %u\n", (unsigned)SYS_GetArena2Lo());
-			printf("Arena2Hi: %u\n", (unsigned)SYS_GetArena2Hi());*/
 			VIDEO_WaitVSync();
 			struct timespec sleeptime = {3, 0};
 			nanosleep(&sleeptime);
+			VIDEO_SetBlack(TRUE);
 		}
 
 		static void check_pak_file_exists()
@@ -153,9 +154,7 @@ namespace quake
 
 		static void* main_thread_function(void*)
 		{
-			// Initialise.
-			init();
-			check_pak_file_exists();
+			u32 level, real_heap_size;
 
 			// Initialise the Common module.
 			char* args[] =
@@ -170,13 +169,29 @@ namespace quake
 			};
 			COM_InitArgv(sizeof(args) / sizeof(args[0]), args);
 
+			_CPU_ISR_Disable(level);
+			heap = (char *)align32(SYS_GetArena2Lo());
+			real_heap_size = heap_size - ((u32)heap - (u32)SYS_GetArena2Lo());
+			if ((u32)heap + real_heap_size > (u32)SYS_GetArena2Hi())
+			{
+				_CPU_ISR_Restore(level);
+				Sys_Error("heap + real_heap_size > (u32)SYS_GetArena2Hi()");
+			}	
+			else
+			{
+				SYS_SetArena2Lo(heap + real_heap_size);
+				_CPU_ISR_Restore(level);
+			}
+
+ARENA2_HI = (u32)heap + real_heap_size;
+
 			// Initialise the Host module.
 			quakeparms_t parms;
 			memset(&parms, 0, sizeof(parms));
 			parms.argc		= com_argc;
 			parms.argv		= com_argv;
 			parms.basedir	= "";
-			parms.memsize	= heap_size;
+			parms.memsize	= real_heap_size;
 			parms.membase	= heap;
 			if (parms.membase == 0)
 			{
@@ -193,6 +208,8 @@ namespace quake
 #if TEST_CONNECTION
 			Cbuf_AddText("connect 192.168.0.2");
 #endif
+
+			VIDEO_SetBlack(FALSE);
 
 			// Run the main loop.
 			u64 last_time = gettime();
@@ -225,13 +242,17 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
-	SYS_SetArena2Lo((void *)ARENA2_HI);
-	__STM_Init();
+	void *qstack = malloc(1024 * 1024);
+
+	// Initialize.
+	init();
+	check_pak_file_exists();
+
 	SYS_SetResetCallback(reset_system);
 
 	// Start the main thread.
 	lwp_t thread;
-	LWP_CreateThread(&thread, &main_thread_function, 0, 0, 256 * 1024, 1);
+	LWP_CreateThread(&thread, &main_thread_function, 0, qstack, 1024 * 1024, 64);
 
 	// Wait for it to finish.
 	void* result;
