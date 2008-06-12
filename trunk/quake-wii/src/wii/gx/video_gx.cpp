@@ -173,7 +173,7 @@ void GL_Init (void)
 	GX_CopyDisp(framebuffer[fb],GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 
-	GX_SetZCompLoc(true); // ELUTODO
+	GX_SetZCompLoc(false); // ELUTODO
 
 	GL_DisableMultitexture();
 
