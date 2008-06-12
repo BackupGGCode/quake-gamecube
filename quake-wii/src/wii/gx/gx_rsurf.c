@@ -351,6 +351,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 	GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT1, p->numverts);
 	for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
 	{
+		// ELUTODO: may warp too far and get culled when should be visible
 		nv[0] = v[0] + 8*sin(v[1]*0.05+realtime)*sin(v[2]*0.05+realtime);
 		nv[1] = v[1] + 8*sin(v[0]*0.05+realtime)*sin(v[2]*0.05+realtime);
 		nv[2] = v[2];

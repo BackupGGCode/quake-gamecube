@@ -234,7 +234,7 @@ void VID_Init(unsigned char* palette)
 	vid.height			= screen_height;
 	vid.maxwarpheight	= WARP_HEIGHT;
 	vid.maxwarpwidth	= WARP_WIDTH;
-	vid.numpages		= 1;
+	vid.numpages		= 2;
 	vid.recalc_refdef	= 0;
 	vid.rowbytes		= sizeof(render_buffer[0]);
 	vid.width			= screen_width;

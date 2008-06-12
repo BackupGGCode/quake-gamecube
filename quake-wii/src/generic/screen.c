@@ -752,9 +752,11 @@ int SCR_ModalMessage (char *text)
 
 	scr_notifystring = text;
  
-// draw a fresh screen
+// draw a fresh screen and make sure the text stays there
 	scr_fullupdate = 0;
 	scr_drawdialog = true;
+	SCR_UpdateScreen ();
+	SCR_UpdateScreen ();
 	SCR_UpdateScreen ();
 	scr_drawdialog = false;
 	
@@ -770,6 +772,14 @@ int SCR_ModalMessage (char *text)
 
 	// Wait for keys to be pressed.
 	while (!keydown['y'] && !keydown['n'] && !keydown[K_JOY1] && !keydown[K_JOY2])
+	{
+		key_count = INT_MIN;
+		Sys_SendKeyEvents();
+		IN_Commands();
+	}
+
+	// Wait for keys to be released.
+	while (keydown['y'] || keydown['n'] || keydown[K_JOY1] || keydown[K_JOY2])
 	{
 		key_count = INT_MIN;
 		Sys_SendKeyEvents();
