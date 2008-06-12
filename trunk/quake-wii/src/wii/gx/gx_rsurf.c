@@ -732,6 +732,8 @@ void R_DrawWorld (void)
 	entity_t	ent;
 	int			i;
 
+	// ELUTODO: z-fighting
+
 	memset (&ent, 0, sizeof(ent));
 	ent.model = cl.worldmodel;
 

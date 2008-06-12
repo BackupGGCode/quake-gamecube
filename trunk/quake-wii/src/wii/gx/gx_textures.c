@@ -715,6 +715,7 @@ void GL_ClearTextureCache(void)
 {
 	int i;
 	int oldnumgltextures = numgltextures;
+	void *newdata;
 
 	numgltextures = 0;
 
@@ -723,10 +724,21 @@ void GL_ClearTextureCache(void)
 		if (gltextures[i].keep)
 		{
 			numgltextures = i + 1;
+
+			newdata = __lwp_heap_allocate(&texture_heap, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
+			if (!newdata)
+				Sys_Error("GL_Upload32: Out of memory.");
+
+			// Pseudo-defragmentation that helps a bit :)
+			memcpy(newdata, gltextures[i].data, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
+			__lwp_heap_free(&texture_heap, gltextures[i].data);
+			gltextures[i].data = newdata;
+			GX_InitTexObj(&gltextures[i].gx_tex, gltextures[i].data, gltextures[i].scaled_width, gltextures[i].scaled_height, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, /*mipmap ? GX_TRUE :*/ GX_FALSE);
+
+			DCFlushRange(gltextures[i].data, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
 		}
 		else
 		{
-			// ELUTODO PRIORITY: defragment, is causing problems the way it is.
 			gltextures[i].used = false;
 			__lwp_heap_free(&texture_heap, gltextures[i].data);
 		}
