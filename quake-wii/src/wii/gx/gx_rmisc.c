@@ -277,7 +277,7 @@ void R_TranslatePlayerSkin (int playernum)
 	inheight = paliashdr->skinheight;
 
 	// because this happens during gameplay, do it fast
-	// instead of sending it through gl_upload 8
+	// instead of sending it through gl_update 8
     // ELUTODO GL_Bind0(playertextures + playernum);
 
 	scaled_width = gl_max_size.value < 512 ? gl_max_size.value : 512;
