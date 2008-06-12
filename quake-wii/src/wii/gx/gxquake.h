@@ -23,12 +23,6 @@ void GL_EndRendering (void);
 
 extern	float	gldepthmin, gldepthmax;
 
-void GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha, qboolean keep, int *dest, int dest_count);
-int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data);
-int GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
-void GL_UpdateLightmapTextureRegion (int pic_id, int width, int height, int xoffset, int yoffset, byte *data);
-int GL_FindTexture (char *identifier);
-
 typedef struct
 {
 	float	x, y, z;
@@ -174,7 +168,9 @@ extern	cvar_t	gl_doubleeyes;
 extern	cvar_t	gl_max_size;
 extern	cvar_t	gl_playermip;
 
-extern	int			mirrortexturenum;	// quake texturenum, not gltexturenum
+extern int white_texturenum;
+
+extern	int			mirrortexturenum;
 extern	qboolean	mirror;
 extern	mplane_t	*mirror_plane;
 
@@ -193,15 +189,42 @@ extern Mtx view, model, modelview;
 #define ZMIN2D			-9999.0f
 #define ZMAX2D			9999.0f
 
+// Textures
+
+typedef struct
+{
+	int			texnum;
+	GXTexObj	gx_tex;
+	char		identifier[64];
+	int			width, height;
+	qboolean	mipmap;
+	unsigned	*data;
+	unsigned	*allocated_area;
+	int			scaled_width, scaled_height;
+
+	// ELUTODO: make sure textures loaded without an identifier are loaded only one time, if "keep" is on
+	// What about mid-game gamma changes?
+	qboolean	type; // 0 = normal, 1 = lightmap
+	qboolean	keep;
+
+	qboolean	used;
+} gltexture_t;
+
+#define	MAX_GLTEXTURES	2048
+extern int numgltextures;
+extern gltexture_t	gltextures[MAX_GLTEXTURES];
+
 void QGX_ZMode(qboolean state);
 void QGX_Alpha(qboolean state);
 void QGX_Blend(qboolean state);
 
-extern int white_texturenum;
+int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha, qboolean keep);
+int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data);
+void GL_UpdateTexture (int pic_id, char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
+void GL_UpdateLightmapTextureRegion (int pic_id, int width, int height, int xoffset, int yoffset, byte *data);
+int GL_FindTexture (char *identifier);
 
 void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
-
-extern int numgltextures;
 
 void GL_ClearTextureCache(void);
