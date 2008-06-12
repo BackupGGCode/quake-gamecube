@@ -128,6 +128,8 @@ void Sys_Quit (void)
 		Host_Shutdown();
 	}
 
+	VIDEO_SetBlack(TRUE);
+
 	// Exit.
 	exit(0);
 }

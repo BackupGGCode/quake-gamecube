@@ -29,8 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #if HW_RVL
-#define ARENA2_LO        0x90080000
-#define ARENA2_HI        0x91000000
+extern int ARENA2_HI;
 #endif
 
 //define	PARANOID			// speed sapping error checking
