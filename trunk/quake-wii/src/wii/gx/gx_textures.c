@@ -729,7 +729,7 @@ void GL_ClearTextureCache(void)
 			if (!newdata)
 				Sys_Error("GL_Upload32: Out of memory.");
 
-			// Pseudo-defragmentation that helps a bit :)
+			// ELUTODO Pseudo-defragmentation that helps a bit :)
 			memcpy(newdata, gltextures[i].data, gltextures[i].scaled_width * gltextures[i].scaled_height * sizeof(unsigned));
 			__lwp_heap_free(&texture_heap, gltextures[i].data);
 			gltextures[i].data = newdata;
