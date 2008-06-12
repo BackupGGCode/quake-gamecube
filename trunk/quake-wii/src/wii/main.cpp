@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
 
 	// Start the main thread.
 	lwp_t thread;
-	LWP_CreateThread(&thread, &main_thread_function, 0, qstack, 1024 * 1024, 64);
+	LWP_CreateThread(&thread, &main_thread_function, 0, qstack, 4 * 1024 * 1024, 64);
 
 	// Wait for it to finish.
 	void* result;
