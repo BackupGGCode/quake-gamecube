@@ -235,7 +235,7 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
-	void *qstack = malloc(1024 * 1024);
+	void *qstack = malloc(4 * 1024 * 1024);
 
 	// Initialize.
 	init();
