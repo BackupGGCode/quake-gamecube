@@ -150,7 +150,6 @@ void GL_SubdivideSurface (msurface_t *fa)
 	int			i;
 	int			lindex;
 	float		*vec;
-	texture_t	*t;
 
 	warpface = fa;
 
