@@ -51,7 +51,7 @@ void R_InitTextureHeap (void)
 
 	_CPU_ISR_Disable(level);
 	texture_heap_ptr = Align_To_32_Bytes(SYS_GetArena2Lo());
-	texture_heap_size = 16 * 1024 * 1024 - ((u32)texture_heap_ptr - (u32)SYS_GetArena2Lo());
+	texture_heap_size = 32 * 1024 * 1024 - ((u32)texture_heap_ptr - (u32)SYS_GetArena2Lo());
 	if ((u32)texture_heap_ptr + texture_heap_size > (u32)SYS_GetArena2Hi())
 	{
 		_CPU_ISR_Restore(level);
@@ -252,6 +252,8 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	}
 
 	destination->data = __lwp_heap_allocate(&texture_heap, scaled_width * scaled_height * sizeof(unsigned));
+	if (!destination->data)
+		Sys_Error("GL_Upload32: Out of memory.");
 
 	destination->scaled_width = scaled_width;
 	destination->scaled_height = scaled_height;
@@ -724,6 +726,7 @@ void GL_ClearTextureCache(void)
 		}
 		else
 		{
+			// ELUTODO PRIORITY: defragment, is causing problems the way it is.
 			gltextures[i].used = false;
 			__lwp_heap_free(&texture_heap, gltextures[i].data);
 		}

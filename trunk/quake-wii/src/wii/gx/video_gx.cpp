@@ -303,7 +303,7 @@ void VID_Init(unsigned char *palette)
 	vid.height = vid.conheight;
 
 	vid.aspect = ((float)vid.height / (float)vid.width) * (320.0 / 240.0);
-	vid.numpages = 1; // ELUTODO
+	vid.numpages = 2;
 
 	GL_Init();
 

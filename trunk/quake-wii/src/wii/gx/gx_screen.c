@@ -742,24 +742,47 @@ int SCR_ModalMessage (char *text)
 
 	scr_notifystring = text;
  
-// draw a fresh screen
+// draw a fresh screen and make sure the text stays there
 	scr_fullupdate = 0;
 	scr_drawdialog = true;
+	// ELUTODO: other cases where we need more updates do keep the screen current
+	SCR_UpdateScreen ();
+	SCR_UpdateScreen ();
 	SCR_UpdateScreen ();
 	scr_drawdialog = false;
 	
 	S_ClearBuffer ();		// so dma doesn't loop current sound
 
-	do
+	// Wait for keys to be released.
+	while (keydown['y'] || keydown['n'] || keydown[K_JOY1] || keydown[K_JOY2])
 	{
-		key_count = -1;		// wait for a key down and up
-		Sys_SendKeyEvents ();
-	} while (key_lastpress != 'y' && key_lastpress != 'n' && key_lastpress != K_ESCAPE);
+			key_count = INT_MIN;
+			Sys_SendKeyEvents();
+			IN_Commands();
+	}
+
+	// Wait for keys to be pressed.
+	while (!keydown['y'] && !keydown['n'] && !keydown[K_JOY1] && !keydown[K_JOY2])
+	{
+			key_count = INT_MIN;
+			Sys_SendKeyEvents();
+			IN_Commands();
+	}
+
+	// Wait for keys to be released.
+	while (keydown['y'] || keydown['n'] || keydown[K_JOY1] || keydown[K_JOY2])
+	{
+			key_count = INT_MIN;
+			Sys_SendKeyEvents();
+			IN_Commands();
+	}
+
+	key_count = 0;
 
 	scr_fullupdate = 0;
 	SCR_UpdateScreen ();
 
-	return key_lastpress == 'y';
+	return (key_lastpress == 'y') || (key_lastpress == K_JOY1);
 }
 
 
