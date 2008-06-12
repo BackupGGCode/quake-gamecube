@@ -65,7 +65,7 @@ void R_InitTextureHeap (void)
 
 	memset(texture_heap_ptr, 0, texture_heap_size);
 
-	size = __lwp_heap_init(&texture_heap, texture_heap_ptr, texture_heap_size, PPC_ALIGNMENT);
+	size = __lwp_heap_init(&texture_heap, texture_heap_ptr, texture_heap_size, PPC_CACHE_ALIGNMENT);
 
 	Con_Printf("Allocated %dM texture heap.\n", size / (1024 * 1024));
 }
@@ -251,8 +251,7 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 		memcpy(scaled, data, scaled_width * scaled_height * sizeof(unsigned));
 	}
 
-	destination->allocated_area = __lwp_heap_allocate(&texture_heap, scaled_width * scaled_height * sizeof(unsigned) + 31);
-	destination->data = Align_To_32_Bytes(destination->allocated_area);
+	destination->data = __lwp_heap_allocate(&texture_heap, scaled_width * scaled_height * sizeof(unsigned));
 
 	destination->scaled_width = scaled_width;
 	destination->scaled_height = scaled_height;
@@ -726,7 +725,7 @@ void GL_ClearTextureCache(void)
 		else
 		{
 			gltextures[i].used = false;
-			__lwp_heap_free(&texture_heap, gltextures[i].allocated_area);
+			__lwp_heap_free(&texture_heap, gltextures[i].data);
 		}
 	}
 
