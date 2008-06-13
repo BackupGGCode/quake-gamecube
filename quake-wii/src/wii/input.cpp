@@ -18,7 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-// ELUTODO: do something about loolspring and lookstrafe
+// ELUTODO: do something about lookspring and lookstrafe
+// ELUTODO: keys to: stop wiimote turning, nunchuk turn and nunchuk look up/down
 
 extern "C"
 {
