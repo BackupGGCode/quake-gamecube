@@ -371,7 +371,7 @@ void CL_SendMove (usercmd_t *cmd)
 	 *
 	 * Another issue is that networked players/demo watchers will see where YOUR gun is facing, not where YOU are facing.
 	 *
-	 * It's also possible to bypass the client-side PITCH limits
+	 * It's also possible to bypass the client-side PITCH limits. Beware, this may be considered cheating!
 	 */
 	MSG_WriteAngle (&buf, cl.viewangles[PITCH] + cl_crossy.value/scr_vrect.height * IR_PITCHRANGE);
 	MSG_WriteAngle (&buf, cl.viewangles[YAW] - cl_crossx.value/scr_vrect.width * IR_YAWRANGE);
