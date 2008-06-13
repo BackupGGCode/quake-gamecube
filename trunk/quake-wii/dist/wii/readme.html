@@ -2,16 +2,25 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>Quake Wii</title>
+		<title>QuakeGX</title>
 	</head>
 	<body>
-		<h1>Quake Wii</h1>
+		<h1>QuakeGX - 2008/06/13</h1>
 		
 		<h2>Requirements</h2>
 
 		<ul>
 			<li>A Wii.</li>
 			<li>Twilight Hack, The Homebrew Channel or some other way of running programs from SD Card.</li>
+		</ul>
+
+		<h2>Release Notes for version 0.01</h2>
+
+		<ul>
+			<li>To correctly see the transparent water without artifacts, please apply <a href=http://vispatch.sourceforge.net/>Vispatch</a> to your pak0.pak (and pak1.pak, if you have the full version) file.</li>
+			<li>This is an early release. I am not currently able to solve the freezing bug until my USBGecko arrives. International mail is SLOW, so please be patient. :)</li>
+			<li>Be sure to read the "Installation" section for info regarding the different Wiimote button mappings.</li>
+			<li>If you notice a split-second freezing, quickly save you progress and quit the game, then reload it. At least it warns before freezing. :D</li>
 		</ul>
 		
 		<h2>Installation</h2>
@@ -21,7 +30,7 @@
 			<li>Copy the ID1 folder to the root of your SD Card.</li>
 			<li>Copy Quake's PAK0.PAK (and PAK1.PAK if you own the full version) into the ID1 folder on your SD Card.</li>
 			<li>Insert the SD Card into the Wii front SD slot.</li>
-			<li>Launch Quake.dol using your method of choice.</li>
+			<li>Launch QuakeGX.dol using your method of choice.</li>
 		</ol>
 		
 		<h2>Credits</h2>
@@ -38,7 +47,7 @@
 		<ul>
 			<li>You can freely change button bindings on the Wiimote without affecting the GC pad bindings, except for the D-Pad on both controllers and Start/Plus. These are paired and changing one's binding will change the other</li>
 			<li>There is still no music support, but expect it for future releases. (Probably you will have to rip your original quake music from your CD.)</li>
-			<li>There is a new menu option for adjusting the size of the screen to adjust for your TV overscan. (Does not work with the GX accelerated version yet.)</li>
+			<li>There is a new menu option for adjusting the size of the screen to adjust for your TV's overscan. (Does not work with the GX accelerated version yet.)</li>
 		</ul>
 
 		<h2>Software rendering notes</h2>
@@ -47,6 +56,7 @@
 			<li>All of the original dosquake rendering features are supported.</li>
 			<li>Unfortunately, the original palette is converted from RGB8 to RGB565. The best way to correct this is writing a full 24-bit software renderer, but don't expect it soon.</li>
 			<li>Framerate may be a bit choppy and there is still no support for going back to the old 320x200 resolution.</li>
+			<li>Software rendering is only available through svn.
 		</ul>
 
 		<h2>Hardware rendering notes</h2>
@@ -90,7 +100,7 @@
 
 		<h2>Contact</h2>
 
-		<p>You can report bugs or suggestions using the project's <a href="http://code.google.com/p/quake-gamecube/issues/list">issue tracker</a>. Please make sure to check the existing issues before adding new ones. By default only open issues are shown, you will have to select "All Issues" in the search field.</p>
+		<p>You can report bugs or suggestions using the project's <a href="http://code.google.com/p/quake-gamecube/issues/list">issue tracker</a>. Please make sure to check the existing issues before adding new ones. By default only open issues are shown, you will have to select "All Issues" in the search field to see if your issue has already been fixed on svn.</p>
 		<p>Be sure to keep checking the <a href="http://code.google.com/p/quake-gamecube/">Google project page</a> for new versions and other info. :)</p>
 		
 		<h2>Source code</h2>
