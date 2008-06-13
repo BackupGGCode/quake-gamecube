@@ -16,9 +16,9 @@
 
 My thanks go out to:
 
- * Wintermute for [http://www.devkitpro.org/ devkitPro]
- * The libOGC guys
+ * Wintermute and shagkur for [http://www.devkitpro.org/ devkitPro] and libOGC
  * Softdev for his alternative SD card library
+ * All the #wiidev@efnet guys for helping and being so kind to me
  * The rest of the !TehSkeen guys for generally rocking when it comes to !GameCube development knowledge
 
 My blown raspberries go out to:
