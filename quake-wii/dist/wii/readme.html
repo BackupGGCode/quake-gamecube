@@ -29,9 +29,39 @@
 			<li>Original game by <a href="http://www.idsoftware.com/">id Software</a>.</li>
 			<li>GameCube conversion by <a href="http://aaiiee.wordpress.com/">Peter Mackay</a>.</li>
 			<li>GameCube version testing by eke, org and plootid.</li>
-			<li>Wii version by Eluan Miranda</li>
+			<li>Wii version and GX graphics acceleration by Eluan Miranda</li>
 		</ul>
-		
+
+		<h2>General notes</h2>
+
+		<ul>
+			<li>You can freely change button bindings on the Wiimote without affecting the GC pad bindings, except for the D-Pad on both controllers and Start/Plus. These are paired and changing one's binding will change the other</li>
+			<li>There is still no music support, but expect it for future releases. (Probably you will have to rip your original quake music from your CD.)</li>
+			<li>There is a new menu option for adjusting the size of the screen to adjust for your TV overscan. (Do not work with the GX accelerated version yet.)</li>
+		</ul>
+
+		<h2>Software rendering notes</h2>
+
+		<ul>
+			<li>All of the original dosquake rendering features are supported.</li>
+			<li>Unfortunately, the original palette is converted from RGB8 to RGB565. The best way to correct this is writing a full 24-bit software renderer, but don't expect it soon.</li>
+			<li>Framerate may be a bit choppy and there is still no support for going back to the old 320x200 resolution.</li>
+		</ul>
+
+		<h2>Hardware rendering notes</h2>
+
+		<ul>
+			<li>Full speed, fully implemented GX port of the original glquake, with some new features being added gradually.</li>
+			<li>Supports all of the original glquake features: dynamic lightmaps, water transparency, and more.</li>
+			<li>To make the water correctly transparent, you will need water-vised maps.</li>
+		</ul>
+
+		<h2>Default controls</h2>
+
+		<ul>
+			<li></li>
+		</ul>
+
 		<h2>Contact</h2>
 
 		<p>You can report bugs or suggestions using the project's <a href="http://code.google.com/p/quake-gamecube/issues/list">issue tracker</a>. Please make sure to check the existing issues before adding new ones.</p>
@@ -39,7 +69,7 @@
 		<h2>Source code</h2>
 
 		<p>
-			The original Quake code was released under the <a href="http://en.wikipedia.org/wiki/GNU_General_Public_License">GNU General Public License</a> (GPL). Quake GameCube's source code is available at the <a href="http://code.google.com/p/quake-gamecube/source">Google project page</a>.
+			The original Quake code was released under the <a href="http://en.wikipedia.org/wiki/GNU_General_Public_License">GNU General Public License</a> (GPL). This port's source code is available at the <a href="http://code.google.com/p/quake-gamecube/source">Google project page</a>.
 		</p>
 	</body>
 </html>

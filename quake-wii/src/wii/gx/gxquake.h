@@ -209,7 +209,7 @@ typedef struct
 	qboolean	used;
 } gltexture_t;
 
-#define	MAX_GLTEXTURES	2048
+#define	MAX_GLTEXTURES	1024
 extern int numgltextures;
 extern gltexture_t	gltextures[MAX_GLTEXTURES];
 

@@ -203,6 +203,9 @@ void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 	}
 }
 
+static	unsigned	scaled[1024*512];	// [512*256];
+static	unsigned	trans[640*480];		// FIXME, temporary
+
 /*
 ===============
 GL_Upload32
@@ -213,7 +216,6 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	int			i, x, y, s;
 	u8			*pos;
 	int			samples;
-	static	unsigned	scaled[1024*512];	// [512*256];
 	int			scaled_width, scaled_height;
 
 	for (scaled_width = 1 << 5 ; scaled_width < width ; scaled_width<<=1)
@@ -319,7 +321,6 @@ GL_Upload8
 */
 void GL_Upload8 (gltexture_t *destination, byte *data, int width, int height,  qboolean mipmap, qboolean alpha)
 {
-	static	unsigned	trans[640*480];		// FIXME, temporary
 	int			i, s;
 	qboolean	noalpha;
 	int			p;
@@ -454,7 +455,6 @@ void GL_Update32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	int			i, x, y, s;
 	u8			*pos;
 	int			samples;
-	static	unsigned	scaled[1024*512];	// [512*256];
 	int			scaled_width, scaled_height;
 
 	for (scaled_width = 1 << 5 ; scaled_width < width ; scaled_width<<=1)
@@ -548,7 +548,6 @@ GL_Update8
 */
 void GL_Update8 (gltexture_t *destination, byte *data, int width, int height,  qboolean mipmap, qboolean alpha)
 {
-	static	unsigned	trans[640*480];		// FIXME, temporary
 	int			i, s;
 	qboolean	noalpha;
 	int			p;

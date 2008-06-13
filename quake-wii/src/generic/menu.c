@@ -307,6 +307,7 @@ void M_Main_Key (int key)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		key_dest = key_game;
 		m_state = m_none;
 		cls.demonum = m_save_demonum;
@@ -328,6 +329,7 @@ void M_Main_Key (int key)
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		m_entersound = true;
 
 		switch (m_main_cursor)
@@ -392,6 +394,7 @@ void M_SinglePlayer_Key (int key)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_Main_f ();
 		break;
 
@@ -409,6 +412,7 @@ void M_SinglePlayer_Key (int key)
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		m_entersound = true;
 
 		switch (m_singleplayer_cursor)
@@ -422,10 +426,12 @@ void M_SinglePlayer_Key (int key)
 					"Are you sure you want to\n"
 					"start a new game?\n"
 					"\n"
-					"Y or %s: Yes\n"
-					"N or %s: No\n",
+					"Y, %s or %s: Yes\n"
+					"N, %s or %s: No\n",
 					Key_KeynumToString(K_JOY1),
-					Key_KeynumToString(K_JOY2));
+					Key_KeynumToString(K_JOY8),
+					Key_KeynumToString(K_JOY2),
+					Key_KeynumToString(K_JOY9));
 				if (!SCR_ModalMessage(message))
 					break;
 			}
@@ -546,11 +552,13 @@ void M_Load_Key (int k)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_SinglePlayer_f ();
 		break;
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		S_LocalSound ("misc/menu2.wav");
 		if (!loadable[load_cursor])
 			return;
@@ -590,11 +598,13 @@ void M_Save_Key (int k)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_SinglePlayer_f ();
 		break;
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		m_state = m_none;
 		key_dest = key_game;
 		Cbuf_AddText (va("save s%i\n", load_cursor));
@@ -659,6 +669,7 @@ void M_MultiPlayer_Key (int key)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_Main_f ();
 		break;
 
@@ -676,6 +687,7 @@ void M_MultiPlayer_Key (int key)
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		m_entersound = true;
 		switch (m_multiplayer_cursor)
 		{
@@ -769,6 +781,7 @@ void M_Setup_Key (int k)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_MultiPlayer_f ();
 		break;
 
@@ -808,6 +821,7 @@ forward:
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		if (setup_cursor == 0 || setup_cursor == 1)
 			return;
 
@@ -995,6 +1009,7 @@ again:
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_MultiPlayer_f ();
 		break;
 
@@ -1012,6 +1027,7 @@ again:
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		m_entersound = true;
 
 		switch (m_net_cursor)
@@ -1246,11 +1262,13 @@ void M_Options_Key (int k)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_Main_f ();
 		break;
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		m_entersound = true;
 		switch (options_cursor)
 		{
@@ -1469,6 +1487,7 @@ void M_Keys_Key (int k)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_Options_f ();
 		break;
 
@@ -1490,6 +1509,7 @@ void M_Keys_Key (int k)
 
 	case K_ENTER:		// go into bind mode
 	case K_JOY1:
+	case K_JOY8:
 		M_FindKeysForCommand (bindnames[keys_cursor][0], keys);
 		S_LocalSound ("misc/menu2.wav");
 		if (keys[1] != -1)
@@ -1600,6 +1620,7 @@ void M_Quit_Key (int key)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 	case 'n':
 	case 'N':
 		if (wasInMenus)
@@ -1616,6 +1637,7 @@ void M_Quit_Key (int key)
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 	case 'Y':
 	case 'y':
 		key_dest = key_console;
@@ -1642,8 +1664,8 @@ void M_Quit_Draw (void)
 		m_state = m_quit;
 	}
 
-	sprintf(yes, "Y or %s: Yes", Key_KeynumToString(K_JOY1));
-	sprintf(no, "N or %s: No", Key_KeynumToString(K_JOY2));
+	sprintf(yes, "Y, %s or %s: Yes", Key_KeynumToString(K_JOY1), Key_KeynumToString(K_JOY8));
+	sprintf(no, "N, %s or %s: No", Key_KeynumToString(K_JOY2), Key_KeynumToString(K_JOY9));
 
 	M_DrawTextBox (56, 76, 24, 4);
 	M_Print (64, 84,  "Really quit?");
@@ -1785,6 +1807,7 @@ void M_SerialConfig_Key (int key)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_Net_f ();
 		break;
 
@@ -1867,6 +1890,7 @@ forward:
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		if (serialConfig_cursor < 3)
 			goto forward;
 
@@ -2017,6 +2041,7 @@ void M_ModemConfig_Key (int key)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_SerialConfig_f ();
 		break;
 
@@ -2048,6 +2073,7 @@ void M_ModemConfig_Key (int key)
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		if (modemConfig_cursor == 0)
 		{
 			if (modemConfig_dialing == 'P')
@@ -2221,6 +2247,7 @@ void M_LanConfig_Key (int key)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_Net_f ();
 		break;
 
@@ -2240,6 +2267,7 @@ void M_LanConfig_Key (int key)
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		if (lanConfig_cursor == 0)
 			break;
 
@@ -2729,6 +2757,7 @@ void M_GameOptions_Key (int key)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_Net_f ();
 		break;
 
@@ -2762,6 +2791,7 @@ void M_GameOptions_Key (int key)
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		S_LocalSound ("misc/menu2.wav");
 		if (gameoptions_cursor == 0)
 		{
@@ -2911,6 +2941,7 @@ void M_ServerList_Key (int k)
 	{
 	case K_ESCAPE:
 	case K_JOY2:
+	case K_JOY9:
 		M_Menu_LanConfig_f ();
 		break;
 
@@ -2936,6 +2967,7 @@ void M_ServerList_Key (int k)
 
 	case K_ENTER:
 	case K_JOY1:
+	case K_JOY8:
 		S_LocalSound ("misc/menu2.wav");
 		m_return_state = m_state;
 		m_return_onerror = true;
