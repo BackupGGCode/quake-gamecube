@@ -203,8 +203,9 @@ void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 	}
 }
 
-static	unsigned	scaled[1024*512];	// [512*256];
-static	unsigned	trans[640*480];		// FIXME, temporary
+// FIXME, temporary
+static	unsigned	scaled[640*480];
+static	unsigned	trans[640*480];
 
 /*
 ===============

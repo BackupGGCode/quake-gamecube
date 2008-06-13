@@ -516,23 +516,26 @@ Fills a box of pixels with a single color
 */
 void Draw_Fill (int x, int y, int w, int h, int c)
 {
-/* ELUTODO
-	glDisable (GL_TEXTURE_2D);
-	glColor3f (host_basepal[c*3]/255.0,
-		host_basepal[c*3+1]/255.0,
-		host_basepal[c*3+2]/255.0);
+	// ELUTODO: do not use a texture
+	GL_Bind0 (white_texturenum);
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
-	glBegin (GL_QUADS);
+	GX_Position3f32(x, y, 0.0f);
+	GX_Color4u8(host_basepal[c*3], host_basepal[c*3+1], host_basepal[c*3+2], 0xff);
+	GX_TexCoord2f32(0, 0);
 
-	glVertex2f (x,y);
-	glVertex2f (x+w, y);
-	glVertex2f (x+w, y+h);
-	glVertex2f (x, y+h);
+	GX_Position3f32(x + w, y, 0.0f);
+	GX_Color4u8(host_basepal[c*3], host_basepal[c*3+1], host_basepal[c*3+2], 0xff);
+	GX_TexCoord2f32(1, 0);
 
-	glEnd ();
-	glColor3f (1,1,1);
-	glEnable (GL_TEXTURE_2D);
-*/
+	GX_Position3f32(x + w, y + h, 0.0f);
+	GX_Color4u8(host_basepal[c*3], host_basepal[c*3+1], host_basepal[c*3+2], 0xff);
+	GX_TexCoord2f32(1, 1);
+
+	GX_Position3f32(x, y + h, 0.0f);
+	GX_Color4u8(host_basepal[c*3], host_basepal[c*3+1], host_basepal[c*3+2], 0xff);
+	GX_TexCoord2f32(0, 1);
+	GX_End();
 }
 //=============================================================================
 
@@ -545,7 +548,6 @@ Draw_FadeScreen
 void Draw_FadeScreen (void)
 {
 	// ELUTODO: do not use a texture
-
 	QGX_Alpha(false);
 	QGX_Blend(true);
 
