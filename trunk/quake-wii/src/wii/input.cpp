@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// ELUTODO: invert the +speed key when always run is ON
+
 extern "C"
 {
 #include "../generic/quakedef.h"
@@ -210,6 +212,7 @@ void IN_Init (void)
 	game_button_map[mask_to_shift(PAD_BUTTON_RIGHT)]	= K_RIGHTARROW;
 	game_button_map[mask_to_shift(PAD_BUTTON_DOWN)]		= K_DOWNARROW;
 	game_button_map[mask_to_shift(PAD_BUTTON_UP)]		= K_UPARROW;
+	game_button_map[mask_to_shift(PAD_BUTTON_START)]	= K_ESCAPE;
 	game_button_map[mask_to_shift(PAD_TRIGGER_Z)]		= K_JOY7;
 	game_button_map[mask_to_shift(PAD_TRIGGER_R)]		= K_JOY6;
 	game_button_map[mask_to_shift(PAD_TRIGGER_L)]		= K_JOY5;
@@ -217,20 +220,19 @@ void IN_Init (void)
 	game_button_map[mask_to_shift(PAD_BUTTON_B)]		= K_JOY2;
 	game_button_map[mask_to_shift(PAD_BUTTON_X)]		= K_JOY3;
 	game_button_map[mask_to_shift(PAD_BUTTON_Y)]		= K_JOY4;
-	game_button_map[mask_to_shift(PAD_BUTTON_START)]	= K_ESCAPE;
 
 	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_LEFT)]		= K_LEFTARROW;
 	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_RIGHT)]		= K_RIGHTARROW;
 	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_DOWN)]		= K_DOWNARROW;
 	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_UP)]			= K_UPARROW;
-	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_A)]			= K_JOY1;
-	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_B)]			= K_JOY6;
 	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_PLUS)]		= K_ESCAPE;
-	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_MINUS)]		= K_JOY4;
-	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_1)]			= K_JOY2;
-	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_2)]			= K_JOY3;
-	nunchuk_game_button_map[mask_to_shift(NUNCHUK_BUTTON_C)]	= K_JOY5;
-	nunchuk_game_button_map[mask_to_shift(NUNCHUK_BUTTON_Z)]	= K_JOY7;
+	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_A)]			= K_JOY8;
+	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_B)]			= K_JOY9;
+	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_MINUS)]		= K_JOY10;
+	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_1)]			= K_JOY11;
+	wiimote_game_button_map[mask_to_shift(WPAD_BUTTON_2)]			= K_JOY12;
+	nunchuk_game_button_map[mask_to_shift(NUNCHUK_BUTTON_C)]	= K_JOY13;
+	nunchuk_game_button_map[mask_to_shift(NUNCHUK_BUTTON_Z)]	= K_JOY14;
 
 #if FORCE_KEY_BINDINGS
 	// Set up the key bindings.
@@ -336,7 +338,7 @@ void IN_Commands (void)
 	// TODO: something fancy like the button interface
 	if (nunchuk_connected && pad->exp.nunchuk.gforce.z < -0.50f)
 	{
-		key_state[K_JOY1] |= 1;
+		key_state[K_JOY8] |= 1;
 	}
 
 	// Find any differences between the key states.

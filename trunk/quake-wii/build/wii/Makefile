@@ -11,7 +11,7 @@ DIST_DIR	:= ../../dist/wii
 DOL				:= $(DIST_DIR)/Quake.dol
 ELF				:= $(OBJ_DIR)/Quake.elf
 ZIP_FILE		:= Quake_$(VERSION).zip
-ZIP_CONTENTS	:= Quake.elf Quake.dol ID1/CONFIG.CFG GPL.txt readme.html
+ZIP_CONTENTS	:= Quake.dol ID1/WII.PAK GPL.txt readme.html
 
 # Tools.
 SED = sed "s/:\([0-9]*\):/\(\1\) :/"
@@ -120,7 +120,7 @@ all: $(DOL)
 # How to clean.
 clean:
 	@echo Cleaning
-	@rm -f $(OBJS) $(DOL) $(ELF) $(dir $(DOL))$(notdir $(ELF))
+	@rm -f $(OBJS) $(DOL) $(ELF)
 	@rm -rf $(OBJ_DIR_TOP)
 
 # How to build the distribution.
@@ -134,7 +134,6 @@ $(DOL): $(ELF)
 	@echo Creating $(notdir $@)
 	@mkdir -p $(dir $@)
 	@powerpc-gekko-objcopy -O binary $< $@
-	@cp $< $(dir $@)
 
 # How to link the ELF.
 $(ELF): $(OBJS)

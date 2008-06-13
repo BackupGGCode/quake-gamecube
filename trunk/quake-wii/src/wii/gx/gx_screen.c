@@ -753,7 +753,7 @@ int SCR_ModalMessage (char *text)
 	S_ClearBuffer ();		// so dma doesn't loop current sound
 
 	// Wait for keys to be released.
-	while (keydown['y'] || keydown['n'] || keydown[K_JOY1] || keydown[K_JOY2])
+	while (keydown['y'] || keydown['n'] || keydown[K_JOY1] || keydown[K_JOY2] || keydown[K_JOY8] || keydown[K_JOY9])
 	{
 			key_count = INT_MIN;
 			Sys_SendKeyEvents();
@@ -761,7 +761,7 @@ int SCR_ModalMessage (char *text)
 	}
 
 	// Wait for keys to be pressed.
-	while (!keydown['y'] && !keydown['n'] && !keydown[K_JOY1] && !keydown[K_JOY2])
+	while (!keydown['y'] && !keydown['n'] && !keydown[K_JOY1] && !keydown[K_JOY2] && !keydown[K_JOY8] && !keydown[K_JOY9])
 	{
 			key_count = INT_MIN;
 			Sys_SendKeyEvents();
@@ -769,7 +769,7 @@ int SCR_ModalMessage (char *text)
 	}
 
 	// Wait for keys to be released.
-	while (keydown['y'] || keydown['n'] || keydown[K_JOY1] || keydown[K_JOY2])
+	while (keydown['y'] || keydown['n'] || keydown[K_JOY1] || keydown[K_JOY2] || keydown[K_JOY8] || keydown[K_JOY9])
 	{
 			key_count = INT_MIN;
 			Sys_SendKeyEvents();
@@ -781,7 +781,7 @@ int SCR_ModalMessage (char *text)
 	scr_fullupdate = 0;
 	SCR_UpdateScreen ();
 
-	return (key_lastpress == 'y') || (key_lastpress == K_JOY1);
+	return (key_lastpress == 'y') || (key_lastpress == K_JOY1) || (key_lastpress == K_JOY8);
 }
 
 
