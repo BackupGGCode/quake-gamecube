@@ -1231,7 +1231,7 @@ void M_Options_Draw (void)
 	r = volume.value;
 	M_DrawSlider (220, 88, r);
 
-	M_Print (16, 96,  "            Always Run");
+	M_Print (16, 96, "        Run by Default");
 	M_DrawCheckbox (220, 96, cl_forwardspeed.value > 200);
 
 	M_Print (16, 104, "          Invert Mouse");
@@ -1339,7 +1339,7 @@ char *bindnames[][2] =
 {"+back", 			"backpedal"},
 {"+left", 			"turn left"},
 {"+right", 			"turn right"},
-{"+speed", 			"run"},
+{"+speed", 			"run/walk"},
 {"+moveleft", 		"step left"},
 {"+moveright", 		"step right"},
 {"+strafe", 		"sidestep"},

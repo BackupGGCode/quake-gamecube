@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-// ELUTODO: invert the +speed key when always run is ON
+// ELUTODO: do something about loolspring and lookstrafe
 
 extern "C"
 {
@@ -479,8 +479,16 @@ void IN_Move (usercmd_t *cmd)
 
 		if (in_speed.state & 1)
 		{
-			cmd->forwardmove *= cl_movespeedkey.value;
-			cmd->sidemove *= cl_movespeedkey.value; /* TODO: always seem to be at the max and I'm too sleepy now to figure out why */
+			if (cl_forwardspeed.value > 200)
+			{
+				cmd->forwardmove /= cl_movespeedkey.value;
+				cmd->sidemove /= cl_movespeedkey.value;
+			}
+			else
+			{
+				cmd->forwardmove *= cl_movespeedkey.value;
+				cmd->sidemove *= cl_movespeedkey.value; /* TODO: always seem to be at the max and I'm too sleepy now to figure out why */
+			}
 		}
 
 		// Turn using the substick.
@@ -493,14 +501,24 @@ void IN_Move (usercmd_t *cmd)
 	// Adjust the yaw.
 	const float turn_rate = sensitivity.value * 50.0f;
 	if (in_speed.state & 1)
-		cl.viewangles[YAW] -= turn_rate * yaw_rate * host_frametime * cl_anglespeedkey.value;
+	{
+		if (cl_forwardspeed.value > 200)
+			cl.viewangles[YAW] -= turn_rate * yaw_rate * host_frametime / cl_anglespeedkey.value;
+		else
+			cl.viewangles[YAW] -= turn_rate * yaw_rate * host_frametime * cl_anglespeedkey.value;
+	}
 	else
 		cl.viewangles[YAW] -= turn_rate * yaw_rate * host_frametime;
 
 	// How fast to pitch?
 	float pitch_offset;
 	if (in_speed.state & 1)
-		pitch_offset = turn_rate * pitch_rate * host_frametime * cl_anglespeedkey.value;
+	{
+		if (cl_forwardspeed.value > 200)
+			pitch_offset = turn_rate * pitch_rate * host_frametime / cl_anglespeedkey.value;
+		else
+			pitch_offset = turn_rate * pitch_rate * host_frametime * cl_anglespeedkey.value;
+	}
 	else
 		pitch_offset = turn_rate * pitch_rate * host_frametime;
 
