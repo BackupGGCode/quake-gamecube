@@ -751,9 +751,9 @@ void R_PolyBlend (void)
 	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 
 	c_guMtxIdentity(view);
-    c_guMtxRotAxisRad(temp, &axis0, DegToRad(-90.0f));		// put Z going up
+	c_guMtxRotAxisRad(temp, &axis0, DegToRad(-90.0f));		// put Z going up
 	c_guMtxConcat(view, temp, view);
-    c_guMtxRotAxisRad(temp, &axis2, DegToRad(90.0f));		// put Z going up
+	c_guMtxRotAxisRad(temp, &axis2, DegToRad(90.0f));		// put Z going up
 	c_guMtxConcat(view, temp, view);
 	GX_LoadPosMtxImm(view, GX_PNMTX0);
 
@@ -917,6 +917,7 @@ void R_SetupGL (void)
     screenaspect = (float)r_refdef.vrect.width/r_refdef.vrect.height;
 	guPerspective (perspective, r_refdef.fov_y, screenaspect, ZMIN3D, ZMAX3D);
 
+	// ELUTODO: perspective is 4x4, these ops are 4x3
 	if (mirror)
 	{
 		if (mirror_plane->normal[2])
@@ -934,12 +935,23 @@ void R_SetupGL (void)
 
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
-	{
-		Vector campos = {r_refdef.vieworg[0],  r_refdef.vieworg[1],  r_refdef.vieworg[2]};
-		Vector camup = {vup[0], vup[1], vup[2]};
-		Vector camforward = {vpn[0] + r_refdef.vieworg[0], vpn[1] + r_refdef.vieworg[1], vpn[2] + r_refdef.vieworg[2]};
-		guLookAt(view, &campos, &camup, &camforward);
-	}
+	c_guMtxIdentity(view);
+
+	c_guMtxRotAxisRad(temp, &axis0, DegToRad(-90.0f));		// put Z going up
+	c_guMtxConcat(view, temp, view);
+	c_guMtxRotAxisRad(temp, &axis2, DegToRad(90.0f));		// put Z going up
+	c_guMtxConcat(view, temp, view);
+
+	c_guMtxRotAxisRad(temp, &axis0, DegToRad(-r_refdef.viewangles[2]));
+	c_guMtxConcat(view, temp, view);
+	c_guMtxRotAxisRad(temp, &axis1, DegToRad(-r_refdef.viewangles[0]));
+	c_guMtxConcat(view, temp, view);
+	c_guMtxRotAxisRad(temp, &axis2, DegToRad(-r_refdef.viewangles[1]));
+	c_guMtxConcat(view, temp, view);
+
+
+	c_guMtxTrans(temp, -r_refdef.vieworg[0],  -r_refdef.vieworg[1],  -r_refdef.vieworg[2]);
+	c_guMtxConcat(view, temp, view);
 
 	// ELUTODOglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
 
