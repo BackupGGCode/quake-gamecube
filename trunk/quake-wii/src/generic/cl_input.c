@@ -243,7 +243,12 @@ void CL_AdjustAngles (void)
 	float	up, down;
 	
 	if (in_speed.state & 1)
-		speed = host_frametime * cl_anglespeedkey.value;
+	{
+		if (cl_forwardspeed.value > 200)
+			speed = host_frametime / cl_anglespeedkey.value;
+		else
+			speed = host_frametime * cl_anglespeedkey.value;
+	}
 	else
 		speed = host_frametime;
 
@@ -320,9 +325,18 @@ void CL_BaseMove (usercmd_t *cmd)
 //
 	if (in_speed.state & 1)
 	{
-		cmd->forwardmove *= cl_movespeedkey.value;
-		cmd->sidemove *= cl_movespeedkey.value;
-		cmd->upmove *= cl_movespeedkey.value;
+		if (cl_forwardspeed.value > 200)
+		{
+			cmd->forwardmove /= cl_movespeedkey.value;
+			cmd->sidemove /= cl_movespeedkey.value;
+			cmd->upmove /= cl_movespeedkey.value;
+		}
+		else
+		{
+			cmd->forwardmove *= cl_movespeedkey.value;
+			cmd->sidemove *= cl_movespeedkey.value;
+			cmd->upmove *= cl_movespeedkey.value;
+		}
 	}
 
 #ifdef QUAKE2
