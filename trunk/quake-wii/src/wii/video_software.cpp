@@ -178,7 +178,7 @@ void VID_Init(unsigned char* palette)
 
 	GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_TRUE);
 	GX_SetColorUpdate(GX_TRUE);
-	GX_SetDispCopyGamma(GX_GM_2_2);
+	GX_SetDispCopyGamma(GX_GM_1_0);
 
 	Mtx	projection;
 	guOrtho(projection, 1, 0, 0, 1, -1, 1);
