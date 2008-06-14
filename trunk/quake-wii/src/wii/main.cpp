@@ -58,7 +58,7 @@ namespace quake
 		GXRModeObj	*rmode			= 0;
 
 		// Set up the heap.
-		static const size_t	heap_size	= 16 * 1024 * 1024;
+		static const size_t	heap_size	= 19 * 1024 * 1024;
 		static char		*heap;
 
 		inline void *align32 (void *p)

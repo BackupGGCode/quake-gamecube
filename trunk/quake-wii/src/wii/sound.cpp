@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// ELUTODO: go to 48khz once we have hi-res sound packs
+
 #include <ogc/audio.h>
 #include <ogc/cache.h>
 
@@ -40,7 +42,7 @@ namespace quake
 		static size_t			current_dma_buffer		= 0;
 
 		// Quake writes its audio into this mix buffer.
-		static const size_t		samples_per_mix_buffer	= samples_per_dma_buffer * 4;
+		static const size_t		samples_per_mix_buffer	= 65536;
 		static sample			mix_buffer[samples_per_mix_buffer];
 		static volatile size_t	mix_buffer_pointer		= 0;
 
