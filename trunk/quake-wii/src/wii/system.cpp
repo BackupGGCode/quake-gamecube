@@ -120,7 +120,7 @@ void Sys_Printf (const char *fmt, ...)
 
 void Sys_Quit (void)
 {
-	Sys_Printf("%s", "Resetting...\n");
+	Sys_Printf("%s", "Returning to loader...\n");
 
 	// Shut down the host system.
 	if (host_initialized)
@@ -132,6 +132,38 @@ void Sys_Quit (void)
 
 	// Exit.
 	exit(0);
+}
+
+void Sys_Reset (void)
+{
+	Sys_Printf("%s", "Resetting...\n");
+
+	// Shut down the host system.
+	if (host_initialized)
+	{
+		Host_Shutdown();
+	}
+
+	VIDEO_SetBlack(TRUE);
+
+	// Exit.
+	SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
+}
+
+void Sys_Shutdown (void)
+{
+	Sys_Printf("%s", "Shutting down...\n");
+
+	// Shut down the host system.
+	if (host_initialized)
+	{
+		Host_Shutdown();
+	}
+
+	VIDEO_SetBlack(TRUE);
+
+	// Exit.
+	SYS_ResetSystem(SYS_POWEROFF, 0, 0);
 }
 
 double Sys_FloatTime (void)

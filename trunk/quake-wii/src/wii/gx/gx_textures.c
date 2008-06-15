@@ -311,8 +311,6 @@ void GL_Upload32 (gltexture_t *destination, unsigned *data, int width, int heigh
 	GX_InitTexObj(&destination->gx_tex, destination->data, scaled_width, scaled_height, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, /*mipmap ? GX_TRUE :*/ GX_FALSE);
 
 	DCFlushRange(destination->data, scaled_width * scaled_height * sizeof(unsigned));
-
-	/* ELUTODO powercallback SYS_SetPowerCallback(powercallback cb);*/
 }
 
 /*
