@@ -35,10 +35,18 @@ extern "C"
 }
 
 int want_to_reset = 0;
+int want_to_shutdown = 0;
+
+extern void Sys_Reset (void);
+extern void Sys_Shutdown (void);
 
 void reset_system(void)
 {
 	want_to_reset = 1;
+}
+void shutdown_system(void)
+{
+	want_to_shutdown = 1;
 }
 
 // Handy switches.
@@ -202,6 +210,9 @@ namespace quake
 			Cbuf_AddText("connect 192.168.0.2");
 #endif
 
+			SYS_SetResetCallback(reset_system);
+			SYS_SetPowerCallback(shutdown_system);
+
 			VIDEO_SetBlack(FALSE);
 
 			// Run the main loop.
@@ -209,7 +220,9 @@ namespace quake
 			for (;;)
 			{
 				if (want_to_reset)
-					SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
+					Sys_Reset();
+				if (want_to_shutdown)
+					Sys_Shutdown();
 
 				// Get the frame time in ticks.
 				const u64		current_time	= gettime();
@@ -240,8 +253,6 @@ int main(int argc, char* argv[])
 	// Initialize.
 	init();
 	check_pak_file_exists();
-
-	SYS_SetResetCallback(reset_system);
 
 	// Start the main thread.
 	lwp_t thread;
