@@ -155,22 +155,35 @@ namespace quake
 			}
 		}
 
+		// ELUTODO: ugly and beyond quake's limits, I think
+		int parms_number = 0;
+		char parms[1024];
+		char *parms_ptr = parms;
+		char *parms_array[64];
+		static void add_parm(const char *parm)
+		{
+			if (strlen(parm) + ((u32)parms_ptr - (u32)parms) > 1023)
+				Sys_Error("cmdline > 1024");
+			
+			strcpy(parms_ptr, parm);
+			parms_array[parms_number++] = parms_ptr;
+			parms_ptr += strlen(parm) + 1;
+		}
+
 		static void* main_thread_function(void*)
 		{
 			u32 level, real_heap_size;
 
 			// Initialise the Common module.
-			char* args[] =
-			{
-				"Quake",
+			add_parm("Quake");
 #if CONSOLE_DEBUG
-				"-condebug",
+			add_parm("-condebug");
 #endif
 #if DISABLE_NETWORK
-				"-noudp",
+			add_parm("-noudp");
 #endif
-			};
-			COM_InitArgv(sizeof(args) / sizeof(args[0]), args);
+
+			COM_InitArgv(parms_number, parms_array);
 
 			_CPU_ISR_Disable(level);
 			heap = (char *)align32(SYS_GetArena2Lo());
