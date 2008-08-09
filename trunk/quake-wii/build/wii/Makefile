@@ -8,10 +8,10 @@ OBJ_DIR		:= $(OBJ_DIR_TOP)/wii
 DIST_DIR	:= ../../dist/wii
 
 # Key files.
-DOL				:= $(DIST_DIR)/Quake.dol
+DOL				:= $(DIST_DIR)/apps/quake/boot.dol
 ELF				:= $(OBJ_DIR)/Quake.elf
 ZIP_FILE		:= Quake_$(VERSION).zip
-ZIP_CONTENTS	:= Quake.dol ID1/WII.PAK GPL.txt readme.html
+ZIP_CONTENTS	:= apps/quake/boot.dol apps/quake/icon.png apps/quake/meta.xml ID1/WII.PAK ID1/GPL.txt ID1/readme.html
 
 # Tools.
 SED = sed "s/:\([0-9]*\):/\(\1\) :/"
