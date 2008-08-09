@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define	VERSION				1.09
 #if HW_RVL && GXQUAKE
-#define WIIGX_VERSION			0.01
+#define WIIGX_VERSION			0.02
 #endif
 
 //define	PARANOID			// speed sapping error checking
