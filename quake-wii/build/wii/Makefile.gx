@@ -1,5 +1,5 @@
 # About the release.
-VERSION	:= 0.02
+VERSION	:= WIP
 
 # Directories.
 SRC_DIR		:= ../../src
