@@ -1242,6 +1242,10 @@ int			posenum;
 byte		**player_8bit_texels_tbl;
 byte		*player_8bit_texels;
 
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b))
+int	aliasbboxmins[3], aliasbboxmaxs[3];
+
 /*
 =================
 Mod_LoadAliasFrame
@@ -1261,10 +1265,13 @@ void * Mod_LoadAliasFrame (void * pin, maliasframedesc_t *frame)
 
 	for (i=0 ; i<3 ; i++)
 	{
-	// these are byte values, so we don't have to worry about
-	// endianness
+		// these are byte values, so we don't have to worry about
+		// endianness
 		frame->bboxmin.v[i] = pdaliasframe->bboxmin.v[i];
-		frame->bboxmin.v[i] = pdaliasframe->bboxmax.v[i];
+		frame->bboxmax.v[i] = pdaliasframe->bboxmax.v[i];
+
+		aliasbboxmins[i] = min (frame->bboxmin.v[i], aliasbboxmins[i]);
+		aliasbboxmaxs[i] = max (frame->bboxmax.v[i], aliasbboxmaxs[i]);
 	}
 
 	pinframe = (trivertx_t *)(pdaliasframe + 1);
@@ -1299,9 +1306,12 @@ void *Mod_LoadAliasGroup (void * pin,  maliasframedesc_t *frame)
 
 	for (i=0 ; i<3 ; i++)
 	{
-	// these are byte values, so we don't have to worry about endianness
+		// these are byte values, so we don't have to worry about endianness
 		frame->bboxmin.v[i] = pingroup->bboxmin.v[i];
-		frame->bboxmin.v[i] = pingroup->bboxmax.v[i];
+		frame->bboxmax.v[i] = pingroup->bboxmax.v[i];
+
+		aliasbboxmins[i] = min (frame->bboxmin.v[i], aliasbboxmins[i]);
+		aliasbboxmaxs[i] = max (frame->bboxmax.v[i], aliasbboxmaxs[i]);
 	}
 
 	pin_intervals = (daliasinterval_t *)(pingroup + 1);
@@ -1595,6 +1605,9 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	posenum = 0;
 	pframetype = (daliasframetype_t *)&pintriangles[pheader->numtris];
 
+	aliasbboxmins[0] = aliasbboxmins[1] = aliasbboxmins[2] =  99999;
+	aliasbboxmaxs[0] = aliasbboxmaxs[1] = aliasbboxmaxs[2] = -99999;
+
 	for (i=0 ; i<numframes ; i++)
 	{
 		aliasframetype_t	frametype;
@@ -1617,9 +1630,12 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	mod->type = mod_alias;
 
-// FIXME: do this right
-	mod->mins[0] = mod->mins[1] = mod->mins[2] = -16;
-	mod->maxs[0] = mod->maxs[1] = mod->maxs[2] = 16;
+	for (i = 0; i < 3; i++)
+	{
+		// ELUTODO - we always have a minimum size of -16...16
+		mod->mins[i] = min(-16, aliasbboxmins[i] * pheader->scale[i] + pheader->scale_origin[i]);
+		mod->maxs[i] = max(16, aliasbboxmaxs[i] * pheader->scale[i] + pheader->scale_origin[i]);
+	}
 
 	//
 	// build the draw lists

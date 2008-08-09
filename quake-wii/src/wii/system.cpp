@@ -175,6 +175,7 @@ double Sys_FloatTime (void)
 		init = true;
 	}
 
+	// ELUTODO
 	if ((main::rmode == &TVPal528IntDf) || (main::rmode == &TVPal264Int))
 	{
 		return frames * (1.0f / 50.0f);
