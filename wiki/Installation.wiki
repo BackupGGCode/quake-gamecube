@@ -3,18 +3,17 @@
 
 = Installing the game on your SD card =
 
- # Download the game and copy it onto your SD card. Your SD card should have the following layout, where "/" is the root of the card:
+ # If using the Wii version, just unzip it to the root of your SD card.
+ # If using the !GameCube version, Your SD card should have the following layout, where "/" is the root of the card:
   * `/ID1/PAK0.PAK`
   * `/ID1/PAK1.PAK` (if you own the full version of Quake)
-  * `/ID1/WII.PAK` (Wii version only)
-  * `/ID1/CONFIG.CFG` (!GameCube version only)
-  * `/SDLOAD.DOL` (only if you use SD Media Launcher and the !GameCube version)
+  * `/ID1/CONFIG.CFG`
+  * `/SDLOAD.DOL` (only if you use SD Media Launcher with the !GameCube version)
  # For the !GameCube version, please ensure that the `ID1` folder and `PAK*.PAK` files are in the correct locations and are named only in UPPER CASE. The SD card library which quake-gamecube uses to read the data files requires that the file names are in upper case _only_. The Wii version doesn't have his problem. SD Media Launcher for !GameCube should have the Quake.dol somewhere inside the SD Card.
- # For the Wii version, the QuakeGX.dol file need to be installed accordingly to your boot method. Consult your launch method documentation for specifics.
 
 = Launching the game =
 
- * Gamecube Version:
+ * !GameCube Version:
  # Insert your SD card into its adaptor and into *slot 1* of your !GameCube. Slot 2 is not supported.
  # If you use SD Media Launcher:
   # Insert the SD Media Launcher disc into your console and switch on your console.
@@ -26,5 +25,4 @@
 
  * Wii Version:
  # Insert your SD card into the Wii front SD slot.
- # If you use The Homebrew Channel:
-  # You can load via wiiload or create an folder for Quake in apps/ according to The Homebrew Channel instructions.
+ # It should appear in the Homebrew Channel menu
