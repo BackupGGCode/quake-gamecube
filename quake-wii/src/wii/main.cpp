@@ -157,10 +157,8 @@ namespace quake
 			parms_ptr += strlen(parm) + 1;
 		}
 
-		static void* main_thread_function(void*)
+		void frontend(void)
 		{
-			u32 level, real_heap_size;
-
 			VIDEO_SetBlack(FALSE);
 			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
 					Oh, and don't forget to put your wrist wrap! :)\n\n");
@@ -181,7 +179,13 @@ namespace quake
 #if DISABLE_NETWORK
 			add_parm("-noudp");
 #endif
+		}
 
+		static void* main_thread_function(void*)
+		{
+			u32 level, real_heap_size;
+
+			// hope the parms are all set by now
 			COM_InitArgv(parms_number, parms_array);
 
 			_CPU_ISR_Disable(level);
@@ -263,6 +267,8 @@ int main(int argc, char* argv[])
 	// Initialize.
 	init();
 	check_pak_file_exists();
+
+	frontend();
 
 	// Start the main thread.
 	lwp_t thread;
