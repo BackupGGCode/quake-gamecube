@@ -93,7 +93,7 @@ namespace quake
 			// Set the frame buffer.
 			VIDEO_SetNextFramebuffer(framebuffer[fb]);
 
-			VIDEO_SetBlack(TRUE);
+			VIDEO_SetBlack(FALSE);
 			VIDEO_Flush();
 			VIDEO_WaitVSync();
 			if (rmode->viTVMode & VI_NON_INTERLACE)
@@ -159,7 +159,6 @@ namespace quake
 
 		void frontend(void)
 		{
-			VIDEO_SetBlack(FALSE);
 			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
 					Oh, and don't forget to put your wrist wrap! :)\n\n");
 
@@ -202,6 +201,8 @@ namespace quake
 				_CPU_ISR_Restore(level);
 			}
 
+			VIDEO_SetBlack(TRUE);
+
 			// Initialise the Host module.
 			quakeparms_t parms;
 			memset(&parms, 0, sizeof(parms));
@@ -228,6 +229,8 @@ namespace quake
 
 			SYS_SetResetCallback(reset_system);
 			SYS_SetPowerCallback(shutdown_system);
+
+			VIDEO_SetBlack(FALSE);
 
 			// Run the main loop.
 			u64 last_time = gettime();

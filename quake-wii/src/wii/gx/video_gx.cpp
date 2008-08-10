@@ -213,9 +213,12 @@ GL_BeginRendering
 */
 void GL_BeginRendering (int *x, int *y, int *width, int *height)
 {
-	*x = *y = 0;
-	*width = scr_width;
-	*height = scr_height;
+	// ELUTODO: lol at the * 2 on width and height
+	*x = *y = vid_tvborder.value * 200;
+	*width = scr_width - (vid_tvborder.value * 400);
+	*height = scr_height - (vid_tvborder.value * 400);
+
+	GX_SetScissor(*x,*y,*width,*height);
 
 	// ELUTODO: really necessary?
 	GX_InvVtxCache();
