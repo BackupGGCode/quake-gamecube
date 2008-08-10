@@ -93,8 +93,7 @@ namespace quake
 			// Set the frame buffer.
 			VIDEO_SetNextFramebuffer(framebuffer[fb]);
 
-			// Show the screen.
-			VIDEO_SetBlack(FALSE);
+			VIDEO_SetBlack(TRUE);
 			VIDEO_Flush();
 			VIDEO_WaitVSync();
 			if (rmode->viTVMode & VI_NON_INTERLACE)
@@ -116,18 +115,6 @@ namespace quake
 
 			wiimote_ir_res_x = rmode->fbWidth;
 			wiimote_ir_res_y = rmode->xfbHeight;
-
-			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
-					Oh, and don't forget to put your wrist wrap! :)\n\n");
-
-			printf("Free MEM1: %d bytes\nFree MEM2: %d bytes\n",
-				(u32)SYS_GetArena1Hi() - (u32)SYS_GetArena1Lo(),
-				(u32)SYS_GetArena2Hi() - (u32)SYS_GetArena2Lo());
-
-			VIDEO_WaitVSync();
-			struct timespec sleeptime = {3, 0};
-			nanosleep(&sleeptime);
-			VIDEO_SetBlack(TRUE);
 		}
 
 		static void check_pak_file_exists()
@@ -173,6 +160,18 @@ namespace quake
 		static void* main_thread_function(void*)
 		{
 			u32 level, real_heap_size;
+
+			VIDEO_SetBlack(FALSE);
+			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
+					Oh, and don't forget to put your wrist wrap! :)\n\n");
+
+			printf("Free MEM1: %d bytes\nFree MEM2: %d bytes\n",
+				(u32)SYS_GetArena1Hi() - (u32)SYS_GetArena1Lo(),
+				(u32)SYS_GetArena2Hi() - (u32)SYS_GetArena2Lo());
+
+			VIDEO_WaitVSync();
+			struct timespec sleeptime = {3, 0};
+			nanosleep(&sleeptime);
 
 			// Initialise the Common module.
 			add_parm("Quake");
@@ -225,8 +224,6 @@ namespace quake
 
 			SYS_SetResetCallback(reset_system);
 			SYS_SetPowerCallback(shutdown_system);
-
-			VIDEO_SetBlack(FALSE);
 
 			// Run the main loop.
 			u64 last_time = gettime();

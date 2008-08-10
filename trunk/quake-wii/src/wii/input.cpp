@@ -431,7 +431,7 @@ void IN_Move (usercmd_t *cmd)
 	else
 	{
 		x2 = clamp(sub_stick_x / 80.0f, -1.0f, 1.0f);
-		Cvar_SetValue("cl_crossx", 0);
+		Cvar_SetValue("cl_crossx", (in_mlook.state & 1) ? scr_vrect.width / 2 * x2 : 0);
 		using_c_stick = true;
 	}
 
@@ -445,7 +445,7 @@ void IN_Move (usercmd_t *cmd)
 	else
 	{
 		y2 = clamp(sub_stick_y / -80.0f, -1.0f, 1.0f);
-		Cvar_SetValue("cl_crossy", 0);
+		Cvar_SetValue("cl_crossy", (in_mlook.state & 1) ? scr_vrect.height / 2 * y2 : 0);
 		using_c_stick = true;
 	}
 
@@ -463,38 +463,35 @@ void IN_Move (usercmd_t *cmd)
 		V_StopPitchDrift();
 	}
 
-	// Look using the main stick?
-	float yaw_rate;
-	float pitch_rate;
+	// Lock view?
 	if (in_mlook.state & 1)
 	{
-		// Turn using both sticks.
-		yaw_rate = clamp(x1 + x2, -1.0f, 1.0f);
-		pitch_rate = clamp(y1 + y2, -1.0f, 1.0f);
+		x2 = 0;
+		y2 = 0;
 	}
-	else
+
+	float yaw_rate;
+	float pitch_rate;
+	// Turn using the substick.
+	yaw_rate = x2;
+	pitch_rate = y2;
+
+	// Move using the main stick.
+	cmd->sidemove += cl_sidespeed.value * x1;
+	cmd->forwardmove -= cl_forwardspeed.value * y1; /* TODO: use cl_backspeed when going backwards? */
+
+	if (in_speed.state & 1)
 	{
-		// Move using the main stick.
-		cmd->sidemove += cl_sidespeed.value * x1;
-		cmd->forwardmove -= cl_forwardspeed.value * y1; /* TODO: use cl_backspeed when going backwards? */
-
-		if (in_speed.state & 1)
+		if (cl_forwardspeed.value > 200)
 		{
-			if (cl_forwardspeed.value > 200)
-			{
-				cmd->forwardmove /= cl_movespeedkey.value;
-				cmd->sidemove /= cl_movespeedkey.value;
-			}
-			else
-			{
-				cmd->forwardmove *= cl_movespeedkey.value;
-				cmd->sidemove *= cl_movespeedkey.value; /* TODO: always seem to be at the max and I'm too sleepy now to figure out why */
-			}
+			cmd->forwardmove /= cl_movespeedkey.value;
+			cmd->sidemove /= cl_movespeedkey.value;
 		}
-
-		// Turn using the substick.
-		yaw_rate = x2;
-		pitch_rate = y2;
+		else
+		{
+			cmd->forwardmove *= cl_movespeedkey.value;
+			cmd->sidemove *= cl_movespeedkey.value; /* TODO: always seem to be at the max and I'm too sleepy now to figure out why */
+		}
 	}
 
 	// TODO: Use yawspeed and pitchspeed
