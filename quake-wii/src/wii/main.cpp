@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define USE_THREAD			1
 #define TEST_CONNECTION		0
 #define DISABLE_NETWORK		1
-#define USBGECKO_DEBUG		1
+#define USBGECKO_DEBUG		0
 
 // Standard includes.
 #include <cstdio>
