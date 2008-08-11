@@ -26,7 +26,7 @@ CXXFLAGS		:= $(CFLAGS) -Weffc++ -fno-exceptions -fno-rtti
 LDFLAGS			:= $(COMMON_FLAGS) -L$(DEVKITPRO)/libogc/lib/wii
 
 # Linker info.
-LIBS := -lwiiuse -lbte -lfat -logc
+LIBS := -lwiiuse -lbte -lfat -ldb -logc
 
 FILESYSTEM := libfat
 
