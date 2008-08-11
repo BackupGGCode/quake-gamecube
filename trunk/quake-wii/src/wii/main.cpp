@@ -18,6 +18,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// Handy switches.
+#define CONSOLE_DEBUG		0
+#define TIME_DEMO			0
+#define USE_THREAD			1
+#define TEST_CONNECTION		0
+#define DISABLE_NETWORK		1
+#define USBGECKO_DEBUG		1
+
 // Standard includes.
 #include <cstdio>
 
@@ -28,6 +36,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ogcsys.h>
 #include <wiiuse/wpad.h>
 #include "input_wiimote.h"
+
+#if USBGECKO_DEBUG
+#include <debug.h>
+#endif
 
 extern "C"
 {
@@ -44,17 +56,11 @@ void reset_system(void)
 {
 	want_to_reset = 1;
 }
+
 void shutdown_system(void)
 {
 	want_to_shutdown = 1;
 }
-
-// Handy switches.
-#define CONSOLE_DEBUG		0
-#define TIME_DEMO		0
-#define USE_THREAD		1
-#define TEST_CONNECTION		0
-#define DISABLE_NETWORK		1
 
 namespace quake
 {
@@ -266,6 +272,11 @@ qboolean isDedicated = qfalse;
 int main(int argc, char* argv[])
 {
 	void *qstack = malloc(4 * 1024 * 1024);
+
+#if USBGECKO_DEBUG
+	DEBUG_Init(GDBSTUB_DEVICE_USB, 1);
+	_break();
+#endif
 
 	// Initialize.
 	init();
