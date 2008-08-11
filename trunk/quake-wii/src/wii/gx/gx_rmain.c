@@ -741,7 +741,7 @@ void R_PolyBlend (void)
 
 	if (!gl_polyblend.value)
 		return;
-	if (!v_blend[3])
+	if (!v_blend[3] && v_gamma.value == 1.0f)
 		return;
 
 	QGX_Alpha(false);
@@ -758,25 +758,52 @@ void R_PolyBlend (void)
 	GX_LoadPosMtxImm(view, GX_PNMTX0);
 
 	// ELUTODO: check if v_blend gets bigger than 1.0f
-	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+	if (v_blend[3])
+	{
+		GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
-	GX_Position3f32(10.0f, 100.0f, 100.0f);
-	GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
-	GX_TexCoord2f32(1.0f, 1.0f);
+		GX_Position3f32(10.0f, 100.0f, 100.0f);
+		GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
+		GX_TexCoord2f32(1.0f, 1.0f);
 
-	GX_Position3f32(10.0f, -100.0f, 100.0f);
-	GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
-	GX_TexCoord2f32(0.0f, 1.0f);
+		GX_Position3f32(10.0f, -100.0f, 100.0f);
+		GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
+		GX_TexCoord2f32(0.0f, 1.0f);
 
-	GX_Position3f32(10.0f, -100.0f, -100.0f);
-	GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
-	GX_TexCoord2f32(0.0f, 0.0f);
+		GX_Position3f32(10.0f, -100.0f, -100.0f);
+		GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
+		GX_TexCoord2f32(0.0f, 0.0f);
 
-	GX_Position3f32(10.0f, 100.0f, -100.0f);
-	GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
-	GX_TexCoord2f32(1.0f, 0.0f);
+		GX_Position3f32(10.0f, 100.0f, -100.0f);
+		GX_Color4u8(v_blend[0] * 255, v_blend[1] * 255, v_blend[2] * 255, v_blend[3] * 255);
+		GX_TexCoord2f32(1.0f, 0.0f);
 
-	GX_End();
+		GX_End();
+	}
+
+	// ELUTODO quick hack
+	if (v_gamma.value != 1.0f)
+	{
+		GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+		GX_Position3f32(10.0f, 100.0f, 100.0f);
+		GX_Color4u8(0xff, 0xff, 0xff, (v_gamma.value * -1.0f + 1.0f) * 0xff);
+		GX_TexCoord2f32(1.0f, 1.0f);
+
+		GX_Position3f32(10.0f, -100.0f, 100.0f);
+		GX_Color4u8(0xff, 0xff, 0xff, (v_gamma.value * -1.0f + 1.0f) * 0xff);
+		GX_TexCoord2f32(0.0f, 1.0f);
+
+		GX_Position3f32(10.0f, -100.0f, -100.0f);
+		GX_Color4u8(0xff, 0xff, 0xff, (v_gamma.value * -1.0f + 1.0f) * 0xff);
+		GX_TexCoord2f32(0.0f, 0.0f);
+
+		GX_Position3f32(10.0f, 100.0f, -100.0f);
+		GX_Color4u8(0xff, 0xff, 0xff, (v_gamma.value * -1.0f + 1.0f) * 0xff);
+		GX_TexCoord2f32(1.0f, 0.0f);
+
+		GX_End();
+	}
 
 	QGX_Blend(false);
 	QGX_Alpha(true);
