@@ -44,6 +44,9 @@ namespace quake
 		bool wiimote_connected = false;
 		bool nunchuk_connected = false;
 
+		// Are we inside the on-screen keyboard?
+		bool in_osk = false;
+
 		// A map from button mask to Quake key.
 		static const size_t	button_count	= sizeof(u16) * 8;
 		typedef size_t button_map[button_count];
@@ -242,6 +245,10 @@ void IN_Init (void)
 	Cbuf_AddText("bind JOY4 \"impulse 10\"\n");
 	Cbuf_AddText("bind JOY6 +attack\n");
 #endif
+
+	memset(&previous_key_state[0], 0, sizeof(previous_key_state));
+
+	in_osk = false;
 }
 
 void IN_Shutdown (void)
@@ -298,48 +305,59 @@ void IN_Commands (void)
 	bool key_state[KEY_COUNT];
 	memset(&key_state[0], 0, sizeof(key_state));
 
-	// For each button in the key map...
-	for (size_t button = 0; button < button_count; ++button)
+	if (wiimote_connected && (wiimote_buttons & WPAD_BUTTON_MINUS))
 	{
-		// Is this mapping defined?
-		size_t key = game_button_map[button];
-		if (key)
-		{
-			// Set the key state.
-			const size_t mask = 1 << button;
-			key_state[key] |= buttons & mask;
-		}
-	}
-	if (wiimote_connected)
-		for (size_t button = 0; button < wiimote_button_count; ++button)
-		{
-			// Is this mapping defined?
-			size_t key = wiimote_game_button_map[button];
-			if (key)
-			{
-				// Set the key state.
-				const size_t mask = 1 << button;
-				key_state[key] |= wiimote_buttons & mask;
-			}
-		}
-	if (nunchuk_connected)
-		for (size_t button = 0; button < nunchuk_button_count; ++button)
-		{
-			// Is this mapping defined?
-			size_t key = nunchuk_game_button_map[button];
-			if (key)
-			{
-				// Set the key state.
-				const size_t mask = 1 << button;
-				key_state[key] |= nunchuk_buttons & mask;
-			}
-		}
+		in_osk = true;
 
-	// Accelerometers
-	// TODO: something fancy like the button interface
-	if (nunchuk_connected && pad->exp.nunchuk.gforce.z < -0.50f)
+		Con_Printf("in_osk\n");
+	}
+	else
 	{
-		key_state[K_JOY8] |= 1;
+		in_osk = false;
+
+		// For each button in the key map...
+		for (size_t button = 0; button < button_count; ++button)
+		{
+			// Is this mapping defined?
+			size_t key = game_button_map[button];
+			if (key)
+			{
+				// Set the key state.
+				const size_t mask = 1 << button;
+				key_state[key] |= buttons & mask;
+			}
+		}
+		if (wiimote_connected)
+			for (size_t button = 0; button < wiimote_button_count; ++button)
+			{
+				// Is this mapping defined?
+				size_t key = wiimote_game_button_map[button];
+				if (key)
+				{
+					// Set the key state.
+					const size_t mask = 1 << button;
+					key_state[key] |= wiimote_buttons & mask;
+				}
+			}
+		if (nunchuk_connected)
+			for (size_t button = 0; button < nunchuk_button_count; ++button)
+			{
+				// Is this mapping defined?
+				size_t key = nunchuk_game_button_map[button];
+				if (key)
+				{
+					// Set the key state.
+					const size_t mask = 1 << button;
+					key_state[key] |= nunchuk_buttons & mask;
+				}
+			}
+
+		// Accelerometers
+		// TODO: something fancy like the button interface
+		if (nunchuk_connected && pad->exp.nunchuk.gforce.z < -0.50f)
+		{
+			key_state[K_JOY8] |= 1;
+		}
 	}
 
 	// Find any differences between the key states.
@@ -366,15 +384,18 @@ void IN_Commands (void)
 	}
 }
 
+// Some things here rely upon IN_Move always being called after IN_Commands on the same frame
 void IN_Move (usercmd_t *cmd)
 {
+	if (in_osk)
+		return;
+
 	// Read the stick values.
 	const s8 stick_x = PAD_StickX(0);
 	const s8 stick_y = PAD_StickY(0);
 	const s8 sub_stick_x = PAD_SubStickX(0);
 	const s8 sub_stick_y = PAD_SubStickY(0);
 
-	// IN_Move always called after IN_Commands on the same frame, this is valid data
 	// TODO: new issue, if the wiimote gets resynced during game, sometimes we get invalid nunchuk data! Has it been fixed?
 	const s8 nunchuk_stick_x = nunchuk_connected ? WPAD_StickX(pad, 0) : 0;
 	const s8 nunchuk_stick_y = nunchuk_connected ? WPAD_StickY(pad, 0) : 0;
