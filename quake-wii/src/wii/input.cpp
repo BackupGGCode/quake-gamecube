@@ -24,6 +24,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern "C"
 {
 #include "../generic/quakedef.h"
+
+	// Are we inside the on-screen keyboard? (ELUTODO: refactor)
+	int in_osk = 0;
+	
+	// \0 means not mapped...
+	// 5 * 15
+	char osk_normal[75] =
+	{
+		'\'', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', ']', K_BACKSPACE,
+		0, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 0, '[', K_ENTER, K_ENTER,
+		0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 0, '~', '/', K_ENTER, K_ENTER,
+		0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', ';', K_ENTER, K_ENTER, K_ENTER,
+		0 , 0, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, 0, 0
+	};
+	
+	char osk_shifted[75] =
+	{
+		'\"', '!', '@', '#', '$', '%', 0, '&', '*', '(', ')', '_', '+', '}', K_BACKSPACE,
+		0, 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 0, '{', K_ENTER, K_ENTER,
+		0, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 0, '^', '?', K_ENTER, K_ENTER,
+		0, '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', ':', K_ENTER, K_ENTER, K_ENTER,
+		0 , 0, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, K_SPACE, 0, 0
+	};
+
+	char *osk_set;
+	int osk_selected;
+	int osk_coords[2];
 }
 
 #include <ogc/pad.h>
@@ -44,8 +71,7 @@ namespace quake
 		bool wiimote_connected = false;
 		bool nunchuk_connected = false;
 
-		// Are we inside the on-screen keyboard?
-		bool in_osk = false;
+		int last_irx = -1, last_iry = -1;
 
 		// A map from button mask to Quake key.
 		static const size_t	button_count	= sizeof(u16) * 8;
@@ -248,7 +274,10 @@ void IN_Init (void)
 
 	memset(&previous_key_state[0], 0, sizeof(previous_key_state));
 
-	in_osk = false;
+	last_irx = -1;
+	last_iry = -1;
+
+	in_osk = 0;
 }
 
 void IN_Shutdown (void)
@@ -274,6 +303,7 @@ void IN_Commands (void)
 	else
 	{
 		// TODO: better way to do this? a callback or something
+		// TODO: random failures when connecting the wiimote at some points
 		if (!wiimote_connected)
 		{
 			WPAD_SetVRes(WPAD_CHAN_0, wiimote_ir_res_x, wiimote_ir_res_y);
@@ -307,13 +337,33 @@ void IN_Commands (void)
 
 	if (wiimote_connected && (wiimote_buttons & WPAD_BUTTON_MINUS))
 	{
-		in_osk = true;
+		// ELUTODO: we are using the previous frame wiimote position... FIX IT
+		in_osk = 1;
+		int line = (last_iry - OSK_YSTART) / (osk_line_size * (osk_line_size / osk_charsize)) - 1;
+		int col = (last_irx - OSK_XSTART) / (osk_col_size * (osk_col_size / osk_charsize)) - 1;
 
-		Con_Printf("in_osk\n");
+		osk_coords[0] = last_irx;
+		osk_coords[1] = last_iry;
+
+		line = clamp(line, 0, osk_num_lines);
+		col = clamp(col, 0, osk_num_col);
+
+		if (nunchuk_connected && (nunchuk_buttons & NUNCHUK_BUTTON_Z))
+			osk_set = osk_shifted;
+		else
+			osk_set = osk_normal;
+
+		osk_selected = osk_set[line * osk_num_col + col];
+
+		if (pad->btns_d & WPAD_BUTTON_B && osk_selected)
+		{
+			Key_Event(static_cast<key_id_t>(osk_selected), qtrue);
+			Key_Event(static_cast<key_id_t>(osk_selected), qfalse);
+		}
 	}
 	else
 	{
-		in_osk = false;
+		in_osk = 0;
 
 		// For each button in the key map...
 		for (size_t button = 0; button < button_count; ++button)
@@ -387,9 +437,6 @@ void IN_Commands (void)
 // Some things here rely upon IN_Move always being called after IN_Commands on the same frame
 void IN_Move (usercmd_t *cmd)
 {
-	if (in_osk)
-		return;
-
 	// Read the stick values.
 	const s8 stick_x = PAD_StickX(0);
 	const s8 stick_y = PAD_StickY(0);
@@ -426,6 +473,12 @@ void IN_Move (usercmd_t *cmd)
 		pads[0].substickY);
 #endif
 
+	last_irx = wiimote_ir_x;
+	last_iry = wiimote_ir_y;
+
+	if (in_osk)
+		return;
+
 	// If the nunchuk is centered, read from the left gamecube pad stick
 	float x1;
 	if (nunchuk_stick_x < 6 && nunchuk_stick_x > -6)
@@ -441,7 +494,6 @@ void IN_Move (usercmd_t *cmd)
 
 	// Now the gamecube C-stick has the priority
 	static bool using_c_stick = false;
-	static int last_irx = -1, last_iry = -1;
 	float x2;
 	if ((sub_stick_x < 6 && sub_stick_x > -6) && wiimote_connected && (using_c_stick == false || (using_c_stick == true && last_irx != wiimote_ir_x)))
 	{
@@ -469,9 +521,6 @@ void IN_Move (usercmd_t *cmd)
 		Cvar_SetValue("cl_crossy", (in_mlook.state & 1) ? scr_vrect.height / 2 * y2 : 0);
 		using_c_stick = true;
 	}
-
-	last_irx = wiimote_ir_x;
-	last_iry = wiimote_ir_y;
 
 	// Apply the dead zone.
 	const float dead_zone = 0.1f;

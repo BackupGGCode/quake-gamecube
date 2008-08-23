@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "../generic/quakedef.h"
 
+// ELUTODO their_addr.sin_len = 8;
+
 extern cvar_t hostname;
 
 static int net_acceptsocket = -1;		// socket for fielding new connections

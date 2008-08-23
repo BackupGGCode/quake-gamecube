@@ -276,6 +276,7 @@ static void Check_Gamma (unsigned char *pal)
 	memcpy (pal, palette, sizeof(palette));
 }
 
+// vid.width and vid.conwidth = 2D resolution
 void VID_Init(unsigned char *palette)
 {
 	unsigned int width = 640, height = 480;

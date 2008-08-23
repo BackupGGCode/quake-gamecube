@@ -938,6 +938,10 @@ void SCR_UpdateScreen (void)
 		M_Draw ();
 	}
 
+	// ELUTODO: place correctly in the if_else structures above
+	if (in_osk)
+		GX_DrawOSK();
+
 	V_UpdatePalette ();
 
 	GL_EndRendering ();

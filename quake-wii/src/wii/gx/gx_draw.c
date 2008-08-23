@@ -408,6 +408,22 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 	Draw_Pic (x, y, pic);
 }
 
+/*
+==================
+Draw_TransAlphaPic
+==================
+*/
+void Draw_TransAlphaPic (int x, int y, qpic_t *pic, float alpha)
+{
+	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
+		 (unsigned)(y + pic->height) > vid.height)
+	{
+		Sys_Error ("Draw_TransPic: bad coordinates");
+	}
+		
+	Draw_AlphaPic (x, y, pic, alpha);
+}
+
 
 /*
 =============
@@ -618,9 +634,9 @@ Setup as if the screen was 320*200
 */
 void GL_Set2D (void)
 {
-	GX_SetViewport(glx,gly,glwidth,glheight, 0.0f, 1.0f);
+	GX_SetViewport(glx, gly, glwidth, glheight, 0.0f, 1.0f);
 
-	guOrtho(perspective,0, vid.conheight,0,vid.conwidth,ZMIN2D,ZMAX2D);
+	guOrtho(perspective,0, vid.height, 0, vid.width, ZMIN2D, ZMAX2D);
 	GX_LoadProjectionMtx(perspective, GX_ORTHOGRAPHIC);
 
 	c_guMtxIdentity(modelview);
