@@ -242,3 +242,7 @@ extern int osk_coords[2];
 #define osk_col_size 16
 #define OSK_XSTART (((glwidth) - ((glwidth) / (osk_col_size) * (osk_num_col))) / 2)
 #define OSK_YSTART (((glheight) - ((glheight) / (osk_line_size) * (osk_num_lines))) / 2)
+
+// Draw.c extensions
+extern void Draw_TransAlphaPic (int x, int y, qpic_t *pic, float alpha);
+extern void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha);
