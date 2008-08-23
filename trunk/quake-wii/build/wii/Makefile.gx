@@ -43,6 +43,7 @@ OBJS := \
 	$(OBJ_DIR)/wii/gx/gx_draw.o \
 	$(OBJ_DIR)/wii/gx/gx_mesh.o \
 	$(OBJ_DIR)/wii/gx/gx_model.o \
+	$(OBJ_DIR)/wii/gx/gx_osk.o \
 	$(OBJ_DIR)/wii/gx/gx_refrag.o \
 	$(OBJ_DIR)/wii/gx/gx_rlight.o \
 	$(OBJ_DIR)/wii/gx/gx_rmain.o \

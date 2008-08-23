@@ -1,3 +1,5 @@
+$(error "The software rendering version is not guaranteed to work, please use the Makefile.gx")
+
 # About the release.
 VERSION	:= WIP
 
