@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-
 int			sb_updates;		// if >= vid.numpages, no update needed
 
 #define STAT_MINUS		10	// num frame for '-' stats digit
@@ -251,6 +250,21 @@ void Sbar_Init (void)
 //=============================================================================
 
 // drawing routines are relative to the status bar location
+
+#if HW_RVL && GXQUAKE
+/*
+=============
+Sbar_DrawAlphaPic
+=============
+*/
+void Sbar_DrawAlphaPic (int x, int y, qpic_t *pic, float alpha)
+{
+	if (cl.gametype == GAME_DEATHMATCH)
+		Draw_AlphaPic (x /* + ((vid.width - 320)>>1)*/, y + (vid.height-SBAR_HEIGHT), pic, alpha);
+	else
+		Draw_AlphaPic (x + ((vid.width - 320)>>1), y + (vid.height-SBAR_HEIGHT), pic, alpha);
+}
+#endif
 
 /*
 =============
@@ -559,7 +573,14 @@ void Sbar_DrawInventory (void)
 	}
 	else
 	{
+#if HW_RVL && GXQUAKE
+		if (scr_viewsize.value >= 90)
+			Sbar_DrawAlphaPic(0, -24, sb_ibar, 0.3f);
+		else
+			Sbar_DrawPic (0, -24, sb_ibar);
+#else
 		Sbar_DrawPic (0, -24, sb_ibar);
+#endif
 	}
 
 // weapons
@@ -953,7 +974,14 @@ void Sbar_Draw (void)
 	}
 	else if (sb_lines)
 	{
+#if HW_RVL && GXQUAKE
+		if (scr_viewsize.value >= 100)
+			Sbar_DrawAlphaPic(0, 0, sb_sbar, 0.3f);
+		else
+			Sbar_DrawPic (0, 0, sb_sbar);
+#else
 		Sbar_DrawPic (0, 0, sb_sbar);
+#endif
 
    // keys (hipnotic only)
       //MED 01/04/97 moved keys here so they would not be overwritten

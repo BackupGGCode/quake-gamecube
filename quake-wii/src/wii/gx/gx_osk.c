@@ -1,7 +1,5 @@
 #include "../../generic/quakedef.h"
 
-extern void Draw_TransAlphaPic (int x, int y, qpic_t *pic, float alpha);
-
 void OSK_DrawCharacter (int cx, int line, int num)
 {
 	Draw_Character ( cx + ((vid.width - 320)>>1), line, num);
@@ -90,8 +88,8 @@ void OSK_DrawTextBox (int x, int y, int width, int lines)
 void GX_DrawOSK(void)
 {
 	int i, j;
-	int xstart = OSK_XSTART * ((float)scr_vrect.width / glwidth);
-	int ystart = OSK_YSTART * ((float)scr_vrect.height / glheight);
+	int xstart = OSK_XSTART * ((float)vid.width / glwidth);
+	int ystart = OSK_YSTART * ((float)vid.height / glheight);
 
 	OSK_DrawTextBox(xstart, ystart, osk_num_col * (osk_col_size / osk_charsize), osk_num_lines * (osk_line_size / osk_charsize));
 
@@ -122,5 +120,5 @@ void GX_DrawOSK(void)
 	else
 		OSK_PrintWhite(xstart + 5 * osk_col_size, ystart + 5 * osk_line_size, "Spacebar");
 
-	OSK_DrawCharacter ((osk_coords[0]) * ((float)vid.width / glwidth), (osk_coords[1]) * ((float)vid.height / glheight), '\\' + 128);
+	OSK_DrawCharacter ((osk_coords[0] + osk_col_size) * ((float)vid.width / glwidth), (osk_coords[1] + osk_line_size) * ((float)vid.height / glheight), '\\' + 128);
 }

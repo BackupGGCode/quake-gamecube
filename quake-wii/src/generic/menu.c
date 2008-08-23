@@ -1092,8 +1092,8 @@ void M_AdjustSliders (int dir)
 	{
 	case 3:	// screen size
 		scr_viewsize.value += dir * 10;
-		if (scr_viewsize.value < 30)
-			scr_viewsize.value = 30;
+		if (scr_viewsize.value < 100)
+			scr_viewsize.value = 100;
 		if (scr_viewsize.value > 120)
 			scr_viewsize.value = 120;
 		Cvar_SetValue ("viewsize", scr_viewsize.value);
@@ -1212,7 +1212,7 @@ void M_Options_Draw (void)
 	M_Print (16, 48, "     Reset to defaults");
 
 	M_Print (16, 56, "           Screen size");
-	r = (scr_viewsize.value - 30) / (120 - 30);
+	r = (scr_viewsize.value - 100) / (120 - 100);
 	M_DrawSlider (220, 56, r);
 
 	M_Print (16, 64, "            Brightness");
