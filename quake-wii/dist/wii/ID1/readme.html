@@ -5,7 +5,7 @@
 		<title>QuakeGX</title>
 	</head>
 	<body>
-		<h1>QuakeGX - 2008/08/08</h1>
+		<h1>QuakeGX - 2008/08/22</h1>
 		
 		<h2>Requirements</h2>
 
@@ -14,11 +14,11 @@
 			<li>Twilight Hack, The Homebrew Channel or some other way of running programs from SD Card.</li>
 		</ul>
 
-		<h2>Release Notes for version 0.02</h2>
+		<h2>Release Notes for version 0.03</h2>
 
 		<ul>
+			<li>New features: view locking, tv overscan adjustment, simple brightness control, on-screen keyboard.</li>
 			<li>To correctly see the transparent water without artifacts, please apply <a href=http://vispatch.sourceforge.net/>Vispatch</a> to your pak0.pak (and pak1.pak, if you have the full version) file.</li>
-			<li>Be sure to read the "Installation" section for info regarding the different Wiimote button mappings.</li>
 		</ul>
 		
 		<h2>Installation</h2>
@@ -44,7 +44,7 @@
 		<ul>
 			<li>You can freely change button bindings on the Wiimote without affecting the GC pad bindings, except for the D-Pad on both controllers and Start/Plus. These are paired and changing one's binding will change the other</li>
 			<li>There is still no music support, but expect it for future releases. (Probably you will have to rip your original quake music from your CD.)</li>
-			<li>There is a new menu option for adjusting the size of the screen to adjust for your TV's overscan. (Does not work with the GX accelerated version yet.)</li>
+			<li>There is a menu option for adjusting the size of the screen to adjust for your TV's overscan.</li>
 		</ul>
 
 		<h2>Software rendering notes</h2>
@@ -53,7 +53,7 @@
 			<li>All of the original dosquake rendering features are supported.</li>
 			<li>Unfortunately, the original palette is converted from RGB8 to RGB565. The best way to correct this is writing a full 24-bit software renderer, but don't expect it soon.</li>
 			<li>Framerate may be a bit choppy and there is still no support for going back to the old 320x200 resolution.</li>
-			<li>Software rendering is only available through svn.
+			<li>Software rendering is only available through svn, if you are brave enough to correct the compile errors! :)</li>
 		</ul>
 
 		<h2>Hardware rendering notes</h2>
@@ -96,6 +96,12 @@
 				<li>Pause/Menu:			Plus</li>
 				<li>Select (in menu):		A</li>
 				<li>Back (in menu):		B</li>
+			</ul>
+			<li>On-screen keyboard (Wiimote only)</li>
+			<ul>
+				<li>Activate OSK:		Minus</li>
+				<li>Shift:			Z</li>
+				<li>Select:			B</li>
 			</ul>
 			<li>If "Previous Weapon" doesn't work, probably you're using Quake's version 1.01 PAK0.PAK, you should really upgrade to version 1.06's PAK0.PAK. It is available at this project's page as the shareware version. (Will work for the full version too.)</li>
 		</ul>
