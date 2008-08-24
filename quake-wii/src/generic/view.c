@@ -749,6 +749,13 @@ void V_CalcRefdef (void)
 #if 0
 	if (cl.model_precache[cl.stats[STAT_WEAPON]] && strcmp (cl.model_precache[cl.stats[STAT_WEAPON]]->name,  "progs/v_shot2.mdl"))
 #endif
+#if HW_RVL && GXQUAKE
+	// ELUTODO: are these the best values?
+	if (scr_viewsize.value == 110)
+		view->origin[2] += 2;
+	else if (scr_viewsize.value == 100)
+		view->origin[2] += 3;
+#else
 	if (scr_viewsize.value == 110)
 		view->origin[2] += 1;
 	else if (scr_viewsize.value == 100)
@@ -757,6 +764,7 @@ void V_CalcRefdef (void)
 		view->origin[2] += 1;
 	else if (scr_viewsize.value == 80)
 		view->origin[2] += 0.5f;
+#endif
 
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	view->frame = cl.stats[STAT_WEAPONFRAME];
