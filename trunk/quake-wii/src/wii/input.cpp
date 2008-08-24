@@ -283,6 +283,10 @@ void IN_Init (void)
 	last_iry = -1;
 
 	in_osk = 0;
+
+	in_pitchangle = .0f;
+	in_yawangle = .0f;
+	in_rollangle = .0f;
 }
 
 void IN_Shutdown (void)
@@ -619,7 +623,16 @@ void IN_Move (usercmd_t *cmd)
 		cl.viewangles[PITCH] = -70.0f;
 	}
 
-	in_pitchangle = pad->orient.pitch;
-	in_yawangle = pad->orient.yaw;
-	in_rollangle = pad->orient.roll;
+	if (wiimote_connected && !using_c_stick)
+	{
+		in_pitchangle = pad->orient.pitch;
+		in_yawangle = pad->orient.yaw;
+		in_rollangle = pad->orient.roll;
+	}
+	else
+	{
+		in_pitchangle = .0f;
+		in_yawangle = .0f;
+		in_rollangle = .0f;
+	}
 }
