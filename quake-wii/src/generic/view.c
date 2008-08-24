@@ -484,6 +484,10 @@ float angledelta (float a)
 	return a;
 }
 
+#ifdef HW_RVL
+extern float in_rollangle;
+#endif
+
 /*
 ==================
 CalcGunAngle
@@ -544,6 +548,7 @@ void CalcGunAngle (void)
 		// ELUTODO: Some small gimbal lock issues
 		cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw - cl_crossx.value/scr_vrect.width * IR_YAWRANGE;
 		cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch + cl_crossy.value/scr_vrect.height * IR_PITCHRANGE);
+		cl.viewent.angles[ROLL] = in_rollangle;
 	}
 	else
 	{
