@@ -522,6 +522,37 @@ void Draw_TileClear (int x, int y, int w, int h)
 	GX_End();
 }
 
+/*
+=============
+Draw_AlphaTileClear
+
+This repeats a 64*64 alpha blended tile graphic to fill the screen around a sized down
+refresh window.
+=============
+*/
+void Draw_AlphaTileClear (int x, int y, int w, int h, float alpha)
+{
+	GL_Bind0 (*(int *)draw_backtile->data);
+	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+	GX_Position3f32(x, y, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, (u8)(0xff * alpha));
+	GX_TexCoord2f32(x / 64.0, y / 64.0);
+
+	GX_Position3f32(x + w, y, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, (u8)(0xff * alpha));
+	GX_TexCoord2f32((x + w) / 64.0, y / 64.0);
+
+	GX_Position3f32(x + w, y + h, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, (u8)(0xff * alpha));
+	GX_TexCoord2f32((x + w) / 64.0, (y + h) / 64.0);
+
+	GX_Position3f32(x, y + h, 0.0f);
+	GX_Color4u8(0xff, 0xff, 0xff, (u8)(0xff * alpha));
+	GX_TexCoord2f32(x / 64.0, (y + h) / 64.0);
+	GX_End();
+}
+
 
 /*
 =============

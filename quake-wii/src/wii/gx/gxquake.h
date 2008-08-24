@@ -246,3 +246,4 @@ extern int osk_coords[2];
 // Draw.c extensions
 extern void Draw_TransAlphaPic (int x, int y, qpic_t *pic, float alpha);
 extern void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha);
+extern void Draw_AlphaTileClear (int x, int y, int w, int h, float alpha);

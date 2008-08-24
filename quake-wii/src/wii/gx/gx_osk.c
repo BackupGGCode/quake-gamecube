@@ -1,5 +1,7 @@
 #include "../../generic/quakedef.h"
 
+// ELUTODO: problems with higher 2D resolutions
+
 void OSK_DrawCharacter (int cx, int line, int num)
 {
 	Draw_Character ( cx + ((vid.width - 320)>>1), line, num);
