@@ -293,8 +293,8 @@ void VID_Init(unsigned char *palette)
 	scr_width = rmode->fbWidth;
 	scr_height = rmode->efbHeight;
 
-	vid.width = 640;
-	vid.height = 480;
+	vid.width = 320;
+	vid.height = 240;
 
 	if (vid.height > height)
 		vid.height = height;
