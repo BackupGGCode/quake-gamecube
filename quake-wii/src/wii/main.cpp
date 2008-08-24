@@ -165,6 +165,7 @@ namespace quake
 
 		void frontend(void)
 		{
+			// ELUTODO: use CONF module to configure certain settings according to the wii's options
 			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
 					Oh, and don't forget to put your wrist wrap! :)\n\n");
 
