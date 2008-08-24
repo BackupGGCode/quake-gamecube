@@ -201,8 +201,6 @@ void GL_Init (void)
 	GX_InvalidateTexAll();
 
 	GX_SetTevOp(GX_TEVSTAGE1, GX_MODULATE); // Will always be this OP
-
-	Cvar_RegisterVariable(&vid_tvborder);
 }
 
 /*
@@ -276,7 +274,9 @@ static void Check_Gamma (unsigned char *pal)
 	memcpy (pal, palette, sizeof(palette));
 }
 
-// vid.width and vid.conwidth = 2D resolution
+// ELUTODO: proper widescreen support
+// scr_width/height = 3D res, vid.width/height = 2D res. vid.conwidth/conheight is no used
+// many things rely on a minimum resolution of 320x{200,240}
 void VID_Init(unsigned char *palette)
 {
 	unsigned int width = 640, height = 480;
@@ -288,25 +288,18 @@ void VID_Init(unsigned char *palette)
 
 // interpret command-line params
 
+// only multiples of eight, please
 // set vid parameters
-	vid.conwidth = 320;
-	vid.conwidth &= 0xfff8; // make it a multiple of eight
-	if (vid.conwidth < 320)
-		vid.conwidth = 320;
-	// pick a conheight that matches with correct aspect
-	vid.conheight = 200;
-	if (vid.conheight < 200)
-		vid.conheight = 200;
-
 	scr_width = rmode->fbWidth;
 	scr_height = rmode->efbHeight;
 
-	if (vid.conheight > height)
-		vid.conheight = height;
-	if (vid.conwidth > width)
-		vid.conwidth = width;
-	vid.width = vid.conwidth;
-	vid.height = vid.conheight;
+	vid.width = 640;
+	vid.height = 480;
+
+	if (vid.height > height)
+		vid.height = height;
+	if (vid.width > width)
+		vid.width = width;
 
 	vid.aspect = ((float)vid.height / (float)vid.width) * (320.0 / 240.0);
 	vid.numpages = 2;
@@ -314,12 +307,13 @@ void VID_Init(unsigned char *palette)
 	GL_Init();
 
 	Check_Gamma(palette);
-
 	VID_SetPalette(palette);
 
 	Con_SafePrintf ("Video mode %dx%d initialized.\n", width, height);
 
 	vid.recalc_refdef = 1;				// force a surface cache flush
+
+	Cvar_RegisterVariable(&vid_tvborder);
 
 	vidmode_active = true;
 }

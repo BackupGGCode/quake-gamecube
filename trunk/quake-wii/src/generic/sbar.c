@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
+cvar_t sbar_alpha = {"sbar_alpha", "0.3", true};
+
 int			sb_updates;		// if >= vid.numpages, no update needed
 
 #define STAT_MINUS		10	// num frame for '-' stats digit
@@ -244,6 +246,8 @@ void Sbar_Init (void)
 		rsb_ammo[1] = Draw_PicFromWad ("r_ammomulti");
 		rsb_ammo[2] = Draw_PicFromWad ("r_ammoplasma");
 	}
+
+	Cvar_RegisterVariable(&sbar_alpha);
 }
 
 
@@ -574,8 +578,9 @@ void Sbar_DrawInventory (void)
 	else
 	{
 #if HW_RVL && GXQUAKE
+		// ELUTODO: not right, but range currently not achievable anyway
 		if (scr_viewsize.value >= 90)
-			Sbar_DrawAlphaPic(0, -24, sb_ibar, 0.3f);
+			Sbar_DrawAlphaPic(0, -24, sb_ibar, sbar_alpha.value);
 		else
 			Sbar_DrawPic (0, -24, sb_ibar);
 #else
@@ -956,8 +961,13 @@ void Sbar_Draw (void)
 
 	sb_updates++;
 
-	if (sb_lines && vid.width > 320) 
+	if (sb_lines && vid.width > 320)
+#if HW_RVL && GXQUAKE
+		Draw_AlphaTileClear (0, vid.height - sb_lines, (vid.width - 320) / 2, sb_lines, sbar_alpha.value);
+		Draw_AlphaTileClear (0, vid.height - sb_lines, (vid.width - 320) / 2 + vid.width, sb_lines, sbar_alpha.value);
+#else
 		Draw_TileClear (0, vid.height - sb_lines, vid.width, sb_lines);
+#endif
 
 	if (sb_lines > 24)
 	{
@@ -975,8 +985,9 @@ void Sbar_Draw (void)
 	else if (sb_lines)
 	{
 #if HW_RVL && GXQUAKE
+		// ELUTODO: not right, but range currently not achievable anyway
 		if (scr_viewsize.value >= 100)
-			Sbar_DrawAlphaPic(0, 0, sb_sbar, 0.3f);
+			Sbar_DrawAlphaPic(0, 0, sb_sbar, sbar_alpha.value);
 		else
 			Sbar_DrawPic (0, 0, sb_sbar);
 #else
