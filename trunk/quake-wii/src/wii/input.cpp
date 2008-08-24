@@ -25,6 +25,11 @@ extern "C"
 {
 #include "../generic/quakedef.h"
 
+	// pass these values to whatever subsystem wants it
+	float in_pitchangle;
+	float in_yawangle;
+	float in_rollangle;
+
 	// Are we inside the on-screen keyboard? (ELUTODO: refactor)
 	int in_osk = 0;
 	
@@ -613,4 +618,8 @@ void IN_Move (usercmd_t *cmd)
 	{
 		cl.viewangles[PITCH] = -70.0f;
 	}
+
+	in_pitchangle = pad->orient.pitch;
+	in_yawangle = pad->orient.yaw;
+	in_rollangle = pad->orient.roll;
 }
