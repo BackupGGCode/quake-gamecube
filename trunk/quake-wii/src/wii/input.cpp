@@ -303,7 +303,6 @@ void IN_Commands (void)
 	else
 	{
 		// TODO: better way to do this? a callback or something
-		// TODO: random failures when connecting the wiimote at some points
 		if (!wiimote_connected)
 		{
 			WPAD_SetVRes(WPAD_CHAN_0, wiimote_ir_res_x, wiimote_ir_res_y);
@@ -473,11 +472,12 @@ void IN_Move (usercmd_t *cmd)
 		pads[0].substickY);
 #endif
 
-	last_irx = wiimote_ir_x;
-	last_iry = wiimote_ir_y;
-
 	if (in_osk)
+	{
+		last_irx = wiimote_ir_x;
+		last_iry = wiimote_ir_y;
 		return;
+	}
 
 	// If the nunchuk is centered, read from the left gamecube pad stick
 	float x1;
@@ -521,6 +521,9 @@ void IN_Move (usercmd_t *cmd)
 		Cvar_SetValue("cl_crossy", (in_mlook.state & 1) ? scr_vrect.height / 2 * y2 : 0);
 		using_c_stick = true;
 	}
+
+	last_irx = wiimote_ir_x;
+	last_iry = wiimote_ir_y;
 
 	// Apply the dead zone.
 	const float dead_zone = 0.1f;
