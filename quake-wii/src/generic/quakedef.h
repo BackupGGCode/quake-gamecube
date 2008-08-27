@@ -24,9 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	QUAKE_GAME			// as opposed to utilities
 
 #define	VERSION				1.09
-#if HW_RVL && GXQUAKE
 #define WIIGX_VERSION			0.03
-#endif
 
 //define	PARANOID			// speed sapping error checking
 
@@ -217,13 +215,8 @@ typedef struct
 #include "progs.h"
 #include "server.h"
 
-#if GXQUAKE && HW_RVL
 #include "../wii/gx/gx_model.h"
 #include "../wii/gx/gxquake.h"
-#else
-#include "model.h"
-#include "d_iface.h"
-#endif
 
 #include "input.h"
 #include "world.h"

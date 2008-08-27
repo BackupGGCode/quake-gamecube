@@ -1711,7 +1711,6 @@ void COM_AddGameDirectory (char *dir)
 		com_searchpaths = search;               
 	}
 
-#ifdef HW_RVL
 	sprintf (pakfile, "%s/wii.pak", dir);
 	pak = COM_LoadPackFile (pakfile);
 	if (pak)
@@ -1721,7 +1720,6 @@ void COM_AddGameDirectory (char *dir)
 		search->next = com_searchpaths;
 		com_searchpaths = search;
 	}
-#endif
 
 //
 // add the contents of the parms.txt file to the end of the command line

@@ -168,6 +168,8 @@ extern	cvar_t	gl_doubleeyes;
 extern	cvar_t	gl_max_size;
 extern	cvar_t	gl_playermip;
 
+extern cvar_t vid_tvborder;
+
 extern int white_texturenum;
 
 extern	int			mirrortexturenum;
@@ -247,3 +249,8 @@ extern int osk_coords[2];
 extern void Draw_TransAlphaPic (int x, int y, qpic_t *pic, float alpha);
 extern void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha);
 extern void Draw_AlphaTileClear (int x, int y, int w, int h, float alpha);
+
+// input extensions
+extern float in_pitchangle;
+extern float in_yawangle;
+extern float in_rollangle;

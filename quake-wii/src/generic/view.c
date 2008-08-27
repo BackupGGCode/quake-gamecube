@@ -20,9 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // view.c -- player eye positioning
 
 #include "quakedef.h"
-#if !HW_RVL && !GXQUAKE
-#include "r_local.h"
-#endif
 
 /*
 
@@ -484,10 +481,6 @@ float angledelta (float a)
 	return a;
 }
 
-#ifdef HW_RVL
-extern float in_rollangle;
-#endif
-
 /*
 ==================
 CalcGunAngle
@@ -538,10 +531,6 @@ void CalcGunAngle (void)
 	oldyaw = yaw;
 	oldpitch = pitch;
 
-#ifndef HW_RVL
-	cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw;
-	cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch);
-#else
 	// ELUTODO: all around the code: scr_vrect.height doesn't count the status bar
 	if (!cls.demoplayback && !in_osk)
 	{
@@ -556,7 +545,6 @@ void CalcGunAngle (void)
 		cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw;
 		cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch);
 	}
-#endif
 
 	cl.viewent.angles[ROLL] -= v_idlescale.value * sinf(cl.time*v_iroll_cycle.value) * v_iroll_level.value;
 	cl.viewent.angles[PITCH] -= v_idlescale.value * sinf(cl.time*v_ipitch_cycle.value) * v_ipitch_level.value;
@@ -749,22 +737,11 @@ void V_CalcRefdef (void)
 #if 0
 	if (cl.model_precache[cl.stats[STAT_WEAPON]] && strcmp (cl.model_precache[cl.stats[STAT_WEAPON]]->name,  "progs/v_shot2.mdl"))
 #endif
-#if HW_RVL && GXQUAKE
 	// ELUTODO: are these the best values?
 	if (scr_viewsize.value == 110)
 		view->origin[2] += 2;
 	else if (scr_viewsize.value == 100)
 		view->origin[2] += 3;
-#else
-	if (scr_viewsize.value == 110)
-		view->origin[2] += 1;
-	else if (scr_viewsize.value == 100)
-		view->origin[2] += 2;
-	else if (scr_viewsize.value == 90)
-		view->origin[2] += 1;
-	else if (scr_viewsize.value == 80)
-		view->origin[2] += 0.5f;
-#endif
 
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	view->frame = cl.stats[STAT_WEAPONFRAME];
@@ -866,12 +843,6 @@ void V_RenderView (void)
 	{
 		R_RenderView ();
 	}
-
-#if ((!HW_RVL && !GXQUAKE) || (HW_RVL && !GXQUAKE))
-	if (crosshair.value)
-		Draw_Character (scr_vrect.x + scr_vrect.width/2 + cl_crossx.value, 
-			scr_vrect.y + scr_vrect.height/2 + cl_crossy.value, '+');
-#endif
 }
 
 //============================================================================
