@@ -255,7 +255,6 @@ void Sbar_Init (void)
 
 // drawing routines are relative to the status bar location
 
-#if HW_RVL && GXQUAKE
 /*
 =============
 Sbar_DrawAlphaPic
@@ -268,7 +267,6 @@ void Sbar_DrawAlphaPic (int x, int y, qpic_t *pic, float alpha)
 	else
 		Draw_AlphaPic (x + ((vid.width - 320)>>1), y + (vid.height-SBAR_HEIGHT), pic, alpha);
 }
-#endif
 
 /*
 =============
@@ -577,15 +575,11 @@ void Sbar_DrawInventory (void)
 	}
 	else
 	{
-#if HW_RVL && GXQUAKE
 		// ELUTODO: not right, but range currently not achievable anyway
 		if (scr_viewsize.value >= 90)
 			Sbar_DrawAlphaPic(0, -24, sb_ibar, sbar_alpha.value);
 		else
 			Sbar_DrawPic (0, -24, sb_ibar);
-#else
-		Sbar_DrawPic (0, -24, sb_ibar);
-#endif
 	}
 
 // weapons
@@ -962,12 +956,8 @@ void Sbar_Draw (void)
 	sb_updates++;
 
 	if (sb_lines && vid.width > 320)
-#if HW_RVL && GXQUAKE
 		Draw_AlphaTileClear (0, vid.height - sb_lines, (vid.width - 320) / 2, sb_lines, sbar_alpha.value);
 		Draw_AlphaTileClear (0, vid.height - sb_lines, (vid.width - 320) / 2 + vid.width, sb_lines, sbar_alpha.value);
-#else
-		Draw_TileClear (0, vid.height - sb_lines, vid.width, sb_lines);
-#endif
 
 	if (sb_lines > 24)
 	{
@@ -984,15 +974,11 @@ void Sbar_Draw (void)
 	}
 	else if (sb_lines)
 	{
-#if HW_RVL && GXQUAKE
 		// ELUTODO: not right, but range currently not achievable anyway
 		if (scr_viewsize.value >= 100)
 			Sbar_DrawAlphaPic(0, 0, sb_sbar, sbar_alpha.value);
 		else
 			Sbar_DrawPic (0, 0, sb_sbar);
-#else
-		Sbar_DrawPic (0, 0, sb_sbar);
-#endif
 
    // keys (hipnotic only)
       //MED 01/04/97 moved keys here so they would not be overwritten

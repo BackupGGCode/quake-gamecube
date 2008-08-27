@@ -1,6 +1,6 @@
 #include "../../generic/quakedef.h"
 
-// ELUTODO: problems with higher 2D resolutions
+// ELUTODO: problems with higher 2D resolutions and different vid_tvborder values
 
 void OSK_DrawCharacter (int cx, int line, int num)
 {

@@ -344,9 +344,7 @@ void CL_BaseMove (usercmd_t *cmd)
 #endif
 }
 
-#ifdef HW_RVL
 extern cvar_t cl_crossx, cl_crossy;
-#endif
 
 /*
 ==============
@@ -355,9 +353,6 @@ CL_SendMove
 */
 void CL_SendMove (usercmd_t *cmd)
 {
-#ifndef HW_RVL
-	int		i;
-#endif
 	int		bits;
 	sizebuf_t	buf;
 	byte	data[128];
@@ -375,10 +370,6 @@ void CL_SendMove (usercmd_t *cmd)
 
 	MSG_WriteFloat (&buf, cl.mtime[0]);	// so server can get ping times
 
-#ifndef HW_RVL
-	for (i=0 ; i<3 ; i++)
-		MSG_WriteAngle (&buf, cl.viewangles[i]);
-#else
 	/* TODO: Not perfect, due to some gimbal lock issues, it will shoot where the shotgun is aiming, not where the
 	 * crosshair is (maybe it's better this way, until the gimbal issues are addressed on the viewmodel too.) It will
 	 * also change the movements a bit (maybe that's better too.)
@@ -390,7 +381,6 @@ void CL_SendMove (usercmd_t *cmd)
 	MSG_WriteAngle (&buf, cl.viewangles[PITCH] + cl_crossy.value/scr_vrect.height * IR_PITCHRANGE);
 	MSG_WriteAngle (&buf, cl.viewangles[YAW] - cl_crossx.value/scr_vrect.width * IR_YAWRANGE);
 	MSG_WriteAngle (&buf, cl.viewangles[ROLL]);
-#endif
 	
     MSG_WriteShort (&buf, cmd->forwardmove);
     MSG_WriteShort (&buf, cmd->sidemove);

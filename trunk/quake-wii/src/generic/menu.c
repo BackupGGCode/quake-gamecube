@@ -1080,10 +1080,6 @@ void M_Menu_Options_f (void)
 	m_entersound = true;
 }
 
-#if HW_RVL
-extern cvar_t	vid_tvborder;
-#endif
-
 void M_AdjustSliders (int dir)
 {
 	S_LocalSound ("misc/menu3.wav");
@@ -1155,7 +1151,6 @@ void M_AdjustSliders (int dir)
 	case 11:	// lookstrafe
 		Cvar_SetValue ("lookstrafe", !lookstrafe.value);
 		break;
-#if HW_RVL
 	case 12:	// tv border
 		vid_tvborder.value += dir * 0.005f;
 		if (vid_tvborder.value < 0)
@@ -1164,7 +1159,6 @@ void M_AdjustSliders (int dir)
 			vid_tvborder.value = 0.2;
 		Cvar_SetValue ("vid_tvborder", vid_tvborder.value);
 		break;
-#endif
 	}
 }
 
@@ -1245,11 +1239,9 @@ void M_Options_Draw (void)
 
 	if (vid_menudrawfn)
 		M_Print (16, 128, "         Video Options");
-#if HW_RVL
 	M_Print (16, 128, "  Horizontal TV Border");
 	r = vid_tvborder.value / 0.2f;
 	M_DrawSlider (220, 128, r);
-#endif
 
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
@@ -1282,11 +1274,6 @@ void M_Options_Key (int k)
 		case 2:
 			Cbuf_AddText ("exec default.cfg\n");
 			break;
-#if !HW_RVL
-		case 12:
-			M_Menu_Video_f ();
-			break;
-#endif
 		default:
 			M_AdjustSliders (1);
 			break;
@@ -1315,16 +1302,6 @@ void M_Options_Key (int k)
 		M_AdjustSliders (1);
 		break;
 	}
-
-#if !HW_RVL
-	if (options_cursor == 12 && vid_menudrawfn == NULL)
-	{
-		if (k == K_UPARROW)
-			options_cursor = 11;
-		else
-			options_cursor = 0;
-	}
-#endif
 }
 
 //=============================================================================
