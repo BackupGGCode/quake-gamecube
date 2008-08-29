@@ -378,7 +378,12 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 				if (!strcmp (identifier, glt->identifier))
 				{
 					if (width != glt->width || height != glt->height)
-						Sys_Error ("GL_LoadTexture: cache mismatch");
+					{
+						Con_DPrintf ("GL_LoadTexture: cache mismatch, reloading");
+						if (!__lwp_heap_free(&texture_heap, glt->data))
+							Sys_Error("GL_ClearTextureCache: Error freeing data.");
+						goto reload; // best way to do it
+					}
 					return glt->texnum;
 				}
 			}
@@ -394,6 +399,7 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 	if (i == MAX_GLTEXTURES)
 		Sys_Error ("GL_LoadTexture: numgltextures == MAX_GLTEXTURES\n");
 
+reload:
 	strcpy (glt->identifier, identifier);
 	glt->texnum = i;
 	glt->width = width;
