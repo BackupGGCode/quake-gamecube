@@ -11,7 +11,7 @@ DIST_DIR	:= ../../dist/wii
 DOL				:= $(DIST_DIR)/apps/quake/boot.dol
 ELF				:= $(OBJ_DIR)/QuakeGX.elf
 ZIP_FILE		:= QuakeGX_$(VERSION).zip
-ZIP_CONTENTS	:= apps/quake/boot.dol apps/quake/icon.png apps/quake/meta.xml ID1/WII.PAK ID1/GPL.txt ID1/readme.html
+ZIP_CONTENTS	:= apps/quake/boot.dol apps/quake/icon.png apps/quake/meta.xml apps/quake/ID1/WII.PAK apps/quake/GPL.txt apps/quake/readme.html
 
 # Tools.
 SED = sed "s/:\([0-9]*\):/\(\1\) :/"

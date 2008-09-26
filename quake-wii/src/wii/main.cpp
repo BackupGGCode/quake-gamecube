@@ -169,9 +169,10 @@ namespace quake
 			printf("\n\n\n\n\n\nIf the Nunchuk isn't detected, please reconnect it to the wiimote.\n\
 					Oh, and don't forget to put your wrist wrap! :)\n\n");
 
+			/* hide this debug thing
 			printf("Free MEM1: %d bytes\nFree MEM2: %d bytes\n",
 				(u32)SYS_GetArena1Hi() - (u32)SYS_GetArena1Lo(),
-				(u32)SYS_GetArena2Hi() - (u32)SYS_GetArena2Lo());
+				(u32)SYS_GetArena2Hi() - (u32)SYS_GetArena2Lo()); */
 
 			VIDEO_WaitVSync();
 			struct timespec sleeptime = {3, 0};
@@ -215,7 +216,7 @@ namespace quake
 			memset(&parms, 0, sizeof(parms));
 			parms.argc		= com_argc;
 			parms.argv		= com_argv;
-			parms.basedir	= "";
+			parms.basedir	= "/apps/quake";
 			parms.memsize	= real_heap_size;
 			parms.membase	= heap;
 			if (parms.membase == 0)
