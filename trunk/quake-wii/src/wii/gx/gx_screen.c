@@ -915,9 +915,10 @@ void SCR_UpdateScreen (void)
 	}
 	else
 	{
+		// ELUTODO: these divisions by 320/240...
         if (crosshair.value)
-                Draw_Character (scr_vrect.x + scr_vrect.width/2 + cl_crossx.value,
-                        scr_vrect.y + scr_vrect.height/2 + cl_crossy.value, '+');
+                Draw_Character ((scr_vrect.x + scr_vrect.width/2 + cl_crossx.value) * vid.width/320,
+                        (scr_vrect.y + scr_vrect.height/2 + cl_crossy.value) * vid.height/240, '+');
 		
 		SCR_DrawRam ();
 		SCR_DrawNet ();

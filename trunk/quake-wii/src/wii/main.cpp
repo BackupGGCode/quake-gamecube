@@ -301,8 +301,8 @@ namespace quake
 				printf("\n\n     Press UP, DOWN, LEFT, RIGHT to make your selections\n");
 				printf("     Press START/PLUS to start the game\n\n");
 
-				printf("     %c Mission Pack: %s%s\n", cursor == 0 ? '>' : ' ', missionpack_names[missionpack_selected],
-					(missionpack_have & (1 << missionpack_selected)) ? "                                   " : " (You don't have it!)");
+				printf("     %c Mission Pack:      %s%s\n", cursor == 0 ? '>' : ' ', missionpack_names[missionpack_selected],
+					(missionpack_have & (1 << missionpack_selected)) ? "                              " : " (You don't have it!)         ");
 
 				const u32 mods_maxprintsize = 32;
 				char mods_printvar[mods_maxprintsize];
@@ -313,9 +313,9 @@ namespace quake
 					mods_printvar[i] = ' ';
 				mods_printvar[i] = '\0';
 
-				printf("     %c Mod:          %s\n", cursor == 1 ? '>' : ' ', mods_printvar);
+				printf("     %c Mod:               %s\n", cursor == 1 ? '>' : ' ', mods_printvar);
 
-				printf("     %c Disable Network: %s\n", cursor == 2 ? '>' : ' ', network_disable ? "yes" : "no ");
+				printf("     %c Disable Network:   %s\n", cursor == 2 ? '>' : ' ', network_disable ? "yes" : "no ");
 
 				printf("     %c Max Network Slots: %u   \n", cursor == 3 ? '>' : ' ', listen_players);
 

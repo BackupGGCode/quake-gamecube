@@ -48,6 +48,8 @@ cvar_t	v_kicktime = {"v_kicktime", "0.5", false};
 cvar_t	v_kickroll = {"v_kickroll", "0.6", false};
 cvar_t	v_kickpitch = {"v_kickpitch", "0.6", false};
 
+cvar_t	cl_weapon_inrollangle = {"cl_weapon_inrollangle", "1", true};
+
 cvar_t	v_iyaw_cycle = {"v_iyaw_cycle", "2", false};
 cvar_t	v_iroll_cycle = {"v_iroll_cycle", "0.5", false};
 cvar_t	v_ipitch_cycle = {"v_ipitch_cycle", "1", false};
@@ -537,7 +539,8 @@ void CalcGunAngle (void)
 		// ELUTODO: Some small gimbal lock issues
 		cl.viewent.angles[YAW] = r_refdef.viewangles[YAW] + yaw - cl_crossx.value/scr_vrect.width * IR_YAWRANGE;
 		cl.viewent.angles[PITCH] = - (r_refdef.viewangles[PITCH] + pitch + cl_crossy.value/scr_vrect.height * IR_PITCHRANGE);
-		cl.viewent.angles[ROLL] = in_rollangle;
+		if (cl_weapon_inrollangle.value)
+			cl.viewent.angles[ROLL] = in_rollangle;
 	}
 	else
 	{
@@ -887,7 +890,9 @@ void V_Init (void)
 
 	Cvar_RegisterVariable (&v_kicktime);
 	Cvar_RegisterVariable (&v_kickroll);
-	Cvar_RegisterVariable (&v_kickpitch);	
+	Cvar_RegisterVariable (&v_kickpitch);
+
+	Cvar_RegisterVariable (&cl_weapon_inrollangle);
 	
 	BuildGammaTable (1.0f);	// no gamma yet
 	Cvar_RegisterVariable (&v_gamma);
