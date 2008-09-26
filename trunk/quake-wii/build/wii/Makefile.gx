@@ -1,3 +1,5 @@
+# Just a reminder about where to change version numbers: Makefile.gx, quakedef.h, meta.xml, readme.html
+
 # About the release.
 VERSION	:= WIP
 
