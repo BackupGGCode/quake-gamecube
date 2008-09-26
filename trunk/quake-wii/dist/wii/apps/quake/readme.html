@@ -5,7 +5,7 @@
 		<title>QuakeGX</title>
 	</head>
 	<body>
-		<h1>QuakeGX - ????/??/??</h1>
+		<h1>QuakeGX - 2008/09/26</h1>
 		
 		<h2>Requirements</h2>
 
@@ -17,7 +17,8 @@
 		<h2>Release Notes for version 0.04</h2>
 
 		<ul>
-			<li>New features:</li>
+			<li>New features: Transparent status bar, variable 2D resolution, now you can also rotate your weapon with the Wiimote, mods and mission packs support, a new menu for changing various new features and various bugfixes.</li>
+			<li>ID1 now resides in /apps/quake inside the SD card, to prevent pollution of the root folder with mods.</li>
 			<li>To correctly see the transparent water without artifacts, please apply <a href=http://vispatch.sourceforge.net/>Vispatch</a> to your pak0.pak (and pak1.pak, if you have the full version) file.</li>
 		</ul>
 		
@@ -25,11 +26,17 @@
 		
 		<ol>
 			<li>Note: If you have a version released before 13th June 2008 installed, remove ID1/CONFIG.CFG from your SD Card. This is necessary because the button naming for the Wiimote has changed, and deleting ID1/CONFIG.CFG will make the new defaults with the new button names be used.</li>
-			<li>Note: If you have a version lower than 0.04 already installed, please note that the ID1 directory now sits into /apps/quake inside your SD-card, it isn't on the root anhmore</li>
+			<li>Note: If you have a version lower than 0.04 already installed, please note that the ID1 directory now sits into /apps/quake inside your SD-card, it isn't on the root anymore</li>
 			<li>Unzip the zip file to the root of your SD Card.</li>
 			<li>Copy Quake's PAK0.PAK (and PAK1.PAK if you own the full version) into the /apps/quake/ID1 folder on your SD Card.</li>
 			<li>If you use the Homebrew Channel, you're ready to go.</li>
 		</ol>
+
+		<h2>Using Mods and Mission Packs</h2>
+
+		<ul>
+			<li>Place the mod/mission pack directory inside the /apps/quake directory, alongside your ID1 directory. You can place as many as the filesystem supports. The frontend will let you select the mod. It will also autodetect the mission packs, leting you choose them too.</li>
+		</ul>
 		
 		<h2>Credits</h2>
 
