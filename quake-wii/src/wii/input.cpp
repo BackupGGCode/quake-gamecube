@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // ELUTODO: do something about lookspring and lookstrafe
 // ELUTODO: keys to: nunchuk turn and nunchuk look up/down?
+// ELUTODO: osk doesn't work if client disconnected
 
 extern "C"
 {
@@ -481,7 +482,7 @@ void IN_Move (usercmd_t *cmd)
 		pads[0].substickY);
 #endif
 
-	if (in_osk || key_dest != key_game)
+	if (in_osk || (cls.state == ca_connected && key_dest != key_game))
 	{
 		last_irx = wiimote_ir_x;
 		last_iry = wiimote_ir_y;

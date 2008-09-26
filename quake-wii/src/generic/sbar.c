@@ -569,9 +569,21 @@ void Sbar_DrawInventory (void)
 	if (rogue)
 	{
 		if ( cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
-			Sbar_DrawPic (0, -24, rsb_invbar[0]);
+		{
+			// ELUTODO: not right, but range currently not achievable anyway
+			if (scr_viewsize.value >= 90)
+				Sbar_DrawAlphaPic(0, -24, rsb_invbar[0], sbar_alpha.value);
+			else
+				Sbar_DrawPic (0, -24, rsb_invbar[0]);
+		}
 		else
-			Sbar_DrawPic (0, -24, rsb_invbar[1]);
+		{
+			// ELUTODO: not right, but range currently not achievable anyway
+			if (scr_viewsize.value >= 90)
+				Sbar_DrawAlphaPic(0, -24, rsb_invbar[1], sbar_alpha.value);
+			else
+				Sbar_DrawPic (0, -24, rsb_invbar[1]);
+		}
 	}
 	else
 	{
