@@ -481,7 +481,7 @@ void IN_Move (usercmd_t *cmd)
 		pads[0].substickY);
 #endif
 
-	if (in_osk)
+	if (in_osk || key_dest != key_game)
 	{
 		last_irx = wiimote_ir_x;
 		last_iry = wiimote_ir_y;
