@@ -25,10 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ogc/video.h>
 #include <ogc/video_types.h>
 
-/*#include <sys/stat.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <signal.h>*/
+// ELUTODO: blank all the framebuffers to prevent artifacts before rendering takes place. Happens between the frontend ending and the quake console showing up
 
 extern "C" {
 #include "../../generic/quakedef.h"
@@ -75,6 +72,7 @@ Mtx44 perspective;
 Mtx view, model, modelview;
 
 cvar_t vid_tvborder = {"vid_tvborder", "0", (qboolean)true};
+cvar_t vid_conmode = {"vid_conmode", "0", (qboolean)true};
 
 using namespace quake;
 using namespace quake::video;
@@ -223,8 +221,39 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 	GX_InvalidateTexAll();
 
 	Sbar_Changed(); // force status bar redraw every frame
-}
 
+	// update console resolution
+	switch((int)vid_conmode.value)
+	{
+		default:
+		case 0:
+			vid.width = 320;
+			vid.height = 240;
+			break;
+		case 1:
+			vid.width = 400;
+			vid.height = 300;
+			break;
+		case 2:
+			vid.width = 480;
+			vid.height = 360;
+			break;
+		case 3:
+			vid.width = 560;
+			vid.height = 420;
+			break;
+		case 4:
+			vid.width = 640;
+			vid.height = 480;
+			break;
+	}
+	if (vid.height > scr_height)
+		vid.height = scr_height;
+	if (vid.width > scr_width)
+		vid.width = scr_width;
+
+	vid.aspect = ((float)vid.height / (float)vid.width) * (320.0 / 240.0);
+}
 
 void GL_EndRendering (void)
 {
@@ -274,12 +303,10 @@ static void Check_Gamma (unsigned char *pal)
 }
 
 // ELUTODO: proper widescreen support
-// scr_width/height = 3D res, vid.width/height = 2D res. vid.conwidth/conheight is no used
+// scr_width/height = 3D res, vid.width/height = 2D res. vid.conwidth/conheight is not used
 // many things rely on a minimum resolution of 320x{200,240}
 void VID_Init(unsigned char *palette)
 {
-	unsigned int width = 640, height = 480;
-
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
 	vid.colormap = host_colormap;
@@ -295,10 +322,10 @@ void VID_Init(unsigned char *palette)
 	vid.width = 320;
 	vid.height = 240;
 
-	if (vid.height > height)
-		vid.height = height;
-	if (vid.width > width)
-		vid.width = width;
+	if (vid.height > scr_height)
+		vid.height = scr_height;
+	if (vid.width > scr_width)
+		vid.width = scr_width;
 
 	vid.aspect = ((float)vid.height / (float)vid.width) * (320.0 / 240.0);
 	vid.numpages = 2;
@@ -308,11 +335,12 @@ void VID_Init(unsigned char *palette)
 	Check_Gamma(palette);
 	VID_SetPalette(palette);
 
-	Con_SafePrintf ("Video mode %dx%d initialized.\n", width, height);
+	Con_SafePrintf ("Video mode %dx%d initialized.\n", scr_width, scr_height);
 
 	vid.recalc_refdef = 1;				// force a surface cache flush
 
 	Cvar_RegisterVariable(&vid_tvborder);
+	Cvar_RegisterVariable(&vid_conmode);
 
 	vidmode_active = true;
 }

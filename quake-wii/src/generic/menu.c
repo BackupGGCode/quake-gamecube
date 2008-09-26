@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 #include "file.h"
 
-enum {m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup, m_net, m_options, m_keys, m_help, m_quit, m_lanconfig, m_gameoptions, m_search, m_slist} m_state;
+enum {m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup, m_net, m_options, m_keys, m_options2, m_help, m_quit, m_lanconfig, m_gameoptions, m_search, m_slist} m_state;
 
 void M_Menu_Main_f (void);
 	void M_Menu_SinglePlayer_f (void);
@@ -31,6 +31,7 @@ void M_Menu_Main_f (void);
 		void M_Menu_Net_f (void);
 	void M_Menu_Options_f (void);
 		void M_Menu_Keys_f (void);
+		void M_Menu_Options2_f (void);
 	void M_Menu_Help_f (void);
 	void M_Menu_Quit_f (void);
 void M_Menu_LanConfig_f (void);
@@ -47,6 +48,7 @@ void M_Main_Draw (void);
 		void M_Net_Draw (void);
 	void M_Options_Draw (void);
 		void M_Keys_Draw (void);
+		void M_Options2_Draw (void);
 	void M_Help_Draw (void);
 	void M_Quit_Draw (void);
 void M_LanConfig_Draw (void);
@@ -63,6 +65,7 @@ void M_Main_Key (int key);
 		void M_Net_Key (int key);
 	void M_Options_Key (int key);
 		void M_Keys_Key (int key);
+		void M_Options2_Key (int key);
 	void M_Help_Key (int key);
 	void M_Quit_Key (int key);
 void M_LanConfig_Key (int key);
@@ -1116,14 +1119,6 @@ void M_AdjustSliders (int dir)
 	case 11:	// lookstrafe
 		Cvar_SetValue ("lookstrafe", !lookstrafe.value);
 		break;
-	case 12:	// tv border
-		vid_tvborder.value += dir * 0.005f;
-		if (vid_tvborder.value < 0)
-			vid_tvborder.value = 0;
-		if (vid_tvborder.value > 0.2)
-			vid_tvborder.value = 0.2;
-		Cvar_SetValue ("vid_tvborder", vid_tvborder.value);
-		break;
 	}
 }
 
@@ -1202,9 +1197,7 @@ void M_Options_Draw (void)
 	M_Print (16, 120, "            Lookstrafe");
 	M_DrawCheckbox (220, 120, lookstrafe.value);
 
-	M_Print (16, 128, "  Horizontal TV Border");
-	r = vid_tvborder.value / 0.2f;
-	M_DrawSlider (220, 128, r);
+	M_Print (16, 128, "          More Options");
 
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
@@ -1236,6 +1229,9 @@ void M_Options_Key (int k)
 			break;
 		case 2:
 			Cbuf_AddText ("exec default.cfg\n");
+			break;
+		case 12:
+			M_Menu_Options2_f ();
 			break;
 		default:
 			M_AdjustSliders (1);
@@ -1461,6 +1457,146 @@ void M_Keys_Key (int k)
 	case K_DEL:				// delete bindings
 		S_LocalSound ("misc/menu2.wav");
 		M_UnbindCommand (bindnames[keys_cursor][0]);
+		break;
+	}
+}
+
+//=============================================================================
+/* OPTIONS2 MENU */
+
+#define	OPTIONS2_ITEMS	5
+
+int		options2_cursor;
+
+void M_Menu_Options2_f (void)
+{
+	key_dest = key_menu;
+	m_state = m_options2;
+	m_entersound = true;
+}
+
+// ELUTODO: aspect ratio
+extern cvar_t	vid_conmode;
+extern cvar_t	sbar_alpha;
+extern cvar_t	cl_weapon_inrollangle;
+extern cvar_t	crosshair;
+
+void M_AdjustSliders2 (int dir)
+{
+	S_LocalSound ("misc/menu3.wav");
+
+	switch (options2_cursor)
+	{
+	case 0:	// sbar transparency
+		sbar_alpha.value += (float)dir * 0.1f;
+		if (sbar_alpha.value < .0f)
+			sbar_alpha.value = .0f;
+		if (sbar_alpha.value > 1.0f)
+			sbar_alpha.value = 1.0f;
+		Cvar_SetValue ("sbar_alpha", sbar_alpha.value);
+		break;
+	case 1:	// 2D res
+		vid_conmode.value += dir;
+		if (vid_conmode.value < 0)
+			vid_conmode.value = 0;
+		if (vid_conmode.value > 4)
+			vid_conmode.value = 4;
+		Cvar_SetValue ("vid_conmode", vid_conmode.value);
+		break;
+	case 2:	// crosshair
+		Cvar_SetValue ("crosshair", !crosshair.value);
+		break;
+	case 3:	// weapon roll by input
+		Cvar_SetValue ("cl_weapon_inrollangle", !cl_weapon_inrollangle.value);
+		break;
+	case 4:	// tv border
+		vid_tvborder.value += dir * 0.005f;
+		if (vid_tvborder.value < 0)
+			vid_tvborder.value = 0;
+		if (vid_tvborder.value > 0.2)
+			vid_tvborder.value = 0.2;
+		Cvar_SetValue ("vid_tvborder", vid_tvborder.value);
+		break;
+	}
+}
+
+void M_Options2_Draw (void)
+{
+	float		r;
+	qpic_t	*p;
+
+	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
+	p = Draw_CachePic ("gfx/p_option.lmp");
+	M_DrawPic ( (320-p->width)/2, 4, p);
+
+	M_Print (16, 32, "      Status Bar Alpha");
+	r = sbar_alpha.value;
+	M_DrawSlider (220, 32, r);
+
+	M_Print (16, 40, "         2D Resolution");
+	r = vid_conmode.value / 4.0f;
+	M_DrawSlider (220, 40, r);
+
+	M_Print (16, 48, "        Show Crosshair");
+	M_DrawCheckbox (220, 48, crosshair.value);
+
+	M_Print (16, 56, "           Weapon Roll");
+	M_DrawCheckbox (220, 56, cl_weapon_inrollangle.value);
+
+	M_Print (16, 64, "           TV Overscan");
+	r = vid_tvborder.value / 0.2f;
+	M_DrawSlider (220, 64, r);
+
+	M_Print (16, 80, "       Please report issues with");
+	M_Print (16, 88, "         2D Resolution changes");
+
+// cursor
+	M_DrawCharacter (200, 32 + options2_cursor*8, 12+((int)(realtime*4)&1));
+}
+
+
+void M_Options2_Key (int k)
+{
+	switch (k)
+	{
+	case K_ESCAPE:
+	case K_JOY2:
+	case K_JOY9:
+		M_Menu_Options_f ();
+		break;
+
+	case K_ENTER:
+	case K_JOY1:
+	case K_JOY8:
+		m_entersound = true;
+		switch (options2_cursor)
+		{
+			default:
+				M_AdjustSliders2 (1);
+				break;
+		}
+		return;
+
+	case K_UPARROW:
+		S_LocalSound ("misc/menu1.wav");
+		options2_cursor--;
+		if (options2_cursor < 0)
+			options2_cursor = OPTIONS2_ITEMS-1;
+		break;
+
+	case K_DOWNARROW:
+		S_LocalSound ("misc/menu1.wav");
+		options2_cursor++;
+		if (options2_cursor >= OPTIONS2_ITEMS)
+			options2_cursor = 0;
+		break;
+
+	case K_LEFTARROW:
+		M_AdjustSliders2 (-1);
+		break;
+
+	case K_RIGHTARROW:
+		M_AdjustSliders2 (1);
 		break;
 	}
 }
@@ -2438,6 +2574,7 @@ void M_Init (void)
 	Cmd_AddCommand ("menu_setup", M_Menu_Setup_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
+	Cmd_AddCommand ("menu_options2", M_Menu_Options2_f);
 	Cmd_AddCommand ("help", M_Menu_Help_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
 }
@@ -2508,6 +2645,10 @@ void M_Draw (void)
 
 	case m_keys:
 		M_Keys_Draw ();
+		break;
+
+	case m_options2:
+		M_Options2_Draw ();
 		break;
 
 	case m_help:
@@ -2588,6 +2729,10 @@ void M_Keydown (int key)
 
 	case m_keys:
 		M_Keys_Key (key);
+		return;
+
+	case m_options2:
+		M_Options2_Key (key);
 		return;
 
 	case m_help:

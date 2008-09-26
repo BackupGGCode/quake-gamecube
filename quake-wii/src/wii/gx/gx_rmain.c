@@ -912,10 +912,11 @@ void R_SetupGL (void)
 	//
 	// set up viewpoint
 	//
-	x = r_refdef.vrect.x * glwidth/vid.width;
-	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * glwidth/vid.width;
-	y = r_refdef.vrect.y * glheight/vid.height;
-	y2 = (r_refdef.vrect.y + r_refdef.vrect.height) * glheight/vid.height;
+	// ELUTODO: these divisions by 320/240...
+	x = r_refdef.vrect.x * glwidth/320;
+	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * glwidth/320;
+	y = r_refdef.vrect.y * glheight/240;
+	y2 = (r_refdef.vrect.y + r_refdef.vrect.height) * glheight/240;
 
 	// fudge around because of frac screen scale
 	if (x > 0)
