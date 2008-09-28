@@ -177,7 +177,7 @@ void SCR_DrawCenterString (void)
 	start = scr_centerstring;
 
 	if (scr_center_lines <= 4)
-		y = vid.height*0.35;
+		y = vid.conheight*0.35;
 	else
 		y = 48;
 
@@ -187,7 +187,7 @@ void SCR_DrawCenterString (void)
 		for (l=0 ; l<40 ; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (vid.width - l*8)/2;
+		x = (vid.conwidth - l*8)/2;
 		for (j=0 ; j<l ; j++, x+=8)
 		{
 			Draw_Character (x, y, start[j]);	
@@ -460,8 +460,8 @@ void SCR_DrawPause (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/pause.lmp");
-	Draw_Pic ( (vid.width - pic->width)/2, 
-		(vid.height - 48 - pic->height)/2, pic);
+	Draw_Pic ( (vid.conwidth - pic->width)/2, 
+		(vid.conheight - 48 - pic->height)/2, pic);
 }
 
 
@@ -479,8 +479,8 @@ void SCR_DrawLoading (void)
 		return;
 		
 	pic = Draw_CachePic ("gfx/loading.lmp");
-	Draw_Pic ( (vid.width - pic->width)/2, 
-		(vid.height - 48 - pic->height)/2, pic);
+	Draw_Pic ( (vid.conwidth - pic->width)/2, 
+		(vid.conheight - 48 - pic->height)/2, pic);
 }
 
 
@@ -505,11 +505,11 @@ void SCR_SetUpToDrawConsole (void)
 
 	if (con_forcedup)
 	{
-		scr_conlines = vid.height;		// full screen
+		scr_conlines = vid.conheight;		// full screen
 		scr_con_current = scr_conlines;
 	}
 	else if (key_dest == key_console)
-		scr_conlines = vid.height/2;	// half screen
+		scr_conlines = vid.conheight/2;	// half screen
 	else
 		scr_conlines = 0;				// none visible
 	
@@ -694,7 +694,7 @@ void SCR_DrawNotifyString (void)
 
 	start = scr_notifystring;
 
-	y = vid.height*0.35;
+	y = vid.conheight*0.35;
 
 	do	
 	{
@@ -702,7 +702,7 @@ void SCR_DrawNotifyString (void)
 		for (l=0 ; l<40 ; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (vid.width - l*8)/2;
+		x = (vid.conwidth - l*8)/2;
 		for (j=0 ; j<l ; j++, x+=8)
 			Draw_Character (x, y, start[j]);	
 			
@@ -800,6 +800,7 @@ void SCR_BringDownConsole (void)
 
 void SCR_TileClear (void)
 {
+	// ELUTODO: this thing WAS NOT updated to remove the vid.width/height vid.conwidth/conheight mess, but in the current state, it's impossible to need this, as it's impossible to size down too much of the screen and tiles are only used to cover unused status bar areas (or maybe tv overscan adjusting triggers this)
 	if (r_refdef.vrect.x > 0) {
 		// left
 		Draw_TileClear (0, 0, r_refdef.vrect.x, vid.height - sb_lines);
@@ -876,7 +877,10 @@ void SCR_UpdateScreen (void)
 	}
 
 	if (vid.recalc_refdef)
+	{
 		SCR_CalcRefdef ();
+		VID_ConModeUpdate();
+	}
 
 //
 // do 3D refresh drawing, and then update the screen
@@ -915,10 +919,9 @@ void SCR_UpdateScreen (void)
 	}
 	else
 	{
-		// ELUTODO: these divisions by 320/240...
         if (crosshair.value)
-                Draw_Character ((scr_vrect.x + scr_vrect.width/2 + cl_crossx.value) * vid.width/320,
-                        (scr_vrect.y + scr_vrect.height/2 + cl_crossy.value) * vid.height/240, '+');
+                Draw_Character ((scr_vrect.x + scr_vrect.width/2 + cl_crossx.value) * vid.conwidth/vid.width,
+                        (scr_vrect.y + scr_vrect.height/2 + cl_crossy.value) * vid.conheight/vid.height, '+');
 		
 		SCR_DrawRam ();
 		SCR_DrawNet ();

@@ -129,6 +129,42 @@ void	VID_SetPalette (unsigned char *palette)
 	d_8to24table[255] = 0;				// ELUTODO: will look prettier until we solve the filtering issue
 }
 
+void VID_ConModeUpdate(void)
+{
+	// update console resolution
+	switch((int)vid_conmode.value)
+	{
+		default:
+		case 0:
+			vid.conwidth = 320;
+			vid.conheight = 240;
+			break;
+		case 1:
+			vid.conwidth = 400;
+			vid.conheight = 300;
+			break;
+		case 2:
+			vid.conwidth = 480;
+			vid.conheight = 360;
+			break;
+		case 3:
+			vid.conwidth = 560;
+			vid.conheight = 420;
+			break;
+		case 4:
+			vid.conwidth = 640;
+			vid.conheight = 480;
+			break;
+	}
+	if (vid.conheight > scr_height)
+		vid.conheight = scr_height;
+	if (vid.conwidth > scr_width)
+		vid.conwidth = scr_width;
+
+	conback->width = vid.conwidth;
+	conback->height = vid.conheight;
+}
+
 /*
 ===============
 GL_Init
@@ -219,40 +255,7 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 	// ELUTODO: really necessary?
 	GX_InvVtxCache();
 	GX_InvalidateTexAll();
-
 	Sbar_Changed(); // force status bar redraw every frame
-
-	// update console resolution
-	switch((int)vid_conmode.value)
-	{
-		default:
-		case 0:
-			vid.width = 320;
-			vid.height = 240;
-			break;
-		case 1:
-			vid.width = 400;
-			vid.height = 300;
-			break;
-		case 2:
-			vid.width = 480;
-			vid.height = 360;
-			break;
-		case 3:
-			vid.width = 560;
-			vid.height = 420;
-			break;
-		case 4:
-			vid.width = 640;
-			vid.height = 480;
-			break;
-	}
-	if (vid.height > scr_height)
-		vid.height = scr_height;
-	if (vid.width > scr_width)
-		vid.width = scr_width;
-
-	vid.aspect = ((float)vid.height / (float)vid.width) * (320.0 / 240.0);
 }
 
 void GL_EndRendering (void)
@@ -303,7 +306,9 @@ static void Check_Gamma (unsigned char *pal)
 }
 
 // ELUTODO: proper widescreen support
-// scr_width/height = 3D res, vid.width/height = 2D res. vid.conwidth/conheight is not used
+// ELUTODO: one more mess to remove: glwidth is the VIEWAREA and scr_width is the WHOLE SCREEN (will have to clean this up if I want to implemented split-screen multiplayer
+// ELUTODO: crosshair, osk are NOT right on higher 2d resolutions and split-screen setups (is the use of scr_vrect for cl_crossx/y right?)
+// scr_width/height = 3D res, vid.conwidth/conheight = 2D res, vid.width/height = "natural" resolution (320x{200,240})
 // many things rely on a minimum resolution of 320x{200,240}
 void VID_Init(unsigned char *palette)
 {

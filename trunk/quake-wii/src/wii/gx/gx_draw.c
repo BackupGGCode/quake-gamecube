@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // draw.c -- this is the only file outside the refresh that touches the
 // vid buffer
 
+// ELUTODO: MANY assumptions about the pictures sizes
+
 #include <ogc/system.h>
 #include <ogc/cache.h>
 
@@ -220,6 +222,8 @@ void Draw_Init (void)
 	gl->sh = 1;
 	gl->tl = 0;
 	gl->th = 1;
+
+	// This is done in video_gx.cpp now too
 	conback->width = vid.width;
 	conback->height = vid.height;
 
@@ -399,8 +403,8 @@ Draw_TransPic
 */
 void Draw_TransPic (int x, int y, qpic_t *pic)
 {
-	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
-		 (unsigned)(y + pic->height) > vid.height)
+	if (x < 0 || (unsigned)(x + pic->width) > vid.conwidth || y < 0 ||
+		 (unsigned)(y + pic->height) > vid.conheight)
 	{
 		Sys_Error ("Draw_TransPic: bad coordinates");
 	}
@@ -415,8 +419,8 @@ Draw_TransAlphaPic
 */
 void Draw_TransAlphaPic (int x, int y, qpic_t *pic, float alpha)
 {
-	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
-		 (unsigned)(y + pic->height) > vid.height)
+	if (x < 0 || (unsigned)(x + pic->width) > vid.conwidth || y < 0 ||
+		 (unsigned)(y + pic->height) > vid.conheight)
 	{
 		Sys_Error ("Draw_TransPic: bad coordinates");
 	}
@@ -482,12 +486,12 @@ Draw_ConsoleBackground
 */
 void Draw_ConsoleBackground (int lines)
 {
-	int y = (vid.height * 3) >> 2;
+	int y = (vid.conheight * 3) >> 2;
 
 	if (lines > y)
-		Draw_Pic(0, lines - vid.height, conback);
+		Draw_Pic(0, lines - vid.conheight, conback);
 	else
-		Draw_AlphaPic (0, lines - vid.height, conback, (float)(1.2 * lines)/y);
+		Draw_AlphaPic (0, lines - vid.conheight, conback, (float)(1.2 * lines)/y);
 }
 
 
@@ -605,15 +609,15 @@ void Draw_FadeScreen (void)
 	GX_Color4u8(0x00, 0x00, 0x00, 0xcc);
 	GX_TexCoord2f32(0, 0);
 
-	GX_Position3f32(vid.width, 0, 0.0f);
+	GX_Position3f32(vid.conwidth, 0, 0.0f);
 	GX_Color4u8(0x00, 0x00, 0x00, 0xcc);
 	GX_TexCoord2f32(1, 0);
 
-	GX_Position3f32(vid.width, vid.height, 0.0f);
+	GX_Position3f32(vid.conwidth, vid.conheight, 0.0f);
 	GX_Color4u8(0x00, 0x00, 0x00, 0xcc);
 	GX_TexCoord2f32(1, 1);
 
-	GX_Position3f32(0, vid.height, 0.0f);
+	GX_Position3f32(0, vid.conheight, 0.0f);
 	GX_Color4u8(0x00, 0x00, 0x00, 0xcc);
 	GX_TexCoord2f32(0, 1);
 	GX_End();
@@ -639,7 +643,7 @@ void Draw_BeginDisc (void)
 	if (!draw_disc)
 		return;
 	// ELUTODO glDrawBuffer  (GL_FRONT);
-	Draw_Pic (vid.width - 24, 0, draw_disc);
+	Draw_Pic (vid.conwidth - 24, 0, draw_disc);
 	// ELUTODO glDrawBuffer  (GL_BACK);
 }
 
@@ -667,7 +671,7 @@ void GL_Set2D (void)
 {
 	GX_SetViewport(glx, gly, glwidth, glheight, 0.0f, 1.0f);
 
-	guOrtho(perspective,0, vid.height, 0, vid.width, ZMIN2D, ZMAX2D);
+	guOrtho(perspective,0, vid.conheight, 0, vid.conwidth, ZMIN2D, ZMAX2D);
 	GX_LoadProjectionMtx(perspective, GX_ORTHOGRAPHIC);
 
 	c_guMtxIdentity(modelview);
