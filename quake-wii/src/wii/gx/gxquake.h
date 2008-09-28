@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void GL_BeginRendering (int *x, int *y, int *width, int *height);
 void GL_EndRendering (void);
+void VID_ConModeUpdate(void);
 
 extern	float	gldepthmin, gldepthmax;
 
@@ -251,6 +252,7 @@ extern int osk_coords[2];
 extern void Draw_TransAlphaPic (int x, int y, qpic_t *pic, float alpha);
 extern void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha);
 extern void Draw_AlphaTileClear (int x, int y, int w, int h, float alpha);
+extern qpic_t		*conback;
 
 // input extensions
 extern float in_pitchangle;
