@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // host.c -- coordinates spawning and killing of local servers
 
 #include "quakedef.h"
-#include "file.h"
 
 /*
 
@@ -166,7 +165,7 @@ void	Host_FindMaxClients (void)
 		cls.state = ca_dedicated;
 		if (i != (com_argc - 1))
 		{
-			svs.maxclients = Q_atoi (com_argv[i+1]);
+			svs.maxclients = atoi (com_argv[i+1]);
 		}
 		else
 			svs.maxclients = 8;
@@ -180,7 +179,7 @@ void	Host_FindMaxClients (void)
 		if (cls.state == ca_dedicated)
 			Sys_Error ("Only one of -dedicated or -listen can be specified");
 		if (i != (com_argc - 1))
-			svs.maxclients = Q_atoi (com_argv[i+1]);
+			svs.maxclients = atoi (com_argv[i+1]);
 		else
 			svs.maxclients = 8;
 	}
@@ -245,13 +244,13 @@ Writes key bindings and archived cvars to config.cfg
 */
 void Host_WriteConfiguration (void)
 {
-	file_t	*f;
+	FILE	*f;
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
-	if (host_initialized & !isDedicated)
+	if (host_initialized && !isDedicated)
 	{
-		f = File_Open (va("%s/config.cfg",com_gamedir), file_mode_write);
+		f = fopen (va("%s/config.cfg",com_gamedir), "wb");
 		if (!f)
 		{
 			Con_Printf ("Couldn't write config.cfg.\n");
@@ -261,7 +260,7 @@ void Host_WriteConfiguration (void)
 		Key_WriteBindings (f);
 		Cvar_WriteVariables (f);
 
-		File_Close (f);
+		fclose (f);
 	}
 }
 
@@ -791,12 +790,12 @@ void Host_InitVCR (quakeparms_t *parms)
 			Sys_Error("Invalid signature in vcr file\n");
 
 		Sys_FileRead (vcrFile, &com_argc, sizeof(int));
-		com_argv = malloc(com_argc * sizeof(char *));
+		com_argv = Z_Malloc(com_argc * sizeof(char *));
 		com_argv[0] = parms->argv[0];
 		for (i = 0; i < com_argc; i++)
 		{
 			Sys_FileRead (vcrFile, &len, sizeof(int));
-			p = malloc(len);
+			p = Z_Malloc(len);
 			Sys_FileRead (vcrFile, p, len);
 			com_argv[i+1] = p;
 		}
@@ -822,7 +821,7 @@ void Host_InitVCR (quakeparms_t *parms)
 				Sys_FileWrite(vcrFile, "-playback", len);
 				continue;
 			}
-			len = Q_strlen(com_argv[i]) + 1;
+			len = strlen(com_argv[i]) + 1;
 			Sys_FileWrite(vcrFile, &len, sizeof(int));
 			Sys_FileWrite(vcrFile, com_argv[i], len);
 		}
@@ -871,7 +870,7 @@ void Host_Init (quakeparms_t *parms)
 	NET_Init ();
 	SV_Init ();
 
-	Con_Printf ("Quake-Wii, by id Software, PeterM and EluanCM\n");
+	Con_Printf ("Quake-Wii, by id Software, PeterM, EluanCM, Izhido, and Piko\n");
 	Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
 	Con_Printf ("%4.1f megabyte heap\n",parms->memsize/ (1024*1024.0));
 	

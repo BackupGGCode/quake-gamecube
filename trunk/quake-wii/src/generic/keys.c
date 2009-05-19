@@ -18,7 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include "quakedef.h"
-#include "file.h"
 
 /*
 
@@ -90,6 +89,13 @@ static keyname_t keynames[] =
 	{"PGUP", K_PGUP},
 	{"HOME", K_HOME},
 	{"END", K_END},
+	{"LSHIFT", K_LSHIFT},
+	{"RSHIFT", K_RSHIFT},
+	{"NUMLOCK", K_NUMLOCK},
+	{"MENU", K_MENU},
+	{"LMETA", K_LMETA},
+	{"RMETA", K_RMETA},
+	{"CAPSLOCK", K_CAPSLOCK},
 
 	{"MOUSE1", K_MOUSE1},
 	{"MOUSE2", K_MOUSE2},
@@ -499,14 +505,14 @@ Key_WriteBindings
 Writes lines containing "bind key value"
 ============
 */
-void Key_WriteBindings (struct file_s *f)
+void Key_WriteBindings (FILE *f)
 {
 	int		i;
 
 	for (i=0 ; i<KEY_COUNT ; i++)
 		if (keybindings[i])
 			if (*keybindings[i])
-				File_PrintF (f, "bind \"%s\" \"%s\"\n", Key_KeynumToString(i), keybindings[i]);
+				fprintf (f, "bind \"%s\" \"%s\"\n", Key_KeynumToString(i), keybindings[i]);
 }
 
 

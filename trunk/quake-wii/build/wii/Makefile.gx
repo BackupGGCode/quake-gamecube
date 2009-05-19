@@ -67,7 +67,6 @@ OBJS := \
 	$(OBJ_DIR)/generic/console.o \
 	$(OBJ_DIR)/generic/crc.o \
 	$(OBJ_DIR)/generic/cvar.o \
-	$(OBJ_DIR)/generic/file.o \
 	$(OBJ_DIR)/generic/host.o \
 	$(OBJ_DIR)/generic/host_cmd.o \
 	$(OBJ_DIR)/generic/keys.o \
