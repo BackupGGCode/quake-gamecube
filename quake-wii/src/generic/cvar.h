@@ -90,7 +90,7 @@ qboolean Cvar_Command (void);
 
 struct file_s;
 
-void 	Cvar_WriteVariables (struct file_s *f);
+void Cvar_WriteVariables (FILE *f);
 // Writes lines containing "set variable value" for all variables
 // with the archive flag set to true.
 

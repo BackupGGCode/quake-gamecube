@@ -209,7 +209,7 @@ int Q_strlen (char *str)
 
 char *Q_strrchr(char *s, char c)
 {
-    int len = Q_strlen(s);
+    int len = strlen(s);
     s += len;
     while (len--)
 	if (*--s == c) return s;
@@ -218,8 +218,8 @@ char *Q_strrchr(char *s, char c)
 
 void Q_strcat (char *dest, char *src)
 {
-	dest += Q_strlen(dest);
-	Q_strcpy (dest, src);
+	dest += strlen(dest);
+	strcpy (dest, src);
 }
 
 int Q_strcmp (char *s1, char *s2)
@@ -286,7 +286,7 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 
 int Q_strcasecmp (char *s1, char *s2)
 {
-	return Q_strncasecmp (s1, s2, 99999);
+	return strncasecmp (s1, s2, 99999);
 }
 
 int Q_atoi (char *str)
@@ -578,7 +578,7 @@ void MSG_WriteString (sizebuf_t *sb, char *s)
 	if (!s)
 		SZ_Write (sb, "", 1);
 	else
-		SZ_Write (sb, s, Q_strlen(s)+1);
+		SZ_Write (sb, s, strlen(s)+1);
 }
 
 void MSG_WriteCoord (sizebuf_t *sb, float f)
@@ -776,20 +776,20 @@ void *SZ_GetSpace (sizebuf_t *buf, int length)
 
 void SZ_Write (sizebuf_t *buf, void *data, int length)
 {
-	Q_memcpy (SZ_GetSpace(buf,length),data,length);         
+	memcpy (SZ_GetSpace(buf,length),data,length);         
 }
 
 void SZ_Print (sizebuf_t *buf, char *data)
 {
 	int             len;
 	
-	len = Q_strlen(data)+1;
+	len = strlen(data)+1;
 
 // byte * cast to keep VC++ happy
 	if (buf->data[buf->cursize-1])
-		Q_memcpy ((byte *)SZ_GetSpace(buf, len),data,len); // no trailing 0
+		memcpy ((byte *)SZ_GetSpace(buf, len),data,len); // no trailing 0
 	else
-		Q_memcpy ((byte *)SZ_GetSpace(buf, len-1)-1,data,len); // write over trailing 0
+		memcpy ((byte *)SZ_GetSpace(buf, len-1)-1,data,len); // write over trailing 0
 }
 
 
@@ -995,7 +995,7 @@ int COM_CheckParm (char *parm)
 	{
 		if (!com_argv[i])
 			continue;               // NEXTSTEP sometimes clears appkit vars.
-		if (!Q_strcmp (parm,com_argv[i]))
+		if (!strcmp (parm,com_argv[i]))
 			return i;
 	}
 		
@@ -1085,7 +1085,7 @@ void COM_InitArgv (int argc, char **argv)
 		 com_argc++)
 	{
 		largv[com_argc] = argv[com_argc];
-		if (!Q_strcmp ("-safe", argv[com_argc]))
+		if (!strcmp ("-safe", argv[com_argc]))
 			safe = true;
 	}
 

@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // cvar.c -- dynamic variable tracking
 
 #include "quakedef.h"
-#include "file.h"
 
 cvar_t	*cvar_vars;
 char	*cvar_null_string = "";
@@ -35,7 +34,7 @@ cvar_t *Cvar_FindVar (char *var_name)
 	cvar_t	*var;
 	
 	for (var=cvar_vars ; var ; var=var->next)
-		if (!Q_strcmp (var_name, var->name))
+		if (!strcmp (var_name, var->name))
 			return var;
 
 	return NULL;
@@ -53,7 +52,7 @@ float	Cvar_VariableValue (char *var_name)
 	var = Cvar_FindVar (var_name);
 	if (!var)
 		return 0;
-	return Q_atof (var->string);
+	return atof (var->string);
 }
 
 
@@ -83,14 +82,14 @@ char *Cvar_CompleteVariable (char *partial)
 	cvar_t		*cvar;
 	int			len;
 	
-	len = Q_strlen(partial);
+	len = strlen(partial);
 	
 	if (!len)
 		return NULL;
 		
 // check functions
 	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
-		if (!Q_strncmp (partial,cvar->name, len))
+		if (!strncmp (partial,cvar->name, len))
 			return cvar->name;
 
 	return NULL;
@@ -114,13 +113,13 @@ void Cvar_Set (char *var_name, char *value)
 		return;
 	}
 
-	changed = Q_strcmp(var->string, value);
+	changed = strcmp(var->string, value);
 	
 	Z_Free (var->string);	// free the old value string
 	
-	var->string = Z_Malloc (Q_strlen(value)+1);
-	Q_strcpy (var->string, value);
-	var->value = Q_atof (var->string);
+	var->string = Z_Malloc (strlen(value)+1);
+	strcpy (var->string, value);
+	var->value = atof (var->string);
 	if (var->server && changed)
 	{
 		if (sv.active)
@@ -169,9 +168,9 @@ void Cvar_RegisterVariable (cvar_t *variable)
 		
 // copy the value off, because future sets will Z_Free it
 	oldstr = variable->string;
-	variable->string = Z_Malloc (Q_strlen(variable->string)+1);	
-	Q_strcpy (variable->string, oldstr);
-	variable->value = Q_atof (variable->string);
+	variable->string = Z_Malloc (strlen(variable->string)+1);	
+	strcpy (variable->string, oldstr);
+	variable->value = atof (variable->string);
 	
 // link the variable in
 	variable->next = cvar_vars;
@@ -214,12 +213,11 @@ Writes lines containing "set variable value" for all variables
 with the archive flag set to true.
 ============
 */
-void Cvar_WriteVariables (struct file_s *f)
+void Cvar_WriteVariables (FILE *f)
 {
 	cvar_t	*var;
 	
 	for (var = cvar_vars ; var ; var = var->next)
 		if (var->archive)
-			File_PrintF (f, "%s \"%s\"\n", var->name, var->string);
+			fprintf (f, "%s \"%s\"\n", var->name, var->string);
 }
-

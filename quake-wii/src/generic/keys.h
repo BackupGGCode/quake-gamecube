@@ -52,12 +52,20 @@ enum key_id_e
 	K_F10,
 	K_F11,
 	K_F12,
+
 	K_INS,
 	K_DEL,
 	K_PGDN,
 	K_PGUP,
 	K_HOME,
 	K_END,
+	K_LSHIFT,
+	K_RSHIFT,
+	K_NUMLOCK,
+	K_MENU,
+	K_LMETA,
+	K_RMETA,
+	K_CAPSLOCK,
 
 	K_PAUSE,
 
@@ -130,7 +138,7 @@ void Key_Init (void);
 
 struct file_s;
 
-void Key_WriteBindings (struct file_s *f);
+void Key_WriteBindings (FILE *f);
 void Key_SetBinding (key_id_t keynum, char *binding);
 void Key_ClearStates (void);
 

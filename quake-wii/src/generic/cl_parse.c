@@ -513,8 +513,9 @@ void CL_ParseClientdata (int bits)
 		cl.idealpitch = MSG_ReadChar ();
 	else
 		cl.idealpitch = 0;
-	
+
 	VectorCopy (cl.mvelocity[0], cl.mvelocity[1]);
+
 	for (i=0 ; i<3 ; i++)
 	{
 		if (bits & (SU_PUNCH1<<i) )
@@ -810,8 +811,8 @@ void CL_ParseServerMessage (void)
 			i = MSG_ReadByte ();
 			if (i >= MAX_LIGHTSTYLES)
 				Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
-			Q_strcpy (cl_lightstyle[i].map,  MSG_ReadString());
-			cl_lightstyle[i].length = Q_strlen(cl_lightstyle[i].map);
+			strcpy (cl_lightstyle[i].map,  MSG_ReadString());
+			cl_lightstyle[i].length = strlen(cl_lightstyle[i].map);
 			break;
 			
 		case svc_sound:

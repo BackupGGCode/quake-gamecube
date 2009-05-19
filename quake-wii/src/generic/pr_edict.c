@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // sv_edict.c -- entity dictionary
 
 #include "quakedef.h"
-#include "file.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
@@ -483,7 +482,7 @@ ED_Write
 For savegames
 =============
 */
-void ED_Write (struct file_s *f, edict_t *ed)
+void ED_Write (FILE *f, edict_t *ed)
 {
 	ddef_t	*d;
 	int		*v;
@@ -491,11 +490,11 @@ void ED_Write (struct file_s *f, edict_t *ed)
 	char	*name;
 	int		type;
 
-	File_PrintF (f, "{\n");
+	fprintf(f, "{\n");
 
 	if (ed->free)
 	{
-		File_PrintF (f, "}\n");
+		fprintf (f, "}\n");
 		return;
 	}
 	
@@ -516,11 +515,11 @@ void ED_Write (struct file_s *f, edict_t *ed)
 		if (j == type_size[type])
 			continue;
 	
-		File_PrintF (f,"\"%s\" ",name);
-		File_PrintF (f,"\"%s\"\n", PR_UglyValueString(d->type, (eval_t *)v));		
+		fprintf (f,"\"%s\" ",name);
+		fprintf (f,"\"%s\"\n", PR_UglyValueString(d->type, (eval_t *)v));		
 	}
 
-	File_PrintF (f, "}\n");
+	fprintf (f, "}\n");
 }
 
 void ED_PrintNum (int ent)
@@ -555,7 +554,7 @@ void ED_PrintEdict_f (void)
 {
 	int		i;
 	
-	i = Q_atoi (Cmd_Argv(1));
+	i = atoi (Cmd_Argv(1));
 	if (i >= sv.num_edicts)
 	{
 		Con_Printf("Bad edict number\n");
@@ -614,14 +613,14 @@ FIXME: need to tag constants, doesn't really work
 ED_WriteGlobals
 =============
 */
-void ED_WriteGlobals (struct file_s *f)
+void ED_WriteGlobals (FILE *f)
 {
 	ddef_t		*def;
 	int			i;
 	char		*name;
 	int			type;
 
-	File_PrintF (f,"{\n");
+	fprintf (f,"{\n");
 	for (i=0 ; i<progs->numglobaldefs ; i++)
 	{
 		def = &pr_globaldefs[i];
@@ -636,10 +635,10 @@ void ED_WriteGlobals (struct file_s *f)
 			continue;
 
 		name = pr_strings + def->s_name;		
-		File_PrintF (f,"\"%s\" ", name);
-		File_PrintF (f,"\"%s\"\n", PR_UglyValueString(type, (eval_t *)&pr_globals[def->ofs]));		
+		fprintf (f,"\"%s\" ", name);
+		fprintf (f,"\"%s\"\n", PR_UglyValueString(type, (eval_t *)&pr_globals[def->ofs]));		
 	}
-	File_PrintF (f,"}\n");
+	fprintf (f,"}\n");
 }
 
 /*

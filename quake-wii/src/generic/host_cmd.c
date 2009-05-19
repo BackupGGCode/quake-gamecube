@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "quakedef.h"
-#include "file.h"
+#include <stdio.h>
 
 extern cvar_t	pausable;
 
@@ -464,7 +464,7 @@ Host_Savegame_f
 void Host_Savegame_f (void)
 {
 	char	name[256];
-	file_t	*f;
+	FILE	*f;
 	int		i;
 	char	comment[SAVEGAME_COMMENT_LENGTH+1];
 
@@ -514,30 +514,30 @@ void Host_Savegame_f (void)
 	COM_DefaultExtension (name, ".sav");
 	
 	Con_Printf ("Saving game to %s...\n", name);
-	f = File_Open (name, file_mode_write);
+	f = fopen (name, "wb");
 	if (!f)
 	{
 		Con_Printf ("ERROR: couldn't open save file for writing.\n");
 		return;
 	}
 	
-	File_PrintF (f, "%i\n", SAVEGAME_VERSION);
+	fprintf (f, "%i\n", SAVEGAME_VERSION);
 	Host_SavegameComment (comment);
-	File_PrintF (f, "%s\n", comment);
+	fprintf (f, "%s\n", comment);
 	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
-		File_PrintF (f, "%f\n", svs.clients->spawn_parms[i]);
-	File_PrintF (f, "%d\n", current_skill);
-	File_PrintF (f, "%s\n", sv.name);
-	File_PrintF (f, "%f\n",sv.time);
+		fprintf (f, "%f\n", svs.clients->spawn_parms[i]);
+	fprintf (f, "%d\n", current_skill);
+	fprintf (f, "%s\n", sv.name);
+	fprintf (f, "%f\n",sv.time);
 
 // write the light styles
 
 	for (i=0 ; i<MAX_LIGHTSTYLES ; i++)
 	{
 		if (sv.lightstyles[i])
-			File_PrintF (f, "%s\n", sv.lightstyles[i]);
+			fprintf (f, "%s\n", sv.lightstyles[i]);
 		else
-			File_PrintF (f,"m\n");
+			fprintf (f,"m\n");
 	}
 
 
@@ -546,7 +546,7 @@ void Host_Savegame_f (void)
 	{
 		ED_Write (f, EDICT_NUM(i));
 	}
-	File_Close (f);
+	fclose (f);
 	Con_Printf ("done.\n");
 }
 
@@ -559,7 +559,7 @@ Host_Loadgame_f
 void Host_Loadgame_f (void)
 {
 	char	name[MAX_OSPATH];
-	file_t	*f;
+	FILE	*f;
 	char	mapname[MAX_QPATH];
 	float	time, tfloat;
 	char	str[32768], *start;
@@ -588,25 +588,25 @@ void Host_Loadgame_f (void)
 //	SCR_BeginLoadingPlaque ();
 
 	Con_Printf ("Loading game from %s...\n", name);
-	f = File_Open (name, file_mode_read);
+	f = fopen (name, "rb");
 	if (!f)
 	{
 		Con_Printf ("ERROR: couldn't open save file for reading.\n");
 		return;
 	}
 
-	File_ScanF (f, "%i\n", &version);
+	fscanf (f, "%i\n", &version);
 	if (version != SAVEGAME_VERSION)
 	{
-		File_Close (f);
+		fclose (f);
 		Con_Printf ("Savegame is version %i, not %i\n", version, SAVEGAME_VERSION);
 		return;
 	}
-	File_ScanF (f, "%s\n", str);
+	fscanf (f, "%s\n", str);
 	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
-		File_ScanF (f, "%f\n", &spawn_parms[i]);
+		fscanf (f, "%f\n", &spawn_parms[i]);
 // this silliness is so we can load 1.06 save files, which have float skill values
-	File_ScanF (f, "%f\n", &tfloat);
+	fscanf (f, "%f\n", &tfloat);
 	current_skill = (int)(tfloat + 0.1f);
 	Cvar_SetValue ("skill", (float)current_skill);
 
@@ -616,8 +616,8 @@ void Host_Loadgame_f (void)
 	Cvar_SetValue ("teamplay", 0);
 #endif
 
-	File_ScanF (f, "%s\n",mapname);
-	File_ScanF (f, "%f\n",&time);
+	fscanf (f, "%s\n",mapname);
+	fscanf (f, "%f\n",&time);
 
 	CL_Disconnect_f ();
 	
@@ -638,18 +638,18 @@ void Host_Loadgame_f (void)
 
 	for (i=0 ; i<MAX_LIGHTSTYLES ; i++)
 	{
-		File_ScanF (f, "%s\n", str);
+		fscanf (f, "%s\n", str);
 		sv.lightstyles[i] = Hunk_Alloc (strlen(str)+1);
 		strcpy (sv.lightstyles[i], str);
 	}
 
 // load the edicts out of the savegame file
 	entnum = -1;		// -1 is the globals
-	while (!File_EOF(f))
+	while (!feof(f))
 	{
 		for (i=0 ; i<sizeof(str)-1 ; i++)
 		{
-			r = File_GetChar (f);
+			r = fgetc (f);
 			if (r == EOF || !r)
 				break;
 			str[i] = r;
@@ -692,7 +692,7 @@ void Host_Loadgame_f (void)
 	sv.num_edicts = entnum;
 	sv.time = time;
 
-	File_Close (f);
+	fclose (f);
 
 	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
 		svs.clients->spawn_parms[i] = spawn_parms[i];
@@ -729,7 +729,7 @@ void Host_Name_f (void)
 
 	if (cmd_source == src_command)
 	{
-		if (Q_strcmp(cl_name.string, newName) == 0)
+		if (strcmp(cl_name.string, newName) == 0)
 			return;
 		Cvar_Set ("_cl_name", newName);
 		if (cls.state == ca_connected)
@@ -738,9 +738,9 @@ void Host_Name_f (void)
 	}
 
 	if (host_client->name[0] && strcmp(host_client->name, "unconnected") )
-		if (Q_strcmp(host_client->name, newName) != 0)
+		if (strcmp(host_client->name, newName) != 0)
 			Con_Printf ("%s renamed to %s\n", host_client->name, newName);
-	Q_strcpy (host_client->name, newName);
+	strcpy (host_client->name, newName);
 	host_client->edict->v.netname = host_client->name - pr_strings;
 	
 // send notification to all clients
@@ -766,9 +766,9 @@ void Host_Please_f (void)
 	if (cmd_source != src_command)
 		return;
 
-	if ((Cmd_Argc () == 3) && Q_strcmp(Cmd_Argv(1), "#") == 0)
+	if ((Cmd_Argc () == 3) && strcmp(Cmd_Argv(1), "#") == 0)
 	{
-		j = Q_atof(Cmd_Argv(2)) - 1;
+		j = atof(Cmd_Argv(2)) - 1;
 		if (j < 0 || j >= svs.maxclients)
 			return;
 		if (!svs.clients[j].active)
@@ -792,7 +792,7 @@ void Host_Please_f (void)
 	{
 		if (!cl->active)
 			continue;
-		if (Q_strcasecmp(cl->name, Cmd_Argv(1)) == 0)
+		if (strcasecmp(cl->name, Cmd_Argv(1)) == 0)
 		{
 			if (cl->privileged)
 			{
@@ -843,7 +843,7 @@ void Host_Say(qboolean teamonly)
 	if (*p == '"')
 	{
 		p++;
-		p[Q_strlen(p)-1] = 0;
+		p[strlen(p)-1] = 0;
 	}
 
 // turn on color set 1
@@ -852,8 +852,8 @@ void Host_Say(qboolean teamonly)
 	else
 		sprintf (text, "%c<%s> ", 1, hostname.string);
 
-	j = sizeof(text) - 2 - Q_strlen(text);  // -2 for /n and null terminator
-	if (Q_strlen(p) > j)
+	j = sizeof(text) - 2 - strlen(text);  // -2 for /n and null terminator
+	if (strlen(p) > j)
 		p[j] = 0;
 
 	strcat (text, p);
@@ -903,8 +903,8 @@ void Host_Tell_f(void)
 	if (Cmd_Argc () < 3)
 		return;
 
-	Q_strcpy(text, host_client->name);
-	Q_strcat(text, ": ");
+	strcpy(text, host_client->name);
+	strcat(text, ": ");
 
 	p = Cmd_Args();
 
@@ -912,12 +912,12 @@ void Host_Tell_f(void)
 	if (*p == '"')
 	{
 		p++;
-		p[Q_strlen(p)-1] = 0;
+		p[strlen(p)-1] = 0;
 	}
 
 // check length & truncate if necessary
-	j = sizeof(text) - 2 - Q_strlen(text);  // -2 for /n and null terminator
-	if (Q_strlen(p) > j)
+	j = sizeof(text) - 2 - strlen(text);  // -2 for /n and null terminator
+	if (strlen(p) > j)
 		p[j] = 0;
 
 	strcat (text, p);
@@ -928,7 +928,7 @@ void Host_Tell_f(void)
 	{
 		if (!client->active || !client->spawned)
 			continue;
-		if (Q_strcasecmp(client->name, Cmd_Argv(1)))
+		if (strcasecmp(client->name, Cmd_Argv(1)))
 			continue;
 		host_client = client;
 		SV_ClientPrintf("%s", text);
@@ -1247,9 +1247,9 @@ void Host_Kick_f (void)
 
 	save = host_client;
 
-	if (Cmd_Argc() > 2 && Q_strcmp(Cmd_Argv(1), "#") == 0)
+	if (Cmd_Argc() > 2 && strcmp(Cmd_Argv(1), "#") == 0)
 	{
-		i = Q_atof(Cmd_Argv(2)) - 1;
+		i = atof(Cmd_Argv(2)) - 1;
 		if (i < 0 || i >= svs.maxclients)
 			return;
 		if (!svs.clients[i].active)
@@ -1263,7 +1263,7 @@ void Host_Kick_f (void)
 		{
 			if (!host_client->active)
 				continue;
-			if (Q_strcasecmp(host_client->name, Cmd_Argv(1)) == 0)
+			if (strcasecmp(host_client->name, Cmd_Argv(1)) == 0)
 				break;
 		}
 	}
@@ -1290,7 +1290,7 @@ void Host_Kick_f (void)
 				message++;							// skip the #
 				while (*message == ' ')				// skip white space
 					message++;
-				message += Q_strlen(Cmd_Argv(2));	// skip the number
+				message += strlen(Cmd_Argv(2));	// skip the number
 			}
 			while (*message && *message == ' ')
 				message++;

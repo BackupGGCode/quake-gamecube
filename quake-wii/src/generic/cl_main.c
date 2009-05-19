@@ -406,7 +406,7 @@ float	CL_LerpPoint (void)
 		f = 0.1f;
 	}
 	frac = (cl.time - cl.mtime[1]) / f;
-//Con_Printf ("frac: %f\n",frac);
+	
 	if (frac < 0)
 	{
 		if (frac < -0.01f)
@@ -423,7 +423,7 @@ SetPal(1);
 		{
 SetPal(2);
 			cl.time = cl.mtime[0];
-//				Con_Printf ("high frac\n");
+			//Con_Printf ("high frac\n");
 		}
 		frac = 1;
 	}
@@ -450,7 +450,7 @@ void CL_RelinkEntities (void)
 	dlight_t	*dl;
 
 // determine partial update time	
-	frac = CL_LerpPoint ();
+	frac = CL_LerpPoint();
 
 	cl_numvisedicts = 0;
 

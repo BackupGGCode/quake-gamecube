@@ -156,7 +156,7 @@ void IN_UseUp (void) {KeyUp(&in_use);}
 void IN_JumpDown (void) {KeyDown(&in_jump);}
 void IN_JumpUp (void) {KeyUp(&in_jump);}
 
-void IN_Impulse (void) {in_impulse=Q_atoi(Cmd_Argv(1));}
+void IN_Impulse (void) {in_impulse=atoi(Cmd_Argv(1));}
 
 /*
 ===============
@@ -300,7 +300,7 @@ void CL_BaseMove (usercmd_t *cmd)
 			
 	CL_AdjustAngles ();
 	
-	Q_memset (cmd, 0, sizeof(*cmd));
+	memset (cmd, 0, sizeof(*cmd));
 	
 	if (in_strafe.state & 1)
 	{
@@ -366,7 +366,7 @@ void CL_SendMove (usercmd_t *cmd)
 //
 // send the movement message
 //
-    MSG_WriteByte (&buf, clc_move);
+	MSG_WriteByte (&buf, clc_move);
 
 	MSG_WriteFloat (&buf, cl.mtime[0]);	// so server can get ping times
 
@@ -382,9 +382,9 @@ void CL_SendMove (usercmd_t *cmd)
 	MSG_WriteAngle (&buf, cl.viewangles[YAW] - cl_crossx.value/scr_vrect.width * IR_YAWRANGE);
 	MSG_WriteAngle (&buf, cl.viewangles[ROLL]);
 	
-    MSG_WriteShort (&buf, cmd->forwardmove);
-    MSG_WriteShort (&buf, cmd->sidemove);
-    MSG_WriteShort (&buf, cmd->upmove);
+	MSG_WriteShort (&buf, cmd->forwardmove);
+	MSG_WriteShort (&buf, cmd->sidemove);
+	MSG_WriteShort (&buf, cmd->upmove);
 
 //
 // send button bits
@@ -423,7 +423,7 @@ void CL_SendMove (usercmd_t *cmd)
 //
 	if (++cl.movemessages <= 2)
 		return;
-	
+
 	if (NET_SendUnreliableMessage (cls.netcon, &buf) == -1)
 	{
 		Con_Printf ("CL_SendMove: lost server connection\n");

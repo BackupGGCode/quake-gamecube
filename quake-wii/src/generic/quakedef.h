@@ -21,10 +21,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#define	GLTEST			// experimental stuff
 
+#ifndef QUAKEDEF_H
+#define QUAKEDEF_H
+
 #define	QUAKE_GAME			// as opposed to utilities
 
 #define	VERSION				1.09
 #define WIIGX_VERSION			0.04
+
+#define QUAKE_WII_BASEDIR "/apps/quake"
 
 //define	PARANOID			// speed sapping error checking
 
@@ -40,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#include <limits.h>
 
 #define	VID_LockBuffer()
 #define	VID_UnlockBuffer()
@@ -182,6 +188,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Use for multiplayer testing only - VERY dangerous!!!
 // #define IDGODS
 
+#include <ogcsys.h>
+
+extern u32 MALLOC_MEM2;
+
 #include "common.h"
 #include "bspfile.h"
 #include "vid.h"
@@ -299,3 +309,4 @@ void Chase_Init (void);
 void Chase_Reset (void);
 void Chase_Update (void);
 
+#endif
