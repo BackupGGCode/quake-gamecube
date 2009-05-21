@@ -379,7 +379,7 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 				{
 					if (width != glt->width || height != glt->height)
 					{
-						Con_DPrintf ("GL_LoadTexture: cache mismatch, reloading");
+						//Con_DPrintf ("GL_LoadTexture: cache mismatch, reloading");
 						if (!__lwp_heap_free(&texture_heap, glt->data))
 							Sys_Error("GL_ClearTextureCache: Error freeing data.");
 						goto reload; // best way to do it
