@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define USE_THREAD			1
 #define TEST_CONNECTION		0
 #define USBGECKO_DEBUG		0
+#define WIFI_DEBUG			0
 
 // Standard includes.
 #include <cstdio>
@@ -39,10 +40,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ogc/lwp_watchdog.h>
 #include <ogcsys.h>
 #include <wiiuse/wpad.h>
+#include <wiikeyboard/keyboard.h>
 #include <fat.h>
 #include "input_wiimote.h"
 
-#if USBGECKO_DEBUG
+#if USBGECKO_DEBUG || WIFI_DEBUG
 #include <debug.h>
 #endif
 
@@ -53,15 +55,20 @@ extern "C"
 #include <unistd.h>
 
 #include "../generic/quakedef.h"
+
+u32 MALLOC_MEM2 = 0;
+
+extern void Sys_Reset(void);
+extern void Sys_Shutdown(void);
 }
 
-#define QUAKE_WII_BASEDIR	"/apps/quake"
+// Video globals.
+void		*framebuffer[2]		= {NULL, NULL};
+u32		fb			= 0;
+GXRModeObj	*rmode			= 0;
 
 int want_to_reset = 0;
 int want_to_shutdown = 0;
-
-extern void Sys_Reset (void);
-extern void Sys_Shutdown (void);
 
 void reset_system(void)
 {
@@ -77,11 +84,6 @@ namespace quake
 {
 	namespace main
 	{
-		// Video globals.
-		void		*framebuffer[2]		= {NULL, NULL};
-		u32		fb			= 0;
-		GXRModeObj	*rmode			= 0;
-
 		// Set up the heap.
 		static const size_t	heap_size	= 19 * 1024 * 1024;
 		static char		*heap;
@@ -124,6 +126,12 @@ namespace quake
 
 			// Initialise the controller library.
 			PAD_Init();
+
+			// Initialise the keyboard library
+			KEYBOARD_Init(NULL);
+
+			if(!fatInitDefault())
+				Sys_Error("Error initializing filesystem");
 
 #ifndef DISABLE_WIIMOTE
 			if (WPAD_Init() != WPAD_ERR_NONE)
@@ -453,12 +461,19 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
-	void *qstack = malloc(4 * 1024 * 1024);
+	void *qstack = malloc(4 * 1024 * 1024); // ELUTODO: clean code to prevent needing a stack this huge
 
 #if USBGECKO_DEBUG
-	DEBUG_Init(GDBSTUB_DEVICE_USB, 1);
+	DEBUG_Init(GDBSTUB_DEVICE_USB, 1); // Slot B
 	_break();
 #endif
+
+#if WIFI_DEBUG
+	printf("Now waiting for WI-FI debugger\n");
+	DEBUG_Init(GDBSTUB_DEVICE_WIFI, 8000); // Port 8000 (use whatever you want)
+	_break();
+#endif
+
 
 	// Initialize.
 	init();

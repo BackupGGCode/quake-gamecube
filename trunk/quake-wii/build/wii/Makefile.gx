@@ -1,4 +1,4 @@
-# Just a reminder about where to change version numbers, etc: Makefile.gx, quakedef.h, meta.xml, readme.html, system_libfat.c
+# Just a reminder about where to change version numbers, etc: Makefile.gx, quakedef.h, meta.xml, readme.html
 
 # About the release.
 VERSION	:= WIP
@@ -28,9 +28,7 @@ CXXFLAGS		:= $(CFLAGS) -Weffc++ -fno-exceptions -fno-rtti
 LDFLAGS			:= $(COMMON_FLAGS) -L$(DEVKITPRO)/libogc/lib/wii -L$(DEVKITPRO)/libfat/lib/wii
 
 # Linker info.
-LIBS := -lwiiuse -lbte -lfat -ldb -logc
-
-FILESYSTEM := libfat
+LIBS := -lwiikeyboard -lwiiuse -lbte -lfat -ldb -logc
 
 # Files to compile.
 OBJS := \
@@ -38,7 +36,6 @@ OBJS := \
 	$(OBJ_DIR)/wii/main.o \
 	$(OBJ_DIR)/wii/sound.o \
 	$(OBJ_DIR)/wii/system.o \
-	$(OBJ_DIR)/wii/system_$(FILESYSTEM).o \
 	$(OBJ_DIR)/wii/net_wii.o \
 	$(OBJ_DIR)/wii/net_udp_wii.o \
 	$(OBJ_DIR)/wii/gx/video_gx.o \

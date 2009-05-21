@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-#include <malloc.h>
 #include <ogc/cache.h>
 #include <ogc/gx.h>
 #include <ogc/gx_struct.h>
@@ -27,36 +26,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // ELUTODO: blank all the framebuffers to prevent artifacts before rendering takes place. Happens between the frontend ending and the quake console showing up
 
-extern "C" {
 #include "../../generic/quakedef.h"
-}
 
-namespace quake
-{
-	namespace main
-	{
-		extern void				*framebuffer[2];
-		extern u32				fb;
-		extern GXRModeObj		*rmode;
-	}
+extern void				*framebuffer[2];
+extern u32				fb;
+extern GXRModeObj		*rmode;
 
-	namespace video
-	{
-		using main::framebuffer;
-		using main::fb;
-		using main::rmode;
+static void	*gp_fifo;
+static const size_t	fifo_size = 1024 * 256;
 
-		static void								*gp_fifo;
-		static const size_t						fifo_size = 1024 * 256;
+#define WARP_WIDTH              640
+#define WARP_HEIGHT             480
 
-		#define WARP_WIDTH              640
-		#define WARP_HEIGHT             480
+static int scr_width, scr_height;
 
-		static int scr_width, scr_height;
-
-		static bool vidmode_active = false;
-	}
-}
+static bool vidmode_active = false;
 
 /*-----------------------------------------------------------------------*/
 
@@ -73,9 +57,6 @@ Mtx view, model, modelview;
 
 cvar_t vid_tvborder = {"vid_tvborder", "0", (qboolean)true};
 cvar_t vid_conmode = {"vid_conmode", "0", (qboolean)true};
-
-using namespace quake;
-using namespace quake::video;
 
 void D_BeginDirectRect (int x, int y, byte *pbitmap, int width, int height)
 {
@@ -289,7 +270,7 @@ static void Check_Gamma (unsigned char *pal)
 	if ((i = COM_CheckParm("-gamma")) == 0) {
 		vid_gamma = 0.7; // default to 0.7 on non-3dfx hardware
 	} else
-		vid_gamma = Q_atof(com_argv[i+1]);
+		vid_gamma = atof(com_argv[i+1]);
 
 	for (i=0 ; i<768 ; i++)
 	{

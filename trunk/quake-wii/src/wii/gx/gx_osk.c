@@ -131,5 +131,5 @@ void GX_DrawOSK(void)
 	else
 		OSK_PrintWhite(xstart + 5 * osk_col_size, ystart + 5 * osk_line_size, "Spacebar");
 
-	Draw_Character ((osk_coords[0] + osk_col_size) * ((float)vid.width / glwidth), (osk_coords[1] + osk_line_size) * ((float)vid.height / glheight), '\\' + 128);
+	Draw_Character ((osk_coords[0] + osk_col_size - 24) * ((float)vid.width / glwidth), (osk_coords[1] + osk_line_size - 24) * ((float)vid.height / glheight), '\\' + 128);
 }
