@@ -114,7 +114,7 @@ dist: clean all
 $(DOL): $(ELF)
 	@echo Creating $(notdir $@)
 	@mkdir -p $(dir $@)
-	@powerpc-gekko-objcopy -O binary $< $@
+	@elf2dol $< $@
 
 # How to link the ELF.
 $(ELF): $(OBJS)

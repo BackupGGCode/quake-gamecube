@@ -85,7 +85,7 @@ namespace quake
 	namespace main
 	{
 		// Set up the heap.
-		static const size_t	heap_size	= 19 * 1024 * 1024;
+		static const size_t	heap_size	= 12 * 1024 * 1024;
 		static char		*heap;
 
 		inline void *align32 (void *p)
@@ -198,7 +198,7 @@ namespace quake
 			std::vector<std::string> mods_names;
 
 			// option 2
-			u32 network_disable = 1;
+			u32 network_disable = 0;
 
 			// option 3
 			u32 listen_players = 4;
@@ -328,7 +328,7 @@ namespace quake
 
 				printf("     %c Max Network Slots: %u   \n", cursor == 3 ? '>' : ' ', listen_players);
 
-				printf("\n\n\n     Network support is still NOT IMPLEMENTED.\n     It's here only to enable easy bot matches.\n");
+				printf("\n\n\n     Network is experimental, may fail randomly.\n     Please activate it to use bots.\n");
 
 				VIDEO_WaitVSync();
 
@@ -461,7 +461,7 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
-	void *qstack = malloc(4 * 1024 * 1024); // ELUTODO: clean code to prevent needing a stack this huge
+	void *qstack = malloc(2 * 1024 * 1024); // ELUTODO: clean code to prevent needing a stack this huge
 
 #if USBGECKO_DEBUG
 	DEBUG_Init(GDBSTUB_DEVICE_USB, 1); // Slot B
@@ -483,7 +483,7 @@ int main(int argc, char* argv[])
 
 	// Start the main thread.
 	lwp_t thread;
-	LWP_CreateThread(&thread, &main_thread_function, 0, qstack, 4 * 1024 * 1024, 64);
+	LWP_CreateThread(&thread, &main_thread_function, 0, qstack, 2 * 1024 * 1024, 64);
 
 	// Wait for it to finish.
 	void* result;
