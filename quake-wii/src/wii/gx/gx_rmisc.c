@@ -170,10 +170,7 @@ void R_Init (void)
 	Test_Init ();
 #endif
 
-/* ELUTODO
-	playertextures = texture_extension_number;
-	texture_extension_number += 16;
-*/
+	memset(playertextures, 0xFF, sizeof(playertextures));
 }
 
 /*
@@ -244,7 +241,6 @@ void R_TranslatePlayerSkin (int playernum)
 
 	// because this happens during gameplay, do it fast
 	// instead of sending it through gl_update 8
-    // ELUTODO GL_Bind0(playertextures + playernum);
 
 	scaled_width = gl_max_size.value < 512 ? gl_max_size.value : 512;
 	scaled_height = gl_max_size.value < 256 ? gl_max_size.value : 256;
@@ -270,13 +266,14 @@ void R_TranslatePlayerSkin (int playernum)
 			frac += fracstep;
 		}
 	}
-/* ELUTODO
-	glTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-*/
+	// ELUTODO: skin changes, cache mismatches, ugly hacks
+	if (playertextures[playernum] < 0 || playertextures[playernum] >= MAX_GLTEXTURES)
+	{
+		playertextures[playernum] = GL_LoadTexture (va("player%d_skin", playernum), scaled_width, scaled_height, (u8 *)pixels, true, true, true); // HACK HACK HACK
+	}
+
+	GL_Update32 (&gltextures[playertextures[playernum]], pixels, scaled_width, scaled_height, true, true);
 }
 
 

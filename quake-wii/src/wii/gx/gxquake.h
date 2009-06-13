@@ -140,7 +140,7 @@ extern	int	currenttexture0;
 extern	int	currenttexture1;
 extern	int	cnttextures[2];
 extern	int	particletexture;
-extern	int	playertextures;
+extern	int	playertextures[MAX_SCOREBOARD];
 
 extern	int	skytexturenum;		// index in cl.loadmodel, not gl texture object
 

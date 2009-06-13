@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 // Silly, dirty code. But at least I still remembered how it worked 1 year later without any effort. YAY!
+// Player textures stuff goes in gx_rmisc.c
 
 #include <ogc/cache.h>
 #include <ogc/system.h>
@@ -112,6 +113,12 @@ void GL_Bind0 (int texnum)
 	if (currenttexture0 == texnum)
 		return;
 
+	if (texnum < 0 || texnum >= MAX_GLTEXTURES)
+	{
+		Con_Printf("Invalid texture0\n");
+		return;
+	}
+
 	if (!gltextures[texnum].used)
 		Sys_Error("Tried to bind a inactive texture0.");
 
@@ -123,6 +130,12 @@ void GL_Bind1 (int texnum)
 {
 	if (currenttexture1 == texnum)
 		return;
+
+	if (texnum < 0 || texnum >= MAX_GLTEXTURES)
+	{
+		Con_Printf("Invalid texture1\n");
+		return;
+	}
 
 	if (!gltextures[texnum].used)
 		Sys_Error("Tried to bind a inactive texture1.");
@@ -465,8 +478,13 @@ void GL_Upload8 (gltexture_t *destination, byte *data, int width, int height,  q
 	if (s&3)
 		Sys_Error ("GL_Upload8: s&3");
 
-	for (i = 0; i < s; i++)
-			trans[i] = d_8to24table[data[i]];
+	for (i = 0; i < s; i += 4)
+	{
+		trans[i] = d_8to24table[data[i]];
+		trans[i + 1] = d_8to24table[data[i + 1]];
+		trans[i + 2] = d_8to24table[data[i + 2]];
+		trans[i + 3] = d_8to24table[data[i + 3]];
+	}
 
 	GL_Upload32 (destination, trans, width, height, mipmap, alpha);
 }
@@ -497,26 +515,26 @@ void GL_UploadLightmapRGB5A3 (gltexture_t *destination, u16 *data, int width, in
 	// ELUTODO: mipmaps
 
 	if (scaled_width * scaled_height > sizeof(scaled)/TEXTURE_SIZE)
-		Sys_Error ("GL_UploadLightmapRGBA32: too big");
+		Sys_Error ("GL_UploadLightmapRGB5A3: too big");
 
 	if (scaled_width != width || scaled_height != height)
 	{
-		Sys_Error ("GL_UploadLightmapRGBA32: scaled_width != width || scaled_height != height");
+		Sys_Error ("GL_UploadLightmapRGB5A3: scaled_width != width || scaled_height != height");
 	}
 
 	destination->data = __lwp_heap_allocate(&texture_heap, scaled_width * scaled_height * TEXTURE_SIZE);
 	if (!destination->data)
-		Sys_Error("GL_Upload32: Out of memory.");
+		Sys_Error("GL_UploadLightmapRGB5A3: Out of memory.");
 
 	destination->scaled_width = scaled_width;
 	destination->scaled_height = scaled_height;
 
 	s = scaled_width * scaled_height;
 	if (s & 31)
-		Sys_Error ("GL_Upload32: s&31");
+		Sys_Error ("GL_UploadLightmapRGB5A3: s&31");
 
 	if ((int)destination->data & 31)
-		Sys_Error ("GL_Upload32: destination->data&31");
+		Sys_Error ("GL_UploadLightmapRGB5A3: destination->data&31");
 
 	GX_CopyRGB5A3((u16 *)destination->data, data, 0, 0, scaled_width, scaled_height, scaled_width);
 
@@ -537,10 +555,15 @@ void GL_UploadLightmap32 (gltexture_t *destination, unsigned *data, int width, i
 	s = width*height;
 
 	if (s&3)
-		Sys_Error ("GL_Upload8: s&3");
+		Sys_Error ("GL_UploadLightmap32: s&3");
 
-	for (i = 0; i < s; i++)
-			((u16 *)trans)[i] = GX_RGBA_To_RGB5A3(data[i]);
+	for (i = 0; i < s; i += 4)
+	{
+		((u16 *)trans)[i] = GX_RGBA_To_RGB5A3(data[i]);
+		((u16 *)trans)[i + 1] = GX_RGBA_To_RGB5A3(data[i + 1]);
+		((u16 *)trans)[i + 2] = GX_RGBA_To_RGB5A3(data[i + 2]);
+		((u16 *)trans)[i + 3] = GX_RGBA_To_RGB5A3(data[i + 3]);
+	}
 
 	GL_UploadLightmapRGB5A3 (destination, (u16 *)trans, width, height, mipmap, alpha);
 }
@@ -569,7 +592,7 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 					{
 						//Con_DPrintf ("GL_LoadTexture: cache mismatch, reloading");
 						if (!__lwp_heap_free(&texture_heap, glt->data))
-							Sys_Error("GL_ClearTextureCache: Error freeing data.");
+							Sys_Error("GL_LoadTexture: Error freeing data.");
 						goto reload; // best way to do it
 					}
 					return glt->texnum;
@@ -774,7 +797,7 @@ void GL_Update32 (gltexture_t *destination, u32 *data, int width, int height,  q
 	if ((int)destination->data & 31)
 		Sys_Error ("GL_Update32: destination->data&31");
 
-	GX_CopyRGBA8_To_RGB5A3((u16 *)destination->data, scaled, 0, 0, width, height, width);
+	GX_CopyRGBA8_To_RGB5A3((u16 *)destination->data, scaled, 0, 0, scaled_width, scaled_height, scaled_width);
 
 	DCFlushRange(destination->data, scaled_width * scaled_height * TEXTURE_SIZE);
 	GX_InvalidateTexAll();
@@ -792,10 +815,15 @@ void GL_Update8 (gltexture_t *destination, byte *data, int width, int height,  q
 	s = width*height;
 
 	if (s&3)
-		Sys_Error ("GL_Upload8: s&3");
+		Sys_Error ("GL_Update8: s&3");
 
-	for (i = 0; i < s; i++)
-			trans[i] = d_8to24table[data[i]];
+	for (i = 0; i < s; i += 4)
+	{
+		trans[i] = d_8to24table[data[i]];
+		trans[i + 1] = d_8to24table[data[i + 1]];
+		trans[i + 2] = d_8to24table[data[i + 2]];
+		trans[i + 3] = d_8to24table[data[i + 3]];
+	}
 
 	GL_Update32 (destination, trans, width, height, mipmap, alpha);
 }
@@ -833,7 +861,7 @@ void GL_UpdateLightmapTextureRegion32 (gltexture_t *destination, unsigned *data,
 	// ELUTODO: mipmaps
 
 	if ((int)destination->data & 31)
-		Sys_Error ("GL_Update32: destination->data&31");
+		Sys_Error ("GL_UpdateLightmapTextureRegion32: destination->data&31");
 
 	for (y = yoffset; y < realheight; y++)
 		for (x = xoffset; x < realwidth; x++)
