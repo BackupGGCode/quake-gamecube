@@ -224,7 +224,7 @@ void Draw_Init (void)
 	gl->tl = 0;
 	gl->th = 1;
 
-	// This is done in video_gx.cpp now too
+	// This is done in video_gx.c now too
 	conback->width = vid.width;
 	conback->height = vid.height;
 
