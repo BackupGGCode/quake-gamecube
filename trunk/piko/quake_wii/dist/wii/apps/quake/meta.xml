@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1">
+	<name>Quake</name>
+	<version>GX 0.04</version>
+	<coder>Eluan</coder>
+	<short_description>Quake port for Wii</short_description>
+	<long_description>This is a port of Quake to the Wii based on the GameCube Quake port by Peter Mackay. </long_description>
+</app>
