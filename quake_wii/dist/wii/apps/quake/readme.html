@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>QuakeGX</title>
+	</head>
+	<body>
+		<h1>QuakeGX - 2008/09/26</h1>
+		
+		<h2>Requirements</h2>
+
+		<ul>
+			<li>A Wii.</li>
+			<li>Twilight Hack, The Homebrew Channel or some other way of running programs from SD Card.</li>
+		</ul>
+
+		<h2>Release Notes for version 0.04</h2>
+
+		<ul>
+			<li>New features: Transparent status bar, variable 2D resolution, now you can also rotate your weapon with the Wiimote, mods and mission packs support, a new menu for changing various new features and various bugfixes.</li>
+			<li>ID1 now resides in /apps/quake inside the SD card, to prevent pollution of the root folder with mods.</li>
+			<li>To correctly see the transparent water without artifacts, please apply <a href=http://vispatch.sourceforge.net/>Vispatch</a> to your pak0.pak (and pak1.pak, if you have the full version) file.</li>
+		</ul>
+		
+		<h2>Installation</h2>
+		
+		<ol>
+			<li>Note: If you have a version released before 13th June 2008 installed, remove ID1/CONFIG.CFG from your SD Card. This is necessary because the button naming for the Wiimote has changed, and deleting ID1/CONFIG.CFG will make the new defaults with the new button names be used.</li>
+			<li>Note: If you have a version lower than 0.04 already installed, please note that the ID1 directory now sits into /apps/quake inside your SD-card, it isn't on the root anymore</li>
+			<li>Unzip the zip file to the root of your SD Card.</li>
+			<li>Copy Quake's PAK0.PAK (and PAK1.PAK if you own the full version) into the /apps/quake/ID1 folder on your SD Card.</li>
+			<li>If you use the Homebrew Channel, you're ready to go.</li>
+		</ol>
+
+		<h2>Using Mods and Mission Packs</h2>
+
+		<ul>
+			<li>Place the mod/mission pack directory inside the /apps/quake directory, alongside your ID1 directory. You can place as many as the filesystem supports. The frontend will let you select the mod. It will also autodetect the mission packs, leting you choose them too.</li>
+		</ul>
+		
+		<h2>Credits</h2>
+
+		<ul>
+			<li>Original game by <a href="http://www.idsoftware.com/">id Software</a>.</li>
+			<li>GameCube conversion by <a href="http://aaiiee.wordpress.com/">Peter Mackay</a>.</li>
+			<li>GameCube version testing by eke, org and plootid.</li>
+			<li>Wii version and GX graphics acceleration by Eluan Miranda</li>
+		</ul>
+
+		<h2>General notes</h2>
+
+		<ul>
+			<li>You can freely change button bindings on the Wiimote without affecting the GC pad bindings, except for the D-Pad on both controllers and Start/Plus. These are paired and changing one's binding will change the other</li>
+			<li>There is still no music support, but expect it for future releases. (Probably you will have to rip your original quake music from your CD.)</li>
+			<li>There is a menu option for adjusting the size of the screen to adjust for your TV's overscan.</li>
+		</ul>
+
+		<h2>Software rendering notes</h2>
+
+		<ul>
+			<li>Support for the software renderer has been removed as of version 0.04.</li>
+		</ul>
+
+		<h2>Hardware rendering notes</h2>
+
+		<ul>
+			<li>Full speed, fully implemented GX port of the original glquake, with some new features being added gradually.</li>
+			<li>Supports all of the original glquake features: dynamic lightmaps, water transparency, and more.</li>
+			<li>To make the water correctly transparent, you will need water-vised maps. Please do not use r_novis 1. It wasn't meant to be this way, r_novis 1 disables all visibility testing and draws the entire map every frame.</li>
+		</ul>
+
+		<h2>Default controls</h2>
+
+		<ul>
+			<li>Gamecube PAD</li>
+			<ul>
+				<li>Attack:			R</li>
+				<li>Jump:			A</li>
+				<li>Run/Walk:			B</li>
+				<li>Lock View:			L</li>
+				<li>Previous Weapon:		D-Pad Left or Y</li>
+				<li>Next Weapon:		D-Pad Right or X</li>
+				<li>Swim Up:			D-Pad Up</li>
+				<li>Swim Down:			D-Pad Down</li>
+				<li>Show Scores:		Z</li>
+				<li>Pause/Menu:			Start/Pause</li>
+				<li>Select (in menu):		A</li>
+				<li>Back (in menu):		B</li>
+			</ul>
+			<li>Wiimote</li>
+			<ul>
+				<li>Attack:			B</li>
+				<li>Jump:			A</li>
+				<li>Run/Walk:			C</li>
+				<li>Lock View:			Z</li>
+				<li>Previous Weapon:		D-Pad Left</li>
+				<li>Next Weapon:		D-Pad Right</li>
+				<li>Swim Up:			D-Pad Up</li>
+				<li>Swim Down:			D-Pad Down</li>
+				<li>Show Scores:		1</li>
+				<li>Pause/Menu:			Plus</li>
+				<li>Select (in menu):		A</li>
+				<li>Back (in menu):		B</li>
+			</ul>
+			<li>On-screen keyboard (Wiimote only)</li>
+			<ul>
+				<li>Activate OSK:		Minus</li>
+				<li>Shift:			Z</li>
+				<li>Select:			B</li>
+			</ul>
+			<li>If "Previous Weapon" doesn't work, probably you're using Quake's version 1.01 PAK0.PAK, you should really upgrade to version 1.06's PAK0.PAK. It is available at this project's page as the shareware version. (Will work for the full version too.)</li>
+		</ul>
+
+		<h2>Contact</h2>
+
+		<p>You can report bugs or suggestions using the project's <a href="http://code.google.com/p/quake-gamecube/issues/list">issue tracker</a>. Please make sure to check the existing issues before adding new ones. By default only open issues are shown, you will have to select "All Issues" in the search field to see if your issue has already been fixed on svn.</p>
+		<p>Be sure to keep checking the <a href="http://code.google.com/p/quake-gamecube/">Google project page</a> for new versions and other info. :)</p>
+		
+		<h2>Source code</h2>
+
+		<p>
+			The original Quake code was released under the <a href="http://en.wikipedia.org/wiki/GNU_General_Public_License">GNU General Public License</a> (GPL). This port's source code is available at the <a href="http://code.google.com/p/quake-gamecube/source">Google project page</a>.
+		</p>
+	</body>
+</html>
