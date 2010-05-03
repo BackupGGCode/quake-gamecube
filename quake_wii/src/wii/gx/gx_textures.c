@@ -49,18 +49,8 @@ void R_InitTextureHeap (void)
 	u32 level, size;
 
 	_CPU_ISR_Disable(level);
-	texture_heap_ptr = SYS_GetArena2Lo();
+	texture_heap_ptr = malloc(39 * 1024 * 1024);
 	texture_heap_size = 39 * 1024 * 1024;
-	if ((u32)texture_heap_ptr + texture_heap_size > (u32)SYS_GetArena2Hi())
-	{
-		_CPU_ISR_Restore(level);
-		Sys_Error("texture_heap + texture_heap_size > (u32)SYS_GetArena2Hi()");
-	}	
-	else
-	{
-		SYS_SetArena2Lo(texture_heap_ptr + texture_heap_size);
-		_CPU_ISR_Restore(level);
-	}
 
 	memset(texture_heap_ptr, 0, texture_heap_size);
 
