@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-cvar_t sbar_alpha = {"sbar_alpha", "0.3", true};
+cvar_t sbar_alpha = {"sbar_alpha", "0.3", TRUE};
 
 int			sb_updates;		// if >= vid.numpages, no update needed
 
@@ -77,7 +77,7 @@ void Sbar_ShowScores (void)
 {
 	if (sb_showscores)
 		return;
-	sb_showscores = true;
+	sb_showscores = TRUE;
 	sb_updates = 0;
 }
 
@@ -90,7 +90,7 @@ Tab key up
 */
 void Sbar_DontShowScores (void)
 {
-	sb_showscores = false;
+	sb_showscores = FALSE;
 	sb_updates = 0;
 }
 

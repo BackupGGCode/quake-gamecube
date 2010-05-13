@@ -161,11 +161,11 @@ void Sys_Shutdown (void)
 
 double Sys_FloatTime (void)
 {
-	static bool init = false;
+	static bool init = FALSE;
 	if (!init)
 	{
 		VIDEO_SetPreRetraceCallback(increment_frame_counter);
-		init = true;
+		init = TRUE;
 	}
 
 	// ELUTODO

@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <cstdio>
 #include <vector>
 #include <string>
+#include <iostream>
+#include <algorithm>
 
 // OGC includes.
 #include <ogc/lwp.h>

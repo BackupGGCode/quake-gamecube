@@ -120,16 +120,16 @@ $(DOL): $(ELF)
 $(ELF): $(OBJS)
 	@echo Linking $(notdir $@)
 	@mkdir -p $(dir $@)
-	@powerpc-gekko-g++ $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+	@powerpc-eabi-g++ $(LDFLAGS) $(OBJS) $(LIBS) -o $@
 
 # How to compile a C++ source file.
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo Compiling $(notdir $<)
 	@mkdir -p $(dir $@)
-	@powerpc-gekko-g++ $(CXXFLAGS) -c $< -o $@ 2>&1 | $(SED)
+	@powerpc-eabi-g++ $(CXXFLAGS) -c $< -o $@ 2>&1 | $(SED)
 
 # How to compile a C source file.
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo Compiling $(notdir $<)
 	@mkdir -p $(dir $@)
-	@powerpc-gekko-gcc $(CFLAGS) -c $< -o $@ 2>&1 | $(SED)
+	@powerpc-eabi-gcc $(CFLAGS) -c $< -o $@ 2>&1 | $(SED)

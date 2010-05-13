@@ -36,7 +36,7 @@ mplane_t	frustum[4];
 
 int			c_brush_polys, c_alias_polys;
 
-qboolean	envmap;				// true during envmap command capture 
+qboolean	envmap;				// TRUE during envmap command capture 
 
 int			currenttexture0 = -1;		// to avoid unnecessary texture sets
 int			currenttexture1 = -1;		// to avoid unnecessary texture sets
@@ -106,7 +106,7 @@ float viewport_size[4];
 =================
 R_CullBox
 
-Returns true if the box is completely outside the frustom
+Returns TRUE if the box is completely outside the frustom
 =================
 */
 qboolean R_CullBox (vec3_t mins, vec3_t maxs)
@@ -116,13 +116,13 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 	// ELUTODO: check for failure cases (rendering to an aspect different of that of the quake-calculated frustum, etc
 	for (i=0 ; i<4 ; i++)
 		if (BoxOnPlaneSide (mins, maxs, &frustum[i]) == 2)
-			return true;
-	return false;
+			return TRUE;
+	return FALSE;
 }
 
-Vector axis2 = {0,0,1};
-Vector axis1 = {0,1,0};
-Vector axis0 = {1,0,0};
+guVector axis2 = {0,0,1};
+guVector axis1 = {0,1,0};
+guVector axis0 = {1,0,0};
 
 void R_RotateForEntity (entity_t *e)
 {
@@ -235,7 +235,7 @@ void R_DrawSpriteModel (entity_t *e)
 
     GL_Bind0(frame->gl_texturenum);
 
-	QGX_Alpha(true);
+	QGX_Alpha(TRUE);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
 	VectorMA (e->origin, frame->down, up, point);
@@ -263,7 +263,7 @@ void R_DrawSpriteModel (entity_t *e)
 	GX_TexCoord2f32(1, 1);
 
 	GX_End();
-	QGX_Alpha(false);
+	QGX_Alpha(FALSE);
 }
 
 /*
@@ -745,9 +745,9 @@ void R_PolyBlend (void)
 	if (!v_blend[3] && v_gamma.value == 1.0f)
 		return;
 
-	QGX_Alpha(false);
-	QGX_Blend(true);
-	QGX_ZMode(false);
+	QGX_Alpha(FALSE);
+	QGX_Blend(TRUE);
+	QGX_ZMode(FALSE);
 	GL_Bind0(white_texturenum); // ELUTODO: do not use a texture
 	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 
@@ -806,8 +806,8 @@ void R_PolyBlend (void)
 		GX_End();
 	}
 
-	QGX_Blend(false);
-	QGX_Alpha(true);
+	QGX_Blend(FALSE);
+	QGX_Alpha(TRUE);
 	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 }
 
@@ -891,7 +891,7 @@ void R_SetupFrame (void)
 	V_SetContentsColor (r_viewleaf->contents);
 	V_CalcBlend ();
 
-	r_cache_thrash = false;
+	r_cache_thrash = FALSE;
 
 	c_brush_polys = 0;
 	c_alias_polys = 0;
@@ -989,9 +989,9 @@ void R_SetupGL (void)
 	if (!gl_cull.value)
 		GX_SetCullMode(GX_CULL_NONE);
 
-	QGX_Blend(false);
-	QGX_Alpha(false);
-	QGX_ZMode(true);
+	QGX_Blend(FALSE);
+	QGX_Alpha(FALSE);
+	QGX_ZMode(TRUE);
 }
 
 /*
@@ -1132,7 +1132,7 @@ void R_RenderView (void)
 		c_alias_polys = 0;
 	}
 
-	mirror = false;
+	mirror = FALSE;
 
 /* ELUTODO
 	if (gl_finish.value)

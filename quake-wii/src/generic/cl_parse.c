@@ -287,7 +287,7 @@ void CL_ParseServerInfo (void)
 
 	for (i=1 ; i<nummodels ; i++)
 	{
-		cl.model_precache[i] = Mod_ForName (model_precache[i], false);
+		cl.model_precache[i] = Mod_ForName (model_precache[i], FALSE);
 		if (cl.model_precache[i] == NULL)
 		{
 			Con_Printf("Model %s not found\n", model_precache[i]);
@@ -312,7 +312,7 @@ void CL_ParseServerInfo (void)
 
 	Hunk_Check ();		// make sure nothing is hurt
 	
-	noclip_anglehack = false;		// noclip is turned off at start	
+	noclip_anglehack = FALSE;		// noclip is turned off at start	
 }
 
 
@@ -361,9 +361,9 @@ if (bits&(1<<i))
 	bitcounts[i]++;
 
 	if (ent->msgtime != cl.mtime[1])
-		forcelink = true;	// no previous frame to lerp from
+		forcelink = TRUE;	// no previous frame to lerp from
 	else
-		forcelink = false;
+		forcelink = FALSE;
 
 	ent->msgtime = cl.mtime[0];
 	
@@ -390,7 +390,7 @@ if (bits&(1<<i))
 				ent->syncbase = 0.0f;
 		}
 		else
-			forcelink = true;	// hack to make null model players work
+			forcelink = TRUE;	// hack to make null model players work
 		if (num > 0 && num <= cl.maxclients)
 			R_TranslatePlayerSkin (num - 1);
 	}
@@ -460,7 +460,7 @@ if (bits&(1<<i))
 		ent->msg_angles[0][2] = ent->baseline.angles[2];
 
 	if ( bits & U_NOLERP )
-		ent->forcelink = true;
+		ent->forcelink = TRUE;
 
 	if ( forcelink )
 	{	// didn't have an update last message
@@ -468,7 +468,7 @@ if (bits&(1<<i))
 		VectorCopy (ent->msg_origins[0], ent->origin);
 		VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
 		VectorCopy (ent->msg_angles[0], ent->angles);
-		ent->forcelink = true;
+		ent->forcelink = TRUE;
 	}
 }
 
@@ -718,7 +718,7 @@ void CL_ParseServerMessage (void)
 	else if (cl_shownet.value == 2)
 		Con_Printf ("------------------\n");
 	
-	cl.onground = false;	// unless the server says otherwise	
+	cl.onground = FALSE;	// unless the server says otherwise	
 //
 // parse the message
 //
@@ -795,7 +795,7 @@ void CL_ParseServerMessage (void)
 			
 		case svc_serverinfo:
 			CL_ParseServerInfo ();
-			vid.recalc_refdef = true;	// leave intermission full screen
+			vid.recalc_refdef = TRUE;	// leave intermission full screen
 			break;
 			
 		case svc_setangle:
@@ -911,28 +911,28 @@ void CL_ParseServerMessage (void)
 			cl.cdtrack = MSG_ReadByte ();
 			cl.looptrack = MSG_ReadByte ();
 			if ( (cls.demoplayback || cls.demorecording) && (cls.forcetrack != -1) )
-				CDAudio_Play ((byte)cls.forcetrack, true);
+				CDAudio_Play ((byte)cls.forcetrack, TRUE);
 			else
-				CDAudio_Play ((byte)cl.cdtrack, true);
+				CDAudio_Play ((byte)cl.cdtrack, TRUE);
 			break;
 
 		case svc_intermission:
 			cl.intermission = 1;
 			cl.completed_time = cl.time;
-			vid.recalc_refdef = true;	// go to full screen
+			vid.recalc_refdef = TRUE;	// go to full screen
 			break;
 
 		case svc_finale:
 			cl.intermission = 2;
 			cl.completed_time = cl.time;
-			vid.recalc_refdef = true;	// go to full screen
+			vid.recalc_refdef = TRUE;	// go to full screen
 			SCR_CenterPrint (MSG_ReadString ());			
 			break;
 
 		case svc_cutscene:
 			cl.intermission = 3;
 			cl.completed_time = cl.time;
-			vid.recalc_refdef = true;	// go to full screen
+			vid.recalc_refdef = TRUE;	// go to full screen
 			SCR_CenterPrint (MSG_ReadString ());			
 			break;
 

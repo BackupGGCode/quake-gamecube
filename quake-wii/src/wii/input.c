@@ -54,7 +54,7 @@ char keycode_shifted[256] = {
 	K_MENU
 };
 
-bool keyboard_shifted = false;
+bool keyboard_shifted = FALSE;
 u8 kb_last_selected = 0x0;
 
 // pass these values to whatever subsystem wants it
@@ -110,10 +110,10 @@ ir_t pointer;
 orient_t orientation;
 expansion_t expansion;
 
-bool wiimote_connected = true;
-bool nunchuk_connected = false;
-bool classic_connected = false;
-bool keyboard_connected = false;
+bool wiimote_connected = TRUE;
+bool nunchuk_connected = FALSE;
+bool classic_connected = FALSE;
+bool keyboard_connected = FALSE;
 
 u16 pad_previous_keys = 0x0000;
 u16 pad_keys = 0x0000;
@@ -282,34 +282,34 @@ void IN_Commands (void)
 		switch(KB_event.type)
 		{
 			case KEYBOARD_CONNECTED:
-				keyboard_connected = true;
+				keyboard_connected = TRUE;
 				break;
 
 			case KEYBOARD_DISCONNECTED:
-				keyboard_connected = false;
+				keyboard_connected = FALSE;
 				break;
 	
 			case KEYBOARD_PRESSED:
 				if(!keyboard_shifted)
-					Key_Event(keycode_normal[KB_event.keycode], true);
+					Key_Event(keycode_normal[KB_event.keycode], TRUE);
 
 				else
-					Key_Event(keycode_shifted[KB_event.keycode], true);
+					Key_Event(keycode_shifted[KB_event.keycode], TRUE);
 
 				if(keycode_normal[KB_event.keycode] == K_LSHIFT || keycode_normal[KB_event.keycode] == K_RSHIFT)
-					keyboard_shifted = true;
+					keyboard_shifted = TRUE;
 
 				break;
 
 			case KEYBOARD_RELEASED:
 				if(!keyboard_shifted)
-					Key_Event(keycode_normal[KB_event.keycode], false);
+					Key_Event(keycode_normal[KB_event.keycode], FALSE);
 
 				else
-					Key_Event(keycode_shifted[KB_event.keycode], false);
+					Key_Event(keycode_shifted[KB_event.keycode], FALSE);
 
 				if(keycode_normal[KB_event.keycode] == K_LSHIFT || keycode_normal[KB_event.keycode] == K_RSHIFT)
-					keyboard_shifted = false;
+					keyboard_shifted = FALSE;
 
 				break;
 		}
@@ -324,8 +324,8 @@ void IN_Commands (void)
 		if(!nunchuk_connected)
 			wpad_previous_keys = 0x0000;
 
-		nunchuk_connected = true;
-		classic_connected = false;
+		nunchuk_connected = TRUE;
+		classic_connected = FALSE;
 		wpad_keys = WPAD_ButtonsHeld(WPAD_CHAN_0);
 		pad_keys = 0x0000;
 		pad_previous_keys = 0x0000;
@@ -336,8 +336,8 @@ void IN_Commands (void)
 		if(!classic_connected)
 			wpad_previous_keys = 0x0000;
 
-		nunchuk_connected = false;
-		classic_connected = true;
+		nunchuk_connected = FALSE;
+		classic_connected = TRUE;
 		wpad_keys = WPAD_ButtonsHeld(WPAD_CHAN_0);
 		pad_keys = 0x0000;
 		pad_previous_keys = 0x0000;
@@ -348,8 +348,8 @@ void IN_Commands (void)
 		if(classic_connected || nunchuk_connected)
 			wpad_previous_keys = 0x0000;
 
-		nunchuk_connected = false;
-		classic_connected = false;
+		nunchuk_connected = FALSE;
+		classic_connected = FALSE;
 		pad_keys = PAD_ButtonsHeld(PAD_CHAN0);
 		wpad_keys = WPAD_ButtonsHeld(WPAD_CHAN_0);
 	}
@@ -380,8 +380,8 @@ void IN_Commands (void)
 
 		if ((wpad_keys & WPAD_BUTTON_B) && osk_selected && (Sys_FloatTime() >= osk_last_press_time + osk_repeat_delay.value || osk_selected != osk_last_selected))
 		{
-			Key_Event((osk_selected), true);
-			Key_Event((osk_selected), false);
+			Key_Event((osk_selected), TRUE);
+			Key_Event((osk_selected), FALSE);
 			osk_last_selected = osk_selected;
 			osk_last_press_time = Sys_FloatTime();
 		}

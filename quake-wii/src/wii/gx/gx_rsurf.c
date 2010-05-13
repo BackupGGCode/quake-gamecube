@@ -286,7 +286,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 		i = s->lightmaptexturenum;
 		if (lightmap_modified[i])
 		{
-			lightmap_modified[i] = false;
+			lightmap_modified[i] = FALSE;
 			theRect = &lightmap_rectchange[i];
 			GL_UpdateLightmapTextureRegion (lightmap_textures + s->lightmaptexturenum, BLOCK_WIDTH, theRect->h, 0, theRect->t, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
 			theRect->l = BLOCK_WIDTH;
@@ -336,7 +336,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 	i = s->lightmaptexturenum;
 	if (lightmap_modified[i])
 	{
-		lightmap_modified[i] = false;
+		lightmap_modified[i] = FALSE;
 		theRect = &lightmap_rectchange[i];
 		GL_UpdateLightmapTextureRegion (lightmap_textures + s->lightmaptexturenum, BLOCK_WIDTH, theRect->h, 0, theRect->t, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
 		theRect->l = BLOCK_WIDTH;
@@ -395,7 +395,7 @@ void R_RenderDynamicLightmaps (msurface_t *fa)
 dynamic:
 		if (r_dynamic.value)
 		{
-			lightmap_modified[fa->lightmaptexturenum] = true;
+			lightmap_modified[fa->lightmaptexturenum] = TRUE;
 			theRect = &lightmap_rectchange[fa->lightmaptexturenum];
 			if (fa->light_t < theRect->t) {
 				if (theRect->h)
@@ -429,7 +429,7 @@ void R_MirrorChain (msurface_t *s)
 {
 	if (mirror)
 		return;
-	mirror = true;
+	mirror = TRUE;
 	mirror_plane = s->plane;
 }
 
@@ -454,7 +454,7 @@ void R_DrawWaterSurfaces (void)
     glLoadMatrixf (r_world_matrix);*/
 
 	if (r_wateralpha.value < 1.0) {
-		QGX_Blend (true);
+		QGX_Blend (TRUE);
 		GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 	}
 
@@ -467,7 +467,7 @@ void R_DrawWaterSurfaces (void)
 
 	if (r_wateralpha.value < 1.0) {
 		GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
-		QGX_Blend (false);
+		QGX_Blend (FALSE);
 	}
 }
 
@@ -513,7 +513,7 @@ void R_DrawBrushModel (entity_t *e)
 
 	if (e->angles[0] || e->angles[1] || e->angles[2])
 	{
-		rotated = true;
+		rotated = TRUE;
 		for (i=0 ; i<3 ; i++)
 		{
 			mins[i] = e->origin[i] - clmodel->radius;
@@ -522,7 +522,7 @@ void R_DrawBrushModel (entity_t *e)
 	}
 	else
 	{
-		rotated = false;
+		rotated = FALSE;
 		VectorAdd (e->origin, clmodel->mins, mins);
 		VectorAdd (e->origin, clmodel->maxs, maxs);
 	}
@@ -1037,7 +1037,7 @@ void GL_BuildLightmaps (void)
 	{
 		if (!allocated[i][0])
 			break;		// no more used
-		lightmap_modified[i] = false;
+		lightmap_modified[i] = FALSE;
 		lightmap_rectchange[i].l = BLOCK_WIDTH;
 		lightmap_rectchange[i].t = BLOCK_HEIGHT;
 		lightmap_rectchange[i].w = 0;

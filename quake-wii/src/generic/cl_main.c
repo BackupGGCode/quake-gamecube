@@ -25,20 +25,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // references them even when on a unix system.
 
 // these two are not intended to be set directly
-cvar_t	cl_name = {"_cl_name", "player", true};
-cvar_t	cl_color = {"_cl_color", "0", true};
+cvar_t	cl_name = {"_cl_name", "player", TRUE};
+cvar_t	cl_color = {"_cl_color", "0", TRUE};
 
 cvar_t	cl_shownet = {"cl_shownet","0"};	// can be 0, 1, or 2
 cvar_t	cl_nolerp = {"cl_nolerp","0"};
 
-cvar_t	lookspring = {"lookspring","0", true};
-cvar_t	lookstrafe = {"lookstrafe","0", true};
-cvar_t	sensitivity = {"sensitivity","3", true};
+cvar_t	lookspring = {"lookspring","0", TRUE};
+cvar_t	lookstrafe = {"lookstrafe","0", TRUE};
+cvar_t	sensitivity = {"sensitivity","3", TRUE};
 
-cvar_t	m_pitch = {"m_pitch","0.022", true};
-cvar_t	m_yaw = {"m_yaw","0.022", true};
-cvar_t	m_forward = {"m_forward","1", true};
-cvar_t	m_side = {"m_side","0.8", true};
+cvar_t	m_pitch = {"m_pitch","0.022", TRUE};
+cvar_t	m_yaw = {"m_yaw","0.022", TRUE};
+cvar_t	m_forward = {"m_forward","1", TRUE};
+cvar_t	m_side = {"m_side","0.8", TRUE};
 
 
 client_static_t	cls;
@@ -99,7 +99,7 @@ This is also called on Host_Error, so it shouldn't cause any errors
 void CL_Disconnect (void)
 {
 // stop sounds (especially looping!)
-	S_StopAllSounds (true);
+	S_StopAllSounds (TRUE);
 	
 // bring the console down and fade the colors back to normal
 //	SCR_BringDownConsole ();
@@ -121,10 +121,10 @@ void CL_Disconnect (void)
 
 		cls.state = ca_disconnected;
 		if (sv.active)
-			Host_ShutdownServer(false);
+			Host_ShutdownServer(FALSE);
 	}
 
-	cls.demoplayback = cls.timedemo = false;
+	cls.demoplayback = cls.timedemo = FALSE;
 	cls.signon = 0;
 }
 
@@ -132,7 +132,7 @@ void CL_Disconnect_f (void)
 {
 	CL_Disconnect ();
 	if (sv.active)
-		Host_ShutdownServer (false);
+		Host_ShutdownServer (FALSE);
 }
 
 
@@ -573,7 +573,7 @@ void CL_RelinkEntities (void)
 			VectorCopy (ent->origin,  dl->origin);
 			dl->radius = 200.0 + (rand()&31);
 			dl->die = cl.time + 0.001f;
-			dl->dark = true;
+			dl->dark = TRUE;
 		}
 		if (ent->effects & EF_LIGHT)
 		{			
@@ -605,7 +605,7 @@ void CL_RelinkEntities (void)
 		else if (ent->model->flags & EF_TRACER3)
 			R_RocketTrail (oldorg, ent->origin, 6);
 
-		ent->forcelink = false;
+		ent->forcelink = FALSE;
 
 		if (i == cl.viewentity && !chase_active.value)
 			continue;

@@ -453,7 +453,7 @@ int	Hunk_HighMark (void)
 {
 	if (hunk_tempactive)
 	{
-		hunk_tempactive = false;
+		hunk_tempactive = FALSE;
 		Hunk_FreeToHighMark (hunk_tempmark);
 	}
 
@@ -464,7 +464,7 @@ void Hunk_FreeToHighMark (int mark)
 {
 	if (hunk_tempactive)
 	{
-		hunk_tempactive = false;
+		hunk_tempactive = FALSE;
 		Hunk_FreeToHighMark (hunk_tempmark);
 	}
 	if (mark < 0 || mark > hunk_high_used)
@@ -489,7 +489,7 @@ void *Hunk_HighAllocName (int size, char *name)
 	if (hunk_tempactive)
 	{
 		Hunk_FreeToHighMark (hunk_tempmark);
-		hunk_tempactive = false;
+		hunk_tempactive = FALSE;
 	}
 
 #ifdef PARANOID
@@ -534,14 +534,14 @@ void *Hunk_TempAlloc (int size)
 	if (hunk_tempactive)
 	{
 		Hunk_FreeToHighMark (hunk_tempmark);
-		hunk_tempactive = false;
+		hunk_tempactive = FALSE;
 	}
 	
 	hunk_tempmark = Hunk_HighMark ();
 
 	buf = Hunk_HighAllocName (size, "temp");
 
-	hunk_tempactive = true;
+	hunk_tempactive = TRUE;
 
 	return buf;
 }
@@ -577,7 +577,7 @@ void Cache_Move ( cache_system_t *c)
 	cache_system_t		*new;
 
 // we are clearing up space at the bottom, so only allocate it late
-	new = Cache_TryAlloc (c->size, true);
+	new = Cache_TryAlloc (c->size, TRUE);
 	if (new)
 	{
 //		Con_Printf ("cache_move ok\n");
@@ -883,7 +883,7 @@ void *Cache_Alloc (cache_user_t *c, int size, char *name)
 // find memory for it	
 	while (1)
 	{
-		cs = Cache_TryAlloc (size, false);
+		cs = Cache_TryAlloc (size, FALSE);
 		if (cs)
 		{
 			strncpy (cs->name, name, sizeof(cs->name)-1);
