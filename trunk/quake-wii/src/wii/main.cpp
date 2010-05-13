@@ -87,7 +87,7 @@ namespace quake
 	namespace main
 	{
 		// Set up the heap.
-		static const size_t	heap_size	= 12 * 1024 * 1024;
+		static const size_t	heap_size	= 19 * 1024 * 1024;
 		static char		*heap;
 
 		inline void *align32 (void *p)
@@ -463,7 +463,7 @@ qboolean isDedicated = qfalse;
 
 int main(int argc, char* argv[])
 {
-	void *qstack = malloc(2 * 1024 * 1024); // ELUTODO: clean code to prevent needing a stack this huge
+	void *qstack = malloc(4 * 1024 * 1024); // ELUTODO: clean code to prevent needing a stack this huge
 
 #if USBGECKO_DEBUG
 	DEBUG_Init(GDBSTUB_DEVICE_USB, 1); // Slot B
@@ -485,7 +485,7 @@ int main(int argc, char* argv[])
 
 	// Start the main thread.
 	lwp_t thread;
-	LWP_CreateThread(&thread, &main_thread_function, 0, qstack, 2 * 1024 * 1024, 64);
+	LWP_CreateThread(&thread, &main_thread_function, 0, qstack, 4 * 1024 * 1024, 64);
 
 	// Wait for it to finish.
 	void* result;
