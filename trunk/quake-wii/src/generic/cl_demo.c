@@ -48,7 +48,7 @@ void CL_StopPlayback (void)
 		return;
 
 	Sys_FileClose(cls.demofile);
-	cls.demoplayback = false;
+	cls.demoplayback = FALSE;
 	cls.demofile = -1;
 	cls.state = ca_disconnected;
 
@@ -181,7 +181,7 @@ void CL_Stop_f (void)
 // finish up
 	Sys_FileClose(cls.demofile);
 	cls.demofile = -1;
-	cls.demorecording = false;
+	cls.demorecording = FALSE;
 	Con_Printf ("Completed demo\n");
 }
 
@@ -255,7 +255,7 @@ void CL_Record_f (void)
 	sprintf(forcetrack, "%i\n", cls.forcetrack);
 	Sys_FileWrite(cls.demofile, forcetrack, strlen(forcetrack));
 	
-	cls.demorecording = true;
+	cls.demorecording = TRUE;
 }
 
 
@@ -282,7 +282,7 @@ void CL_PlayDemo_f (void)
 {
 	char	name[256];
 	int c;
-	qboolean neg = false;
+	qboolean neg = FALSE;
 
 	if (cmd_source != src_command)
 		return;
@@ -313,13 +313,13 @@ void CL_PlayDemo_f (void)
 		return;
 	}
 
-	cls.demoplayback = true;
+	cls.demoplayback = TRUE;
 	cls.state = ca_connected;
 	cls.forcetrack = 0;
 
 	while ((c = CL_FileGetChar(cls.demofile)) != '\n')
 		if (c == '-')
-			neg = true;
+			neg = TRUE;
 		else
 			cls.forcetrack = cls.forcetrack * 10 + (c - '0');
 
@@ -340,7 +340,7 @@ void CL_FinishTimeDemo (void)
 	int		frames;
 	float	time;
 	
-	cls.timedemo = false;
+	cls.timedemo = FALSE;
 	
 // the first frame didn't count
 	frames = (host_framecount - cls.td_startframe) - 1;
@@ -373,7 +373,7 @@ void CL_TimeDemo_f (void)
 // cls.td_starttime will be grabbed at the second frame of the demo, so
 // all the loading time doesn't get counted
 	
-	cls.timedemo = true;
+	cls.timedemo = TRUE;
 	cls.td_startframe = host_framecount;
 	cls.td_lastframe = -1;		// get a new message this frame
 }

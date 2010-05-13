@@ -52,7 +52,7 @@ bind g "impulse 5 ; +attack ; wait ; -attack ; impulse 2"
 */
 void Cmd_Wait_f (void)
 {
-	cmd_wait = true;
+	cmd_wait = TRUE;
 }
 
 /*
@@ -186,7 +186,7 @@ void Cbuf_Execute (void)
 		if (cmd_wait)
 		{	// skip out while text still remains in buffer, leaving it
 			// for next frame
-			cmd_wait = false;
+			cmd_wait = FALSE;
 			break;
 		}
 	}
@@ -572,10 +572,10 @@ qboolean	Cmd_Exists (char *cmd_name)
 	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
 	{
 		if (!strcmp (cmd_name,cmd->name))
-			return true;
+			return TRUE;
 	}
 
-	return false;
+	return FALSE;
 }
 
 

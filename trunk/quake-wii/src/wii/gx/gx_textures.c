@@ -618,7 +618,7 @@ reload:
 	glt->mipmap = mipmap;
 	glt->type = 0;
 	glt->keep = keep;
-	glt->used = true;
+	glt->used = TRUE;
 
 	GL_Upload8 (glt, data, width, height, mipmap, alpha);
 
@@ -646,12 +646,12 @@ int GL_LoadLightmapTexture (char *identifier, int width, int height, byte *data)
 	glt->texnum = numgltextures;
 	glt->width = width;
 	glt->height = height;
-	glt->mipmap = true; // ELUTODO
+	glt->mipmap = TRUE; // ELUTODO
 	glt->type = 1;
-	glt->keep = false;
-	glt->used = true;
+	glt->keep = FALSE;
+	glt->used = TRUE;
 
-	GL_UploadLightmap32 (glt, (u32 *)data, width, height, true, true);
+	GL_UploadLightmap32 (glt, (u32 *)data, width, height, TRUE, TRUE);
 
 	if (width != glt->scaled_width || height != glt->scaled_height)
 		Sys_Error("GL_LoadLightmapTexture: Tried to scale lightmap\n");
@@ -886,7 +886,7 @@ void GL_UpdateLightmapTextureRegion (int pic_id, int width, int height, int xoff
 	// see if the texture is allready present
 	destination = &gltextures[pic_id];
 
-	GL_UpdateLightmapTextureRegion32 (destination, (unsigned *)data, width, height, xoffset, yoffset, true, true);
+	GL_UpdateLightmapTextureRegion32 (destination, (unsigned *)data, width, height, xoffset, yoffset, TRUE, TRUE);
 }
 
 /*
@@ -897,7 +897,7 @@ GL_LoadPicTexture
 int GL_LoadPicTexture (qpic_t *pic)
 {
 	// ELUTODO: loading too much with "" fills the memory with repeated data? Hope not... Check later.
-	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true, true);
+	return GL_LoadTexture ("", pic->width, pic->height, pic->data, FALSE, TRUE, TRUE);
 }
 
 // ELUTODO: clean the disable/enable multitexture calls around the engine
@@ -966,7 +966,7 @@ void GL_ClearTextureCache(void)
 			}
 			else
 			{
-				gltextures[i].used = false;
+				gltextures[i].used = FALSE;
 				if (!__lwp_heap_free(&texture_heap, gltextures[i].data))
 					Sys_Error("GL_ClearTextureCache: Error freeing data.");
 			}

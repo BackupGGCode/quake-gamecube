@@ -40,7 +40,7 @@ static const size_t	fifo_size = 1024 * 256;
 
 static int scr_width, scr_height;
 
-static bool vidmode_active = false;
+static bool vidmode_active = FALSE;
 
 /*-----------------------------------------------------------------------*/
 
@@ -55,8 +55,8 @@ static float vid_gamma = 1.0;
 Mtx44 perspective;
 Mtx view, model, modelview;
 
-cvar_t vid_tvborder = {"vid_tvborder", "0", (qboolean)true};
-cvar_t vid_conmode = {"vid_conmode", "0", (qboolean)true};
+cvar_t vid_tvborder = {"vid_tvborder", "0", (qboolean)TRUE};
+cvar_t vid_conmode = {"vid_conmode", "0", (qboolean)TRUE};
 
 void D_BeginDirectRect (int x, int y, byte *pbitmap, int width, int height)
 {
@@ -74,7 +74,7 @@ void VID_Shutdown(void)
 		free(MEM_K1_TO_K0(gp_fifo));
 		gp_fifo = 0;
 
-		vidmode_active = false;
+		vidmode_active = FALSE;
 	}
 }
 
@@ -187,7 +187,7 @@ void GL_Init (void)
 	GX_CopyDisp(framebuffer[fb],GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 
-	GX_SetZCompLoc(false); // ELUTODO
+	GX_SetZCompLoc(FALSE); // ELUTODO
 
 	GL_DisableMultitexture();
 
@@ -328,5 +328,5 @@ void VID_Init(unsigned char *palette)
 	Cvar_RegisterVariable(&vid_tvborder);
 	Cvar_RegisterVariable(&vid_conmode);
 
-	vidmode_active = true;
+	vidmode_active = TRUE;
 }

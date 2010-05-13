@@ -82,8 +82,8 @@ qboolean SNDDMA_Init(void)
 	shm->channels			= 2;
 	shm->samplebits			= 16;
 	shm->speed				= 32000;
-	shm->soundalive			= true;
-	shm->splitbuffer		= false;
+	shm->soundalive			= TRUE;
+	shm->splitbuffer		= FALSE;
 	shm->samples			= samples_per_mix_buffer * shm->channels;
 	shm->samplepos			= 0;
 	shm->submission_chunk	= 1;
@@ -97,7 +97,7 @@ qboolean SNDDMA_Init(void)
 	// Start the first chunk of audio playing.
 	play_more_audio();
 
-	return true;
+	return TRUE;
 }
 
 void SNDDMA_Shutdown(void)

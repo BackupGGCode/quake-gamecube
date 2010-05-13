@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "../../generic/quakedef.h"
 
-cvar_t		gl_cshiftpercent = {"gl_cshiftpercent", "100", false};
+cvar_t		gl_cshiftpercent = {"gl_cshiftpercent", "100", FALSE};
 
 byte	dottexture[8][8] =
 {
@@ -51,7 +51,7 @@ void R_InitParticleTexture (void)
 		}
 	}
 
-	particletexture = GL_LoadTexture("", 8, 8, (byte *)data, false, true, true);
+	particletexture = GL_LoadTexture("", 8, 8, (byte *)data, FALSE, TRUE, TRUE);
 }
 
 /*
@@ -69,7 +69,7 @@ void R_Envmap_f (void)
 
 	glDrawBuffer  (GL_FRONT);
 	glReadBuffer  (GL_FRONT);
-	envmap = true;
+	envmap = TRUE;
 
 	r_refdef.vrect.x = 0;
 	r_refdef.vrect.y = 0;
@@ -116,7 +116,7 @@ void R_Envmap_f (void)
 	glReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	COM_WriteFile ("env5.rgb", buffer, sizeof(buffer));		
 
-	envmap = false;
+	envmap = FALSE;
 	glDrawBuffer  (GL_BACK);
 	glReadBuffer  (GL_BACK);
 	GL_EndRendering ();
@@ -270,10 +270,10 @@ void R_TranslatePlayerSkin (int playernum)
 	// ELUTODO: skin changes, cache mismatches, ugly hacks
 	if (playertextures[playernum] < 0 || playertextures[playernum] >= MAX_GLTEXTURES)
 	{
-		playertextures[playernum] = GL_LoadTexture (va("player%d_skin", playernum), scaled_width, scaled_height, (u8 *)pixels, true, true, true); // HACK HACK HACK
+		playertextures[playernum] = GL_LoadTexture (va("player%d_skin", playernum), scaled_width, scaled_height, (u8 *)pixels, TRUE, TRUE, TRUE); // HACK HACK HACK
 	}
 
-	GL_Update32 (&gltextures[playertextures[playernum]], pixels, scaled_width, scaled_height, true, true);
+	GL_Update32 (&gltextures[playertextures[playernum]], pixels, scaled_width, scaled_height, TRUE, TRUE);
 }
 
 
@@ -421,19 +421,19 @@ void V_UpdatePalette (void)
 
 	V_CalcPowerupCshift ();
 	
-	new = false;
+	new = FALSE;
 	
 	for (i=0 ; i<NUM_CSHIFTS ; i++)
 	{
 		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent)
 		{
-			new = true;
+			new = TRUE;
 			cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
 		}
 		for (j=0 ; j<3 ; j++)
 			if (cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j])
 			{
-				new = true;
+				new = TRUE;
 				cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
 			}
 	}

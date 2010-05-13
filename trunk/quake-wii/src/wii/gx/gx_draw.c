@@ -196,7 +196,7 @@ void Draw_Init (void)
 			draw_chars[i] = 255;	// proper transparent color
 
 	// now turn them into textures
-	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false, true, true);
+	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, FALSE, TRUE, TRUE);
 
 	start = Hunk_LowMark();
 
@@ -218,7 +218,7 @@ void Draw_Init (void)
 	ncdata = cb->data;
 
 	gl = (glpic_t *)conback->data;
-	gl->texnum = GL_LoadTexture ("conback", conback->width, conback->height, ncdata, false, false, true);
+	gl->texnum = GL_LoadTexture ("conback", conback->width, conback->height, ncdata, FALSE, FALSE, TRUE);
 	gl->sl = 0;
 	gl->sh = 1;
 	gl->tl = 0;
@@ -234,7 +234,7 @@ void Draw_Init (void)
 	player_pic = Draw_CachePic("gfx/menuplyr.lmp");
 	// save a texture slot for translated picture
 	translate_texture = GL_LoadTexture("player_translate", player_pic->width, player_pic->height, player_pic->data,
-		false, false, true);
+		FALSE, FALSE, TRUE);
 
 	//
 	// get the other pics we need
@@ -242,7 +242,7 @@ void Draw_Init (void)
 	draw_disc = Draw_PicFromWad ("disc");
 	draw_backtile = Draw_PicFromWad ("backtile");
 
-	white_texturenum = GL_LoadTexture("white_texturenum", 8, 8, white_texture, false, false, true);
+	white_texturenum = GL_LoadTexture("white_texturenum", 8, 8, white_texture, FALSE, FALSE, TRUE);
 }
 
 
@@ -336,8 +336,8 @@ void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 
 	gl = (glpic_t *)pic->data;
 
-	QGX_Alpha(false);
-	QGX_Blend(true);
+	QGX_Alpha(FALSE);
+	QGX_Blend(TRUE);
 
 	GL_Bind0 (gl->texnum);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
@@ -359,8 +359,8 @@ void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	GX_TexCoord2f32(gl->sl, gl->th);
 	GX_End();
 
-	QGX_Blend(false);
-	QGX_Alpha(true);
+	QGX_Blend(FALSE);
+	QGX_Alpha(TRUE);
 }
 
 
@@ -455,7 +455,7 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 	}
 
 	GL_UpdateTexture (translate_texture, gltextures[translate_texture].identifier, gltextures[translate_texture].width,
-		gltextures[translate_texture].height, trans, gltextures[translate_texture].mipmap, false);
+		gltextures[translate_texture].height, trans, gltextures[translate_texture].mipmap, FALSE);
 
 	GL_Bind0 (translate_texture);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
@@ -600,8 +600,8 @@ Draw_FadeScreen
 void Draw_FadeScreen (void)
 {
 	// ELUTODO: do not use a texture
-	QGX_Alpha(false);
-	QGX_Blend(true);
+	QGX_Alpha(FALSE);
+	QGX_Blend(TRUE);
 
 	GL_Bind0 (white_texturenum);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
@@ -623,8 +623,8 @@ void Draw_FadeScreen (void)
 	GX_TexCoord2f32(0, 1);
 	GX_End();
 
-	QGX_Blend(false);
-	QGX_Alpha(true);
+	QGX_Blend(FALSE);
+	QGX_Alpha(TRUE);
 
 	Sbar_Changed();
 }
@@ -679,10 +679,10 @@ void GL_Set2D (void)
 	GX_LoadPosMtxImm(modelview, GX_PNMTX0);
 
 	// ELUODO: filtering is making some borders
-	QGX_ZMode(false);
-	QGX_Blend(true);
+	QGX_ZMode(FALSE);
+	QGX_Blend(TRUE);
 	GX_SetCullMode(GX_CULL_NONE);
-	QGX_Alpha(true);
+	QGX_Alpha(TRUE);
 
 	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 

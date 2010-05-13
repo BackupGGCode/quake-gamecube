@@ -97,7 +97,7 @@ int UDP_Init (void)
 
 	do
 	{
-		netinit_error = if_config(ipaddress_text, NULL, NULL, true);
+		netinit_error = if_config(ipaddress_text, NULL, NULL, TRUE);
 	} while(netinit_error == -EAGAIN);
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
@@ -143,7 +143,7 @@ int UDP_Init (void)
 		*colon = 0;
 
 	Con_Printf("UDP Initialized\n");
-	tcpipAvailable = true;
+	tcpipAvailable = TRUE;
 
 	return net_controlsocket;
 }
@@ -152,7 +152,7 @@ int UDP_Init (void)
 
 void UDP_Shutdown (void)
 {
-	UDP_Listen (false);
+	UDP_Listen (FALSE);
 	UDP_CloseSocket (net_controlsocket);
 }
 
@@ -183,7 +183,7 @@ int UDP_OpenSocket (int port)
 {
 	int newsocket;
 	struct sockaddr_in address;
-	qboolean _true = true;
+	qboolean _TRUE = TRUE;
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library (and using supported parameters):
@@ -194,8 +194,8 @@ int UDP_OpenSocket (int port)
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library:
-	//if (ioctl (newsocket, FIONBIO, (char *)&_true) == -1)
-	if (net_ioctl (newsocket, FIONBIO, (char *)&_true) < 0)
+	//if (ioctl (newsocket, FIONBIO, (char *)&_TRUE) == -1)
+	if (net_ioctl (newsocket, FIONBIO, (char *)&_TRUE) < 0)
 // <<< FIX
 		goto ErrorReturn;
 

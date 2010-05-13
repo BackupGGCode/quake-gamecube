@@ -661,7 +661,7 @@ void R_DrawParticles (void)
 	unsigned		color;
 
 	GL_Bind0(particletexture);
-	QGX_Blend (true);
+	QGX_Blend (TRUE);
 
 	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 
@@ -791,7 +791,7 @@ void R_DrawParticles (void)
 		}
 	}
 
-	QGX_Blend(false);
+	QGX_Blend(FALSE);
 	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 }
 

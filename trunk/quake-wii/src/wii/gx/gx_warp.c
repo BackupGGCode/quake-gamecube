@@ -282,7 +282,7 @@ void R_DrawSkyChain (msurface_t *s)
 	for (fa=s ; fa ; fa=fa->texturechain)
 		EmitSkyPolys (fa);
 
-	QGX_Blend(true);
+	QGX_Blend(TRUE);
 	GL_Bind0 (alphaskytexture);
 	speedscale = realtime*16;
 	speedscale -= (int)speedscale & ~127 ;
@@ -290,7 +290,7 @@ void R_DrawSkyChain (msurface_t *s)
 	for (fa=s ; fa ; fa=fa->texturechain)
 		EmitSkyPolys (fa);
 
-	QGX_Blend(false);
+	QGX_Blend(FALSE);
 }
 
 #endif
@@ -774,19 +774,19 @@ void ClipSkyPolygon (int nump, vec3_t vecs, int stage)
 		return;
 	}
 
-	front = back = false;
+	front = back = FALSE;
 	norm = skyclip[stage];
 	for (i=0, v = vecs ; i<nump ; i++, v+=3)
 	{
 		d = DotProduct (v, norm);
 		if (d > ON_EPSILON)
 		{
-			front = true;
+			front = TRUE;
 			sides[i] = SIDE_FRONT;
 		}
 		else if (d < ON_EPSILON)
 		{
-			back = true;
+			back = TRUE;
 			sides[i] = SIDE_BACK;
 		}
 		else
@@ -984,7 +984,7 @@ void R_InitSky (texture_t *mt)
 		for (j=0 ; j<128 ; j++)
 			trans[(i*128) + j] = src[i*256 + j + 128];
 
-	solidskytexture = GL_LoadTexture("render_solidskytexture", 128, 128, trans, true, true, false);
+	solidskytexture = GL_LoadTexture("render_solidskytexture", 128, 128, trans, TRUE, TRUE, FALSE);
 
 	for (i=0 ; i<128 ; i++)
 		for (j=0 ; j<128 ; j++)
@@ -996,6 +996,6 @@ void R_InitSky (texture_t *mt)
 				trans[(i*128) + j] = p;
 		}
 
-	alphaskytexture = GL_LoadTexture("render_alphaskytexture", 128, 128, trans, true, true, false);
+	alphaskytexture = GL_LoadTexture("render_alphaskytexture", 128, 128, trans, TRUE, TRUE, FALSE);
 }
 
