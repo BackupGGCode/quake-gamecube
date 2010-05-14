@@ -168,6 +168,7 @@ void UDP_Listen (qboolean state)
 	// disable listening
 	if (net_acceptsocket == -1)
 		return;
+	
 	UDP_CloseSocket (net_acceptsocket);
 	net_acceptsocket = -1;
 }
