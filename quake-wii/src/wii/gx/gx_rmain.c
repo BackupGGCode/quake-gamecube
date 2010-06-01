@@ -832,27 +832,14 @@ void R_SetFrustum (void)
 {
 	int		i;
 
-	if (r_refdef.fov_x == 90) 
-	{
-		// front side is visible
-
-		VectorAdd (vpn, vright, frustum[0].normal);
-		VectorSubtract (vpn, vright, frustum[1].normal);
-
-		VectorAdd (vpn, vup, frustum[2].normal);
-		VectorSubtract (vpn, vup, frustum[3].normal);
-	}
-	else
-	{
-		// rotate VPN right by FOV_X/2 degrees
-		RotatePointAroundVector( frustum[0].normal, vup, vpn, -(90-r_refdef.fov_x / 2 ) );
-		// rotate VPN left by FOV_X/2 degrees
-		RotatePointAroundVector( frustum[1].normal, vup, vpn, 90-r_refdef.fov_x / 2 );
-		// rotate VPN up by FOV_X/2 degrees
-		RotatePointAroundVector( frustum[2].normal, vright, vpn, 90-r_refdef.fov_y / 2 );
-		// rotate VPN down by FOV_X/2 degrees
-		RotatePointAroundVector( frustum[3].normal, vright, vpn, -( 90 - r_refdef.fov_y / 2 ) );
-	}
+	// rotate VPN right by FOV_X/2 degrees
+	RotatePointAroundVector( frustum[0].normal, vup, vpn, -(90-r_refdef.fov_x / 2 ) );
+	// rotate VPN left by FOV_X/2 degrees
+	RotatePointAroundVector( frustum[1].normal, vup, vpn, 90-r_refdef.fov_x / 2 );
+	// rotate VPN up by FOV_X/2 degrees
+	RotatePointAroundVector( frustum[2].normal, vright, vpn, 90-r_refdef.fov_y / 2 );
+	// rotate VPN down by FOV_X/2 degrees
+	RotatePointAroundVector( frustum[3].normal, vright, vpn, -( 90 - r_refdef.fov_y / 2 ) );
 
 	for (i=0 ; i<4 ; i++)
 	{
