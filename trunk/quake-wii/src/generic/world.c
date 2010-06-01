@@ -283,6 +283,9 @@ void SV_TouchLinks ( edict_t *ent, areanode_t *node )
 // touch linked edicts
 	for (l = node->trigger_edicts.next ; l != &node->trigger_edicts ; l = next)
 	{
+		// An adequate fix would be pre-storing the list in a vector.
+		if (!l)
+			Host_Error ("SV_TouchLink: entity from linked list freed - this is a gamecode bug.");
 		next = l->next;
 		touch = EDICT_FROM_AREA(l);
 		if (touch == ent)

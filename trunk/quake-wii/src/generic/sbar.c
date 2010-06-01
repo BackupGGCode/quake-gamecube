@@ -937,6 +937,8 @@ void Sbar_DrawFace (void)
 
 	if (cl.stats[STAT_HEALTH] >= 100)
 		f = 4;
+	else if (cl.stats[STAT_HEALTH] <= 0)
+		f = 0;
 	else
 		f = cl.stats[STAT_HEALTH] / 20;
 
